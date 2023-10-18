@@ -2,7 +2,11 @@
 // for information about these interfaces
 // and what to do when importing types
 declare namespace App {
-	// interface Locals {}
+	type PocketBase = import('pocketbase').default;
+	interface Locals {
+		pb?: PocketBase;
+		user?: Record<string, T>;
+	}
 	// interface PageData {}
 	// interface Error {}
 	// interface Platform {}
