@@ -10,7 +10,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// Load the authStore from the cookie
 	event.locals.pb.authStore.loadFromCookie(event.request.headers.get('cookie') || '');
-
 	try {
 		// Check if the user is authenticated
 		if (event.locals.pb.authStore.isValid) {
@@ -24,14 +23,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// Clear the authStore if there is an error
 		event.locals.pb.authStore.clear();
 	}
-	console.log(event.locals.user);
 
-	// Check if the user is logged on every request to '/dashboard/...'
 	if (event.url.pathname.startsWith('/admin' || '/app')) {
 		if (!event.locals.user) {
-			// Redirect to the login page if the user is not logged in
+			event.locals.pb.authStore.clear();
 			throw redirect(303, '/login');
 		}
+		// if (!event.locals.user.first_name && event.url.pathname !== '/admin/initial-setup') {
+		// 	throw redirect(303, '/admin/initial-setup');
+		// }
 	}
 
 	// Resolve the request

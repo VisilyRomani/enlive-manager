@@ -1,7 +1,7 @@
 <div class="flex justify-center items-center h-full">
 	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
 		<h1 class="h2">Sign Up</h1>
-		<form class="space-y-5">
+		<form class="space-y-5" action="?/passwordSignUp" method="post">
 			<input name="email" class="input variant-form-material" type="email" placeholder="email" />
 			<input
 				name="password"
@@ -10,7 +10,7 @@
 				placeholder="Password"
 			/>
 			<input
-				name="confirm"
+				name="passwordConfirm"
 				class="input variant-form-material"
 				type="password"
 				placeholder="Confirm Password"

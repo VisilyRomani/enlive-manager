@@ -13,6 +13,7 @@
 		<li><a href="/admin/jobs" on:click={navClose}>Jobs</a></li>
 		<li><a href="/admin/schedule" on:click={navClose}>Schedule</a></li>
 		<li><a href="/admin/invoice" on:click={navClose}>Invoice</a></li>
+		<li><a href="/admin/settings" on:click={navClose}>Settings</a></li>
 		<li><a href="/app/daily" on:click={navClose}>App Jobs</a></li>
 	</ul>
 </nav>

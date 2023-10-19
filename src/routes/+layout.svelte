@@ -22,8 +22,6 @@
 		drawerStore.open({});
 	};
 
-	$: showLogout = $page.data.user;
-
 	$: classesSidebar =
 		($page.url.pathname === '/' ||
 			$page.url.pathname === '/signup' ||
