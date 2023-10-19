@@ -24,6 +24,7 @@
 
 	$: classesSidebar =
 		($page.url.pathname === '/' ||
+			$page.url.pathname === '/admin/initial-setup' ||
 			$page.url.pathname === '/signup' ||
 			$page.url.pathname === '/login') &&
 		'hidden';

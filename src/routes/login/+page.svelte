@@ -17,6 +17,11 @@
 	}
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex nofollow" />
+	<title>Login</title>
+</svelte:head>
+
 <div class="flex justify-center items-center h-full">
 	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
 		<h1 class="h2">Login</h1>
