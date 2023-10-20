@@ -29,9 +29,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.locals.pb.authStore.clear();
 			throw redirect(303, '/login');
 		}
-		// if (!event.locals.user.first_name && event.url.pathname !== '/admin/initial-setup') {
-		// 	throw redirect(303, '/admin/initial-setup');
-		// }
+		if (
+			(!event.locals.user.first_name || !event.locals.user.company) &&
+			event.url.pathname !== '/admin/initial-setup'
+		) {
+			throw redirect(303, '/admin/initial-setup');
+		}
 	}
 
 	// Resolve the request
