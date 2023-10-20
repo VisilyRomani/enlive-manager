@@ -30,13 +30,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			throw redirect(303, '/login');
 		}
 		if (
-			!event.locals.user.first_name &&
-			!event.locals.user.company &&
+			(!event.locals.user.first_name || !event.locals.user.company) &&
 			event.url.pathname !== '/admin/initial-setup'
 		) {
 			throw redirect(303, '/admin/initial-setup');
 		}
-		// check for setup after setup is done and redirect
 	}
 
 	// Resolve the request
