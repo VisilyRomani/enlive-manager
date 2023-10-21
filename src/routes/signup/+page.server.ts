@@ -26,12 +26,13 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url }) => {
 
 export const actions = {
 	passwordSignUp: async ({ locals, cookies, request }) => {
-		// const email = url.searchParams.get('email') ?? '';
-		// const password = url.searchParams.get('password') ?? '';
 		const data = await request.formData();
+		const email = String(data.get('email'));
+		const password = String(data.get('password'));
 
 		try {
 			await locals.pb?.collection('users').create(data);
+			await locals.pb?.collection('users').authWithPassword(email, password);
 		} catch (err) {
 			console.log(err);
 		}

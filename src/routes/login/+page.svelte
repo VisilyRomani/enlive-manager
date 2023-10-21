@@ -41,6 +41,7 @@
 		<hr />
 
 		<button
+			disabled
 			on:click={gotoAuthProvider}
 			class="btn w-full variant-form-material variant-outline-secondary">Login with Google</button
 		>
