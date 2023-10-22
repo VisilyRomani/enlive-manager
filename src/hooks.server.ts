@@ -26,7 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.url.pathname.startsWith('/admin' || '/app')) {
 		if (!event.locals.user) {
-			event.locals.pb.authStore.clear();
+			console.log('missing user');
 			throw redirect(303, '/login');
 		}
 		if (
@@ -34,6 +34,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.url.pathname !== '/admin/initial-setup'
 		) {
 			throw redirect(303, '/admin/initial-setup');
+		}
+
+		if (
+			event.locals.user.first_name &&
+			event.locals.user.company &&
+			event.url.pathname === '/admin/initial-setup'
+		) {
+			throw redirect(303, '/admin/dashboard');
 		}
 	}
 
