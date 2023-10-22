@@ -1,12 +1,27 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-
+import { superValidate } from 'sveltekit-superforms/server';
+import { z } from 'zod';
 export type OutputType = { authProviderRedirect: string; authProviderState: string };
 
-export const load: PageServerLoad<OutputType> = async ({ locals, url }) => {
+const SignUpValidation = z
+	.object({
+		email: z.string().email(),
+		password: z.string().min(8),
+		passwordConfirm: z.string().min(8)
+	})
+	.superRefine((data, ctx) => {
+		if (data.password !== data.passwordConfirm) {
+			ctx.addIssue({ code: 'custom', message: 'Password mismatch', path: ['passwordConfirm'] });
+		}
+	});
+
+export const load: PageServerLoad<OutputType> = async ({ locals, url, request }) => {
 	const authMethods = await locals.pb?.collection('users').listAuthMethods();
+	const form = await superValidate(request, SignUpValidation);
 	if (!authMethods) {
 		return {
+			form,
 			authProviderRedirect: '',
 			authProviderState: ''
 		};
@@ -19,24 +34,34 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url }) => {
 	const state = githubAuthProvider.state;
 
 	return {
+		form,
 		authProviderRedirect: authProviderRedirect,
 		authProviderState: state
 	};
 };
 
 export const actions = {
-	passwordSignUp: async ({ locals, cookies, request }) => {
-		const data = await request.formData();
-		const email = String(data.get('email'));
-		const password = String(data.get('password'));
+	passwordSignUp: async ({ locals, request }) => {
+		const form = await superValidate(request, SignUpValidation);
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const signup = new FormData();
+
+		signup.append('email', form.data.email);
+		signup.append('password', form.data.password);
+		signup.append('passwordConfirm', form.data.passwordConfirm);
 
 		try {
-			await locals.pb?.collection('users').create(data);
-			await locals.pb?.collection('users').authWithPassword(email, password);
+			await locals.pb?.collection('users').create(signup);
 		} catch (err) {
+			if (err instanceof Error) {
+				return fail(400, { form, error: err.message });
+			}
 			console.log(err);
 		}
-		cookies.set('cookie', locals.pb?.authStore.exportToCookie() ?? '');
-		throw redirect(303, '/admin/initial-setup');
+		throw redirect(303, '/login');
 	}
 };
