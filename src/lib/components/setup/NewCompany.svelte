@@ -3,7 +3,6 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { CompanySchema } from '../../../routes/(dashboard)/admin/initial-setup/proxy+page.server';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import { goto } from '$app/navigation';
 	export let data: SuperValidated<CompanySchema>;
 	const { form, enhance, errors, delayed } = superForm(data, {
@@ -19,9 +18,6 @@
 	let files: FileList;
 </script>
 
-<div class="absolute">
-	<SuperDebug data={$form} />
-</div>
 {#if $delayed}
 	<div class="flex flex-col m-10 justify-center items-center">
 		<h3 class="h3">Saving Company info...</h3>

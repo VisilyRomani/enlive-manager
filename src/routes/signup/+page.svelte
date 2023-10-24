@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms/client';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	export let data;
 	const { form, enhance, errors } = superForm(data.form);
 </script>
@@ -9,9 +8,6 @@
 	<meta name="robots" content="noindex nofollow" />
 	<title>Sign Up</title>
 </svelte:head>
-<div class="absolute">
-	<SuperDebug data={$form} />
-</div>
 <div class="flex justify-center items-center h-full">
 	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
 		<h2 class="h2">Sign Up</h2>
