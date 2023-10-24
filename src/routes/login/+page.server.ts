@@ -1,10 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { POCKETBASE_URL } from '$env/static/private';
+import type { AuthMethodsList } from 'pocketbase';
 
 export type OutputType = { authProviderRedirect: string; authProviderState: string };
-
-export const load: PageServerLoad<OutputType> = async ({ locals, url }) => {
-	const authMethods = await locals.pb?.collection('users').listAuthMethods();
+export const load: PageServerLoad<OutputType> = async ({ url }) => {
+	// const authMethods = await locals.pb?.collection('users').listAuthMethods();
+	const authMethods: AuthMethodsList = await (
+		await fetch(`${POCKETBASE_URL}/api/collections/users/auth-methods`)
+	).json();
 	if (!authMethods) {
 		return {
 			authProviderRedirect: '',

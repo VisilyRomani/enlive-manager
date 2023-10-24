@@ -5,7 +5,9 @@
 		AppBar,
 		getDrawerStore,
 		initializeStores,
-		Drawer
+		Drawer,
+		Toast,
+		Modal
 	} from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/components/Navigation.svelte';
 
@@ -13,6 +15,7 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
+	import { modalRegistry } from '$lib/ModalRegistry';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -24,6 +27,7 @@
 
 	$: classesSidebar =
 		($page.url.pathname === '/' ||
+			$page.url.pathname === '/admin/initial-setup' ||
 			$page.url.pathname === '/signup' ||
 			$page.url.pathname === '/login') &&
 		'hidden';
@@ -34,6 +38,9 @@
 	<hr />
 	<Navigation />
 </Drawer>
+
+<Toast />
+<Modal components={modalRegistry} />
 
 <!-- App Shell -->
 <AppShell>
