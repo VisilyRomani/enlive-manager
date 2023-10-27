@@ -33,9 +33,6 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		expand: 'address',
 		fields: 'first_name, last_name, id,expand'
 	});
-	// const page = parseInt(url.searchParams.get('page') ?? '');
-	// console.log(isNaN(page));
-	// const clients = await locals.pb?.collection('clients').getList(isNaN(page) ? 1 : page, 20);
 	return {
 		clientForm,
 		clientList
@@ -55,10 +52,10 @@ export const actions = {
 		for (const [key, value] of Object.entries(clientForm.data)) {
 			if (key === 'addr') {
 				newClientAddress.append('address', String(value));
-			} else if (key === 'lat' || key === 'lng') {
-				newClientAddress.append(key, String(value));
 			} else {
-				newClient.append(key, String(value));
+				if (!(key === 'email' && !value)) {
+					newClient.append(key, String(value));
+				}
 			}
 		}
 

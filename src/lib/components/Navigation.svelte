@@ -21,7 +21,7 @@
 	$: console.log($page.url.pathname);
 </script>
 
-<nav class="list-nav p-4 flex flex-col justify-between h-full">
+<nav class="list-nav p-4 flex flex-col justify-between">
 	<ul>
 		<li>
 			<a

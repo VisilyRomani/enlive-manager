@@ -5,7 +5,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { ClientSchema } from '../../../routes/(dashboard)/admin/client/proxy+page.server';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 
 	export let parent: any;
 
@@ -15,10 +15,10 @@
 
 	const { form, errors, enhance } = superForm(clientform, {
 		clearOnSubmit: 'errors-and-message',
-		onResult(event) {
+		async onResult(event) {
 			if (event.result.type === 'success') {
 				modalStore.close();
-				invalidateAll();
+				await invalidate('/admin/client');
 			}
 		}
 	});

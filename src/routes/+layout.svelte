@@ -31,7 +31,7 @@
 			$page.url.pathname === '/admin/initial-setup' ||
 			$page.url.pathname === '/signup' ||
 			$page.url.pathname === '/login') &&
-		'hidden';
+		'!hidden';
 
 	let mapsScript;
 
@@ -41,17 +41,12 @@
 			'https://maps.googleapis.com/maps/api/js?key=AIzaSyB7EdZYIgR4SxMikrHBWC3YxTWFft1oLz0&libraries=places';
 		script.async = true;
 		script.defer = true;
-
-		// script.onload = () => {
-		// 	// The Google Maps API script has loaded
-		// };
-
 		mapsScript = script;
 		document.head.appendChild(script);
 	});
 </script>
 
-<Drawer>
+<Drawer width="w-[20em]">
 	<h2 class="p-4">Enlive Manager</h2>
 	<hr />
 	<Navigation />
@@ -66,7 +61,7 @@
 		<AppBar>
 			<svelte:fragment slot="lead">
 				<div class="flex items-center">
-					<button class="lg:hidden {classesSidebar} btn btn-sm mr-4" on:click={navOpen}>
+					<button class="{classesSidebar} btn btn-sm mr-4" on:click={navOpen}>
 						<span>
 							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
 								<rect width="100" height="20" />
@@ -82,5 +77,11 @@
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
+	<svelte:fragment slot="sidebarLeft"
+		><div class=" hidden {classesSidebar} lg:block w-[15em]">
+			<Navigation />
+		</div>
+	</svelte:fragment>
+
 	<slot />
 </AppShell>
