@@ -27,7 +27,7 @@
 						<span>
 							<dt>{client.first_name} {client.last_name}</dt>
 							{#each client.expand?.address ?? [] as addr}
-								<dd class="text-gray-500 inline-block break-all w-100%">
+								<dd class="text-gray-500 break-all w-100% flex flex-col">
 									{addr.address}
 								</dd>
 							{/each}

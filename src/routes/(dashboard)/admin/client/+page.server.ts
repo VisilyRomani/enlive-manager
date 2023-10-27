@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, ClientValidation);
 	const clientList = await locals.pb?.collection('clients').getFullList({
 		expand: 'address',
-		fields: 'first_name, last_name, id,expand'
+		fields: 'first_name, last_name, id, expand'
 	});
 	return {
 		clientForm,
@@ -50,12 +50,16 @@ export const actions = {
 		const newClientAddress = new FormData();
 
 		for (const [key, value] of Object.entries(clientForm.data)) {
+			if (!(key === 'email' && !value)) {
+				newClient.append(key, String(value));
+			}
+
+			// Used to seperate the from for Address
 			if (key === 'addr') {
 				newClientAddress.append('address', String(value));
-			} else {
-				if (!(key === 'email' && !value)) {
-					newClient.append(key, String(value));
-				}
+			}
+			if (key === 'lat' || key === 'lng') {
+				newClientAddress.append(key, String(value));
 			}
 		}
 

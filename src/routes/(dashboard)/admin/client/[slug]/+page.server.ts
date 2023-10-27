@@ -1,6 +1,8 @@
 export const load = async ({ params, locals }) => {
 	try {
-		const client = await locals.pb?.collection('clients').getOne(params.slug);
+		const client = await locals.pb
+			?.collection('clients')
+			.getOne(params.slug, { expand: 'address' });
 		return { client, slug: params.slug };
 	} catch (e) {
 		if (e instanceof Error) {
