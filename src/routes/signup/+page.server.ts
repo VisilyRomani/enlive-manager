@@ -19,7 +19,7 @@ const SignUpValidation = z
 export const load: PageServerLoad<OutputType> = async ({ locals, url, request }) => {
 	const authMethods = await locals.pb?.collection('users').listAuthMethods();
 	const form = await superValidate(request, SignUpValidation);
-	if (!authMethods) {
+	if (!authMethods || !authMethods.authProviders.length) {
 		return {
 			form,
 			authProviderRedirect: '',

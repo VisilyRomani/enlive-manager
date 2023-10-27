@@ -1,4 +1,3 @@
-<!-- YOU CAN DELETE EVERYTHING IN THIS PAGE -->
 <svelte:head>
 	<meta name="robots" content="noindex nofollow" />
 	<title>Enlive Manager</title>

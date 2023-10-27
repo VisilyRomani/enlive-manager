@@ -29,8 +29,9 @@ export type UserSchema = typeof UserValidation;
 
 export type CompanySchema = typeof CompanyValidation;
 
-export const load: PageServerLoad = async ({ request }) => {
+export const load: PageServerLoad = async ({ request, locals }) => {
 	const userForm = await superValidate(request, UserValidation);
+	userForm.data = { first_name: locals.user?.first_name, last_name: locals.user?.last_name };
 	const companyForm = await superValidate(request, CompanyValidation);
 
 	return {

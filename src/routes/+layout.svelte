@@ -10,6 +10,7 @@
 		Modal
 	} from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import { onMount } from 'svelte';
 
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -31,6 +32,23 @@
 			$page.url.pathname === '/signup' ||
 			$page.url.pathname === '/login') &&
 		'hidden';
+
+	let mapsScript;
+
+	onMount(() => {
+		const script = document.createElement('script');
+		script.src =
+			'https://maps.googleapis.com/maps/api/js?key=AIzaSyB7EdZYIgR4SxMikrHBWC3YxTWFft1oLz0&libraries=places';
+		script.async = true;
+		script.defer = true;
+
+		// script.onload = () => {
+		// 	// The Google Maps API script has loaded
+		// };
+
+		mapsScript = script;
+		document.head.appendChild(script);
+	});
 </script>
 
 <Drawer>

@@ -7,12 +7,7 @@
 	export let data: SuperValidated<CompanySchema>;
 	const { form, enhance, errors, delayed } = superForm(data, {
 		delayMs: 500,
-		timeoutMs: 8000,
-		onResult: (result) => {
-			if (result.result.type === 'success') {
-				goto('/admin/dashboard');
-			}
-		}
+		timeoutMs: 8000
 	});
 
 	let files: FileList;
@@ -176,7 +171,7 @@
 						<span class="text-xs text-red-500">{$errors.footer}</span>{/if}
 				</div>
 			</div>
-			<button type="submit" class="btn variant-form-material variant-outline-secondary">Next</button
+			<button type="submit" class="btn variant-form-material variant-outline-secondary">Save</button
 			>
 		</form>
 	</div>
