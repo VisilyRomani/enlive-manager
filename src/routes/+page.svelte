@@ -9,7 +9,7 @@
 	<title>Enlive Manager</title>
 </svelte:head>
 
-<div class="w-full my-52 flex justify-center items-center flex-col">
+<div class="w-full my-40 flex justify-center items-center flex-col">
 	<div class="space-y-10 text-center flex flex-col items-center max-w-2xl">
 		<h2 class="h1">An Efficient Way To Manage Your Buisness</h2>
 		<p>
@@ -20,7 +20,7 @@
 	</div>
 </div>
 
-<div class="flex flex-row gap-10 justify-center my-52 flex-wrap">
+<div class="flex flex-row gap-10 justify-center my-40 flex-wrap">
 	<div class="card p-5 max-w-[20em] space-y-5 flex flex-col justify-items-center text-center">
 		<h4 class="h4">Clients</h4>
 		<svg class="mx-auto fill-secondary-500" width="5em" viewBox="0 0 24 24">{@html people}</svg>
@@ -32,22 +32,25 @@
 	<div class="card p-5 max-w-[20em] space-y-5 flex flex-col justify-items-center text-center">
 		<h4 class="h4">Invoicing</h4>
 		<svg class="mx-auto fill-secondary-500" width="5em" viewBox="0 0 24 24">{@html payment}</svg>
-		<p>Streamline financial management for a secure, prosperous future.</p>
+		<p>
+			Effortlessly invoice with our one click solution for quicker payments and improved financial
+			efficiency.
+		</p>
 	</div>
 	<div class="card p-5 max-w-[20em] space-y-5 flex flex-col justify-items-center text-center">
 		<h4 class="h4">Finance</h4>
 		<svg class="mx-auto fill-secondary-500" width="5em" viewBox="0 0 24 24">{@html charts}</svg>
 		<p>
-			Effortlessly streamline invoicing with our automated feature for quicker payments and improved
-			financial efficiency.
+			Empower you to efficiently monitor and analyze financial data, ensuring informed
+			decision-making and stronger client relationships.
 		</p>
 	</div>
 </div>
-<div class="bg-secondary-500 w-full flex flex-col gap-5 justify-center p-20">
-	<h1 class="h1 text-gray-900 text-center">Get Started Today</h1>
-	<a href="/signup" class="btn btn-xl variant-form-material variant-filled-tertiary !bg-gray-900"
-		>Start Here</a
-	>
+
+<div class="bg-primary-500 w-full flex flex-col gap-5 justify-center p-20 text-center">
+	<h1 class="h1 text-gray-900">Get Started Today</h1>
+	<p class="text-gray-800 text-xl h5">Manage your buisness quickly and easily.</p>
+	<a href="/signup" class="btn btn-xl variant-filled-tertiary !bg-gray-900">Start Here</a>
 </div>
 
 <div class="bg-surface-800 w-full flex flex-wrap justify-around">
