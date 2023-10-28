@@ -38,6 +38,6 @@
 				</div>
 			</div>
 		</label>
-		<button type="submit" class="btn variant-form-material variant-outline-secondary">Next</button>
+		<button type="submit" class="btn variant-form-material variant-outline-secondary">Save</button>
 	</form>
 </div>

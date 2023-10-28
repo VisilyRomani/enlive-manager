@@ -46,7 +46,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "1.5.3",
-    "@googlemaps/google-maps-services-js": "^3.3.41",
+    "@types/google.maps": "^3.54.4",
     "pocketbase": "^0.18.3"
   }
 }

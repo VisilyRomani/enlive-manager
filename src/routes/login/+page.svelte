@@ -1,20 +1,16 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import type { PageData } from './$types';
+	import { superForm } from 'sveltekit-superforms/client';
 
-	// Define the data variable
-	export let data: PageData;
-
-	// Define the gotoAuthProvider function
 	function gotoAuthProvider() {
-		// Save the state in the cookie
 		if (browser) {
 			document.cookie = `state=${data?.authProviderState}`;
 		}
-
-		// Redirect the user to the OAuth login for Github
 		window.location.href = data.authProviderRedirect || '';
 	}
+
+	export let data;
+	const { form, enhance, errors } = superForm(data.loginForm);
 </script>
 
 <svelte:head>
@@ -25,14 +21,29 @@
 <div class="flex justify-center items-center h-full">
 	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
 		<h1 class="h2">Login</h1>
-		<form method="post" class="space-y-5" action="?/passwordLogin">
-			<input name="email" class="input variant-form-material" type="email" placeholder="email" />
-			<input
-				name="password"
-				class="input variant-form-material"
-				type="password"
-				placeholder="Password"
-			/>
+		<form method="post" class="space-y-5" action="?/passwordLogin" use:enhance>
+			<label class="flex flex-col w-full items-start">
+				<input
+					name="email"
+					class="input variant-form-material {$errors.email ? 'input-error' : undefined}"
+					type="email"
+					placeholder="Email"
+					bind:value={$form.email}
+				/>
+				{#if $errors.email}
+					<span class="text-xs text-[rgb(var(--color-error-500))]">{$errors.email}</span>{/if}
+			</label>
+			<label class="flex flex-col w-full items-start">
+				<input
+					name="password"
+					class="input variant-form-material {$errors.password ? 'input-error' : undefined}"
+					type="password"
+					placeholder="Password"
+					bind:value={$form.password}
+				/>
+				{#if $errors.password}
+					<span class="text-xs text-[rgb(var(--color-error-500))]">{$errors.password}</span>{/if}
+			</label>
 			<button type="submit" class=" w-full btn variant-form-material variant-outline-primary"
 				>Submit</button
 			>

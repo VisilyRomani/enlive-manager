@@ -29,8 +29,9 @@ export type UserSchema = typeof UserValidation;
 
 export type CompanySchema = typeof CompanyValidation;
 
-export const load: PageServerLoad = async ({ request }) => {
+export const load: PageServerLoad = async ({ request, locals }) => {
 	const userForm = await superValidate(request, UserValidation);
+	userForm.data = { first_name: locals.user?.first_name, last_name: locals.user?.last_name };
 	const companyForm = await superValidate(request, CompanyValidation);
 
 	return {
@@ -89,7 +90,7 @@ export const actions = {
 		}
 
 		try {
-			const company = await locals.pb?.collection('companies').create(companyData);
+			const company = await locals.pb?.collection('company').create(companyData);
 			await locals.pb?.collection('users').update(locals.user?.id, { company: company?.id });
 			locals.user = structuredClone(locals.pb?.authStore.model) ?? undefined;
 			return { companyForm };
