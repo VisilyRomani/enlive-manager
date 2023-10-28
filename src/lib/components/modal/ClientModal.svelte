@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { SlideToggle, getModalStore, type AutocompleteOption } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
@@ -8,9 +8,7 @@
 	import { invalidate } from '$app/navigation';
 
 	export let parent: any;
-
 	const modalStore = getModalStore();
-
 	const clientform: SuperValidated<ClientSchema> = $page.data.clientForm;
 
 	const { form, errors, enhance } = superForm(clientform, {
@@ -45,8 +43,6 @@
 			);
 		});
 	});
-
-	let manualAddress = false;
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
@@ -100,9 +96,7 @@
 				{#if $errors.email}
 					<span class="text-xs text-red-500">{$errors.email}</span>{/if}
 			</div>
-			<SlideToggle class="lg:col-span-2 w-fit" name="slide" bind:checked={manualAddress}
-				>Manual Address</SlideToggle
-			>
+
 			<div class="lg:col-span-2 gap-3 flex flex-wrap">
 				<div class="w-full">
 					<input
@@ -117,39 +111,30 @@
 						<span class="text-xs text-red-500">{$errors.addr}</span>{/if}
 				</div>
 
-				{#if manualAddress}
-					<div class="grid gap-3 lg:grid-cols-2 w-full">
-						<div>
-							<input
-								class="input variant-form-material {$errors.lat ? 'input-error' : undefined}"
-								type="text"
-								placeholder="Latitude"
-								name="lat"
-								bind:value={$form.lat}
-							/>
-							{#if $errors.lat}
-								<span class="text-xs text-red-500">{$errors.lat}</span>{/if}
-						</div>
-						<div>
-							<input
-								class="input variant-form-material {$errors.lng ? 'input-error' : undefined}"
-								type="text"
-								name="lng"
-								placeholder="Longitude"
-								bind:value={$form.lng}
-							/>
-							{#if $errors.lng}
-								<span class="text-xs text-red-500">{$errors.lng}</span>{/if}
-						</div>
+				<div class="grid gap-3 lg:grid-cols-2 w-full">
+					<div>
+						<input
+							class="input variant-form-material {$errors.lat ? 'input-error' : undefined}"
+							type="text"
+							placeholder="Latitude"
+							name="lat"
+							bind:value={$form.lat}
+						/>
+						{#if $errors.lat}
+							<span class="text-xs text-red-500">{$errors.lat}</span>{/if}
 					</div>
-				{:else}
-					<input type="hidden" name="lat" bind:value={$form.lat} />
-					{#if $errors.lat}
-						<span class="text-xs text-red-500">{$errors.lat}</span>{/if}
-					<input type="hidden" name="lng" bind:value={$form.lng} />
-					{#if $errors.lng}
-						<span class="text-xs text-red-500">{$errors.lng}</span>{/if}
-				{/if}
+					<div>
+						<input
+							class="input variant-form-material {$errors.lng ? 'input-error' : undefined}"
+							type="text"
+							name="lng"
+							placeholder="Longitude"
+							bind:value={$form.lng}
+						/>
+						{#if $errors.lng}
+							<span class="text-xs text-red-500">{$errors.lng}</span>{/if}
+					</div>
+				</div>
 			</div>
 			<div class="lg:col-span-2">
 				<textarea
@@ -161,13 +146,12 @@
 				{#if $errors.notes}
 					<span class="text-xs text-red-500">{$errors.notes}</span>{/if}
 			</div>
-			<footer class="modal-footer {parent.regionFooter}">
+			<footer class="modal-footer float-right">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>
 				<button type="submit" class="btn {parent.buttonPositive}">Submit Form</button>
 			</footer>
 		</form>
-		<!-- prettier-ignore -->
 	</div>
 {/if}
