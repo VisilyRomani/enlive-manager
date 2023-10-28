@@ -29,7 +29,7 @@ export type ClientSchema = typeof ClientValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, ClientValidation);
-	const clientList = await locals.pb?.collection('clients').getFullList({
+	const clientList = await locals.pb?.collection('client').getFullList({
 		expand: 'address',
 		fields: 'first_name, last_name, id, expand'
 	});
@@ -79,7 +79,7 @@ export const actions = {
 			} else {
 				return fail(400, { error: 'Could not create address' });
 			}
-			await locals.pb?.collection('clients').create(newClient);
+			await locals.pb?.collection('client').create(newClient);
 			return { clientForm };
 		} catch (e) {
 			console.log(e);

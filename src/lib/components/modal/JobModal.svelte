@@ -13,7 +13,7 @@
 	const modalStore = getModalStore();
 	// const JobForm: SuperValidated<ClientSchema> = $page.data.JobForm;
 
-	const clientOptions: AutocompleteOption = $page.data.clientList.map((c) => ({
+	const clientOptions: AutocompleteOption<string>[] = $page.data.clientList.map((c) => ({
 		label: `${c.first_name} ${c.last_name}`,
 		value: c.id
 	}));
@@ -27,7 +27,7 @@
 	$: console.log(offsetWidth);
 
 	const popupClient: PopupSettings = {
-		event: 'click',
+		event: 'focus-blur',
 		target: 'client-popup',
 		placement: 'bottom'
 	};
@@ -38,13 +38,16 @@
 		<h2 class="h2">{$modalStore[0].title}</h2>
 		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateClient" method="post">
 			<div bind:offsetWidth>
+				<input type="text" style="display:none" />
+
 				<input
 					class="input variant-form-material"
 					type="search"
+					autocomplete="off"
 					id="client-search"
 					bind:value={selectedSearch.label}
 					use:popup={popupClient}
-					placeholder="Search..."
+					placeholder="Select Client"
 				/>
 				<div data-popup="client-popup" class=" w-full">
 					<div class={search}>

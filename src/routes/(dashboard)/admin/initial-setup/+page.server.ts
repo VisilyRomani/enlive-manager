@@ -90,7 +90,7 @@ export const actions = {
 		}
 
 		try {
-			const company = await locals.pb?.collection('companies').create(companyData);
+			const company = await locals.pb?.collection('company').create(companyData);
 			await locals.pb?.collection('users').update(locals.user?.id, { company: company?.id });
 			locals.user = structuredClone(locals.pb?.authStore.model) ?? undefined;
 			return { companyForm };

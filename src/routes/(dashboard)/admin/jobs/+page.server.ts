@@ -9,7 +9,7 @@ const JobValidation = z.object({
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const jobForm = await superValidate(request, JobValidation);
 	const clientList =
-		(await locals.pb?.collection('clients').getFullList({
+		(await locals.pb?.collection('client').getFullList({
 			expand: 'address',
 			fields: 'first_name, last_name, id, expand'
 		})) ?? [];

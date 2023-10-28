@@ -57,6 +57,7 @@
 					class="input variant-form-material {$errors.first_name ? 'input-error' : undefined}"
 					bind:value={$form.first_name}
 					type="text"
+					autocapitalize="on"
 					name="first_name"
 					placeholder="First Name"
 				/>
@@ -68,6 +69,7 @@
 					class="input variant-form-material {$errors.last_name ? 'input-error' : undefined}"
 					bind:value={$form.last_name}
 					type="text"
+					autocapitalize="on"
 					name="last_name"
 					placeholder="Last Name"
 				/>
@@ -140,6 +142,7 @@
 				<textarea
 					class="input variant-form-material {$errors.notes ? 'input-error' : undefined}"
 					placeholder="Notes"
+					autocapitalize="on"
 					name="notes"
 					bind:value={$form.notes}
 				/>
