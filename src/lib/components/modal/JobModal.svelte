@@ -7,11 +7,9 @@
 		type PopupSettings,
 		popup
 	} from '@skeletonlabs/skeleton';
-	import { onMount } from 'svelte';
 	export let parent: any;
 
 	const modalStore = getModalStore();
-	// const JobForm: SuperValidated<ClientSchema> = $page.data.JobForm;
 
 	const clientOptions: AutocompleteOption<string>[] = $page.data.clientList.map((c) => ({
 		label: `${c.first_name} ${c.last_name}`,
@@ -23,8 +21,6 @@
 	let offsetWidth = 0;
 
 	$: search = `card max-h-60 overflow-auto w-[${offsetWidth + 'px'}]`;
-
-	$: console.log(offsetWidth);
 
 	const popupClient: PopupSettings = {
 		event: 'focus-blur',
@@ -49,7 +45,7 @@
 					use:popup={popupClient}
 					placeholder="Select Client"
 				/>
-				<div data-popup="client-popup" class=" w-full">
+				<div data-popup="client-popup" class="w-full">
 					<div class={search}>
 						<Autocomplete
 							bind:input={selectedSearch.label}
@@ -61,8 +57,6 @@
 						/>
 					</div>
 				</div>
-				<!-- {#if $errors.first_name}
-					<span class="text-xs text-red-500">{$errors.first_name}</span>{/if} -->
 			</div>
 		</form>
 		<footer class="modal-footer float-right">
