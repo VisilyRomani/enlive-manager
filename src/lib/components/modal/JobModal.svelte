@@ -52,17 +52,19 @@
 		placement: 'bottom'
 	};
 
-	$: clientOptions = data.clientList.map((c) => ({
-		label: `${c.first_name} ${c.last_name}`,
-		value: c.id,
-		meta: c.expand.address.map((a) => ({ label: a.address, value: a.id }))
-	}));
+	$: clientOptions =
+		data.clientList?.map((c) => ({
+			label: `${c.first_name} ${c.last_name}`,
+			value: c.id,
+			meta: c.expand?.['address(client)'].map((a) => ({ label: a.address, value: a.id }))
+		})) ?? [];
 
-	$: addressOptions = clientOptions.find((c) => c.value === selectedSearch.value)?.meta as {
-		label: string;
-		value: string;
-	}[];
-	$: taskOptions = data.serviceList.map((s) => ({ value: s.id, label: s.name }));
+	$: addressOptions =
+		(clientOptions?.find((c) => c.value === selectedSearch.value)?.meta as {
+			label: string;
+			value: string;
+		}[]) ?? [];
+	$: taskOptions = data.serviceList?.map((s) => ({ value: s.id, label: s.name })) ?? [];
 
 	const addTask = () => {
 		form.update(

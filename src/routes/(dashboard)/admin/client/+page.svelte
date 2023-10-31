@@ -8,6 +8,8 @@
 	const newClientModal = () => {
 		modalStore.trigger({ type: 'component', component: 'ClientModal', title: 'Create Client' });
 	};
+
+	$: console.log(data.clientList);
 </script>
 
 <div class="flex sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10">
@@ -24,7 +26,7 @@
 				<a href="/admin/client/{client.id}">
 					<span>
 						<dt>{client.first_name} {client.last_name}</dt>
-						{#each client.expand?.address ?? [] as addr}
+						{#each client.address ?? [] as addr}
 							<dd class="text-gray-500 break-all w-100% flex flex-col">
 								{addr.address}
 							</dd>

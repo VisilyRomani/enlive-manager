@@ -58,7 +58,7 @@
 <div class="card m-3 p-3">
 	<h4 class="h4">Addresses</h4>
 	<dl class="list-dl">
-		{#each data.client?.expand?.address as addr}
+		{#each data.client?.expand?.['address(client)'] as addr}
 			<a
 				class="hover:bg-secondary-900 flex flex-row p-1 bg-surface-700 rounded-lg my-3"
 				href="https://maps.google.com/?q={addr.address}

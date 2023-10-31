@@ -20,21 +20,48 @@ const JobValidation = z.object({
 		.default(new Map())
 });
 
+type TJobList = {
+	id: string;
+	note: string;
+	status: string;
+	expand: {
+		address: {
+			address: string;
+			expand: {
+				client: {
+					first_name: string;
+					last_name: string;
+				};
+			};
+		};
+		task: {
+			expand: {
+				service: { name: string };
+			};
+		}[];
+	};
+};
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const jobForm = await superValidate(request, JobValidation);
-	const clientList =
-		(await locals.pb?.collection('client').getFullList<IClientList>({
-			expand: 'address',
-			fields: 'first_name, last_name, id, expand'
+	const clientList = locals.pb?.collection('client').getFullList<IClientList>({
+		expand: 'address(client)',
+		fields: 'first_name, last_name, id, expand'
+	});
+	const serviceList = locals.pb?.collection('service').getFullList({
+		filter: 'active=true',
+		fields: 'name,id'
+	});
+	const jobList =
+		(await locals.pb?.collection('job').getFullList<TJobList>({
+			expand: 'task.service, address.client',
+			fields: 'expand,id,notes,status'
 		})) ?? [];
-	const serviceList =
-		(await locals.pb?.collection('service').getFullList({
-			filter: 'active=true',
-			fields: 'name,id'
-		})) ?? [];
+
 	return {
 		jobForm,
 		clientList,
+		jobList,
 		serviceList
 	};
 };
@@ -42,7 +69,6 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 export const actions = {
 	CreateJob: async ({ request, locals }) => {
 		const jobForm = await superValidate(request, JobValidation);
-		console.log(jobForm);
 		if (!jobForm.valid) {
 			return fail(400, { jobForm });
 		}
@@ -59,12 +85,9 @@ export const actions = {
 		jobData.append('company', locals.user?.company);
 
 		try {
-			const job = await locals.pb?.collection('job').create(jobData);
-
 			const tasks = Array.from(jobForm.data.task).map((t) => {
 				return locals.pb?.collection('task').create(
 					{
-						job: job?.id,
 						service: t[1].service_id,
 						price: t[1].price,
 						company: locals.user?.company
@@ -72,7 +95,15 @@ export const actions = {
 					{ requestKey: null }
 				);
 			});
-			return { result: await Promise.all(tasks), jobForm };
+
+			(await Promise.all(tasks)).forEach((task) => {
+				if (task) {
+					jobData.append('task', task.id);
+				}
+			});
+			const job = await locals.pb?.collection('job').create(jobData);
+
+			return { result: job, jobForm };
 		} catch (e) {
 			if (e instanceof Error) {
 				console.error(e.message);
