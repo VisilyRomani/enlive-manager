@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { Avatar, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
-	import { late } from 'zod';
 
 	export let data: PageData;
-	$: console.log(data);
 </script>
 
 <div class="card m-3 p-3 grid grid-cols-2">

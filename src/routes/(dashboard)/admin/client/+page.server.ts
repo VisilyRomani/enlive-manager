@@ -2,6 +2,7 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
+import type Record from 'pocketbase';
 
 const ClientValidation = z.object({
 	first_name: z.string().min(1, 'First name is required'),
@@ -27,9 +28,21 @@ const ClientValidation = z.object({
 });
 export type ClientSchema = typeof ClientValidation;
 
+export interface IClientList extends Record {
+	id: string;
+	first_name: string;
+	last_name: string;
+	expand: {
+		address: {
+			address: string;
+			id: string;
+		}[];
+	};
+}
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, ClientValidation);
-	const clientList = await locals.pb?.collection('client').getFullList({
+	const clientList = await locals.pb?.collection('client').getFullList<IClientList>({
 		expand: 'address',
 		fields: 'first_name, last_name, id, expand'
 	});

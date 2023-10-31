@@ -47,7 +47,6 @@ export const actions = {
 		if (!userForm.valid) {
 			return fail(400, { userForm });
 		}
-		console.log(userForm);
 
 		const userData = new FormData();
 		userData.append('first_name', userForm.data.first_name);
@@ -68,7 +67,6 @@ export const actions = {
 		const formData = await request.formData();
 		const companyForm = await superValidate(formData, CompanyValidation);
 		if (!companyForm.valid) {
-			console.log(companyForm);
 			return fail(400, { companyForm });
 		}
 
@@ -83,7 +81,6 @@ export const actions = {
 		}
 		if (formData.has('logo')) {
 			const logo = formData.get('logo');
-			console.log(logo);
 			if (logo instanceof File) {
 				companyData.append('logo', logo);
 			}

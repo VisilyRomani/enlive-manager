@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	export let data;
-	$: console.log(data.clientList);
 
 	const modalStore = getModalStore();
 
