@@ -42,18 +42,20 @@ export interface IClientList extends Record {
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, ClientValidation);
-	const clientList = await locals.pb?.collection('client').getFullList<IClientList>({
-		expand: 'address(client)',
-		fields: 'first_name, last_name, id, expand'
-	});
+	const clientList = (
+		await locals.pb?.collection('client').getFullList<IClientList>({
+			expand: 'address(client)',
+			fields: 'first_name, last_name, id, expand'
+		})
+	)?.map((c) => ({
+		id: c.id,
+		first_name: c.first_name,
+		last_name: c.last_name,
+		address: c.expand?.['address(client)']
+	}));
 	return {
 		clientForm,
-		clientList: clientList?.map((c) => ({
-			id: c.id,
-			first_name: c.first_name,
-			last_name: c.last_name,
-			address: c.expand?.['address(client)']
-		}))
+		clientList: clientList
 	};
 };
 

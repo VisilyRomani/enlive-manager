@@ -13,7 +13,8 @@ const JobValidation = z.object({
 			z.object({
 				service_name: z.string(),
 				service_id: z.string(),
-				price: z.number().default('' as unknown as number)
+				price: z.number().default('' as unknown as number),
+				count: z.number().default('' as unknown as number)
 			})
 		)
 		.refine((t) => (t.size < 0 ? { message: 'Must have at least one Task' } : true))
@@ -55,9 +56,9 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	const jobList =
 		(await locals.pb?.collection('job').getFullList<TJobList>({
 			expand: 'task.service, address.client',
-			fields: 'expand,id,notes,status'
+			fields:
+				'expand.task.expand.service.name,id,notes,status, expand.address.address, expand.address.expand.client.first_name, expand.address.expand.client.last_name'
 		})) ?? [];
-
 	return {
 		jobForm,
 		clientList,
@@ -90,6 +91,7 @@ export const actions = {
 					{
 						service: t[1].service_id,
 						price: t[1].price,
+						count: t[1].count,
 						company: locals.user?.company
 					},
 					{ requestKey: null }

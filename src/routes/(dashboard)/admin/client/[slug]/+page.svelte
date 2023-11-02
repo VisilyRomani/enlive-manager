@@ -5,6 +5,21 @@
 	export let data: PageData;
 </script>
 
+<ol class="breadcrumb">
+	<li class="crumb">
+		<a class="anchor" href="/admin/client">
+			<h3 class="h3">Clients</h3>
+		</a>
+	</li>
+	<li class="crumb-separator" aria-hidden>&rsaquo;</li>
+	<li>
+		<h3 class="h3">
+			{data.client?.first_name}
+			{data.client?.last_name}
+		</h3>
+	</li>
+</ol>
+
 <div class="card m-3 p-3 grid grid-cols-2">
 	<div class="flex gap-3">
 		<Avatar width="w-28" initials={data.client?.first_name} />

@@ -8,8 +8,6 @@
 	const newClientModal = () => {
 		modalStore.trigger({ type: 'component', component: 'ClientModal', title: 'Create Client' });
 	};
-
-	$: console.log(data.clientList);
 </script>
 
 <div class="flex sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10">
@@ -18,6 +16,12 @@
 	>
 	<input bind:value={clientFilter} placeholder="Search" class="input variant-form-material" />
 </div>
+
+{#if !data.clientList}
+	<div>
+		<div class="placeholder animate-pulse" />
+	</div>
+{/if}
 
 <nav>
 	<dl class="list-dl">

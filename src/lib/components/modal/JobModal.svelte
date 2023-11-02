@@ -21,7 +21,7 @@
 	let offsetAddressWidth = 0;
 	let offsetTaskWidth = 0;
 
-	let selectTask = { service_name: '', service_id: '', price: 0 };
+	let selectTask = { service_name: '', service_id: '', price: '', count: '' };
 	let selectedSearch = { label: '', value: '' };
 	let selectedSearchAddress = { label: '', value: '' };
 
@@ -78,7 +78,7 @@
 					$errors.task = [...($errors.task ?? []), 'Missing Service ID'];
 					return $form;
 				}
-				if (selectTask.price < 0) {
+				if (+selectTask.price < 0) {
 					$errors.task = [...($errors.task ?? []), 'Price Must Be Positive'];
 
 					return $form;
@@ -87,9 +87,10 @@
 				$form.task.set($form.task.size, {
 					service_id: selectTask.service_id,
 					service_name: selectTask.service_name,
-					price: Math.trunc(selectTask.price * 100)
+					count: isNaN(parseInt(selectTask.count)) ? 1 : parseInt(selectTask.count),
+					price: Math.trunc(+selectTask.price * 100)
 				});
-				selectTask = { service_name: '', service_id: '', price: 0 };
+				selectTask = { service_name: '', service_id: '', price: '', count: '' };
 				$errors.task = undefined;
 				return $form;
 			},
@@ -102,7 +103,7 @@
 	<div class="card p-4 w-modal max-w-4xl shadow-xl space-y-4">
 		<h2 class="h2">{$modalStore[0].title}</h2>
 		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateJob" method="post" use:enhance>
-			<div class="flex flex-col justify-between gap-3">
+			<div class="flex flex-col gap-3">
 				<input type="text" style="display:none" />
 				<div bind:offsetWidth={offsetAddressWidth}>
 					<input
@@ -163,15 +164,21 @@
 						<span class="text-xs text-red-500">{$errors.address}</span>
 					{/if}
 				</div>
-				<textarea class="input variant-form-material" name="notes" placeholder="Notes" />
+				<textarea
+					class="input variant-form-material"
+					name="notes"
+					placeholder="Notes"
+					bind:value={$form.notes}
+				/>
 			</div>
-			<div class="h-52 flex justify-between flex-col gap-2">
+			<div class="h-72 flex justify-between flex-col gap-2">
 				<div class="table-container">
 					<table class="table">
 						<thead>
 							<tr>
 								<th>Service</th>
-								<th>Price </th>
+								<th>Count</th>
+								<th>Price</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -180,6 +187,10 @@
 									<td>
 										{task[1].service_name}
 									</td>
+									<td>
+										{task[1].count}
+									</td>
+
 									<td>
 										{Dinero({ amount: task[1].price }).toFormat('$0.00')}
 									</td>
@@ -195,8 +206,8 @@
 							<span class="text-xs text-red-500">{error}</span>
 						{/each}
 					{/if}
-					<div class="flex flex-row gap-2">
-						<div class="w-full" bind:offsetWidth={offsetTaskWidth}>
+					<div class="grid grid-cols-3 gap-2">
+						<div class="w-full col-span-3" bind:offsetWidth={offsetTaskWidth}>
 							<input
 								class="input variant-form-material h-full {$errors.task
 									? 'input-error'
@@ -222,6 +233,13 @@
 								</div>
 							</div>
 						</div>
+						<input
+							class="input variant-form-material"
+							type="number"
+							bind:value={selectTask.count}
+							placeholder="Count"
+						/>
+
 						<input
 							class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
 							placeholder="Price"
