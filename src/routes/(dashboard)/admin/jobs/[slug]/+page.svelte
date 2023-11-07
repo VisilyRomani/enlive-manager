@@ -4,10 +4,8 @@
 	$: calcCost = data.job?.expand.task.reduce(
 		(acc, cur) => {
 			acc.subtotal = Dinero({ amount: cur.price }).multiply(cur.count).add(acc.subtotal);
-			// acc.tax = cur.price * (cur.expand.service.expand.tax / 100) + acc.tax;
 			acc.tax = cur.expand.service.expand.tax
 				.reduce((acc, current) => {
-					// = acc + cur.price * cur.count * (current.percent / 100);
 					acc = acc.add(
 						Dinero({ amount: cur.price })
 							.multiply(cur.count)
@@ -28,7 +26,7 @@
 			<h3 class="h3">Jobs</h3>
 		</a>
 	</li>
-	<li class="crumb-separator" aria-hidden>&rsaquo;</li>
+	<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
 	<li>
 		<h3 class="h3">
 			{data.job?.id.slice(-4)}
@@ -58,7 +56,7 @@
 <div class="card m-3 p-3">
 	<div class="flex flex-row justify-between mb-3">
 		<h5 class="h5">Job Tasks</h5>
-		<span class="chip variant-filled">
+		<span class="badge variant-filled">
 			{data.job?.status}
 		</span>
 	</div>

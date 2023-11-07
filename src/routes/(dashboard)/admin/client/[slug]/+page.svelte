@@ -5,13 +5,13 @@
 	export let data: PageData;
 </script>
 
-<ol class="breadcrumb">
+<ol class="breadcrumb mx-3 px-3">
 	<li class="crumb">
 		<a class="anchor" href="/admin/client">
 			<h3 class="h3">Clients</h3>
 		</a>
 	</li>
-	<li class="crumb-separator" aria-hidden>&rsaquo;</li>
+	<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
 	<li>
 		<h3 class="h3">
 			{data.client?.first_name}

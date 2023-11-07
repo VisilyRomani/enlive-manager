@@ -1,0 +1,68 @@
+<script lang="ts">
+	import dayjs, { Dayjs } from 'dayjs';
+	import cleft from '$lib/photos/cleft.svg?raw';
+	import cright from '$lib/photos/cright.svg?raw';
+
+	export let date = dayjs();
+
+	const getCells = (selectedDate: Dayjs) => {
+		return new Array(selectedDate.daysInMonth())
+			.fill('')
+			.map((a, idx) => {
+				const date = selectedDate.set('date', idx + 1);
+				if (idx === 0 && date.day() !== 0) {
+					const values: Dayjs[] = [];
+					for (let i = 0; i < date.day(); i++) {
+						values.push(date.subtract(date.day() - i, 'day'));
+					}
+					values.push(date.set('date', idx + 1));
+					return values;
+				} else if (idx === selectedDate.daysInMonth() - 1 && date.day() !== 6) {
+					const endDays: Dayjs[] = [];
+					endDays.push(date);
+					for (let i = 1; i <= 6 - date.day(); i++) {
+						endDays.push(date.add(i, 'day'));
+					}
+					return endDays;
+				}
+				return date;
+			})
+			.flat();
+	};
+	$: cells = getCells(date);
+</script>
+
+<div>
+	<div class="flex justify-between">
+		<h5 class="h5 text-secondary-300">
+			{date.format('MMMM YYYY')}
+		</h5>
+		<div>
+			<button
+				class="hover:fill-secondary-500 fill-secondary-300"
+				on:click={() => (date = date.subtract(1, 'month'))}
+			>
+				<svg class="mx-auto" width="2em" viewBox="0 0 24 24">{@html cleft}</svg>
+			</button>
+			<button
+				class="hover:fill-secondary-500 fill-secondary-300"
+				on:click={() => (date = date.add(1, 'month'))}
+			>
+				<svg class="mx-auto" width="2em" viewBox="0 0 24 24">{@html cright}</svg>
+			</button>
+		</div>
+	</div>
+	<div class="grid grid-cols-7 rounded-lg">
+		{#each cells as cell}
+			<button
+				on:click={() => (date = cell)}
+				class="hover:bg-secondary-300 rounded-md text-md font-semibold {cell.isSame(date, 'day') &&
+					'!bg-secondary-400 text-black'} {cell.month() !== date.month() && 'bg-gray-700'}"
+			>
+				<p class="">
+					{cell.format('D')}
+				</p>
+			</button>
+		{/each}
+	</div>
+</div>
