@@ -12,7 +12,7 @@
 	const clientform: SuperValidated<ClientSchema> = $page.data.clientForm;
 
 	const { form, errors, enhance } = superForm(clientform, {
-		clearOnSubmit: 'errors-and-message',
+		resetForm: true,
 		async onResult(event) {
 			if (event.result.type === 'success') {
 				modalStore.close();

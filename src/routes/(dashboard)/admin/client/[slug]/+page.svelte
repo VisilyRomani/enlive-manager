@@ -1,11 +1,24 @@
 <script lang="ts">
 	import { Avatar, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
-	import { late } from 'zod';
 
 	export let data: PageData;
-	$: console.log(data);
 </script>
+
+<ol class="breadcrumb mx-3 px-3">
+	<li class="crumb">
+		<a class="anchor" href="/admin/client">
+			<h3 class="h3">Clients</h3>
+		</a>
+	</li>
+	<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
+	<li>
+		<h3 class="h3">
+			{data.client?.first_name}
+			{data.client?.last_name}
+		</h3>
+	</li>
+</ol>
 
 <div class="card m-3 p-3 grid grid-cols-2">
 	<div class="flex gap-3">
@@ -60,7 +73,7 @@
 <div class="card m-3 p-3">
 	<h4 class="h4">Addresses</h4>
 	<dl class="list-dl">
-		{#each data.client?.expand?.address as addr}
+		{#each data.client?.expand?.['address(client)'] as addr}
 			<a
 				class="hover:bg-secondary-900 flex flex-row p-1 bg-surface-700 rounded-lg my-3"
 				href="https://maps.google.com/?q={addr.address}

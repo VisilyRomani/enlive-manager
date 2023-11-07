@@ -4,9 +4,9 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	export let data: PageData;
 
-	const { form, enhance, errors } = superForm(data.taxForm);
-
-	$: console.log(data.taxes);
+	const { form, enhance, errors } = superForm(data.taxForm, {
+		resetForm: true
+	});
 </script>
 
 <h2 class="h2">Tax Settings</h2>
@@ -14,7 +14,6 @@
 	<div class="w-full">
 		<input
 			class="input variant-form-material {$errors.name ? 'input-error' : undefined}"
-			autocapitalize="characters"
 			name="name"
 			placeholder="Tax name"
 			bind:value={$form.name}

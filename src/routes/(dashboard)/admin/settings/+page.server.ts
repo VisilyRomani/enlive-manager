@@ -12,6 +12,11 @@ const TaxValidation = z.object({
 		.default('' as unknown as number)
 });
 
+const ServiceValidation = z.object({
+	name: z.string().min(1),
+	tax: z.object({ label: z.string(), value: z.string() }).array().min(1)
+});
+
 interface TTaxList extends Record {
 	active: boolean;
 	name: string;
@@ -19,19 +24,30 @@ interface TTaxList extends Record {
 	percent: number;
 }
 
+interface TServiceList extends Record {
+	name: string;
+	expand: { tax: { name: string; percent: number }[] };
+	active: boolean;
+	id: string;
+}
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const taxForm = await superValidate(request, TaxValidation);
+	const serviceForm = await superValidate(request, ServiceValidation);
 
 	try {
 		const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
-		return { taxForm, taxes };
+		const services =
+			(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
+
+		return { taxForm, taxes, serviceForm, services };
 	} catch (e) {
 		if (e instanceof Error) {
 			return fail(400, e.message);
 		}
 	}
 
-	return { taxForm, taxes: [] };
+	return { taxForm, serviceForm, taxes: [], services: [] };
 };
 
 export const actions = {
@@ -43,7 +59,7 @@ export const actions = {
 
 		const taxData = new FormData();
 
-		taxData.append('name', taxForm.data.name);
+		taxData.append('name', taxForm.data.name.toUpperCase());
 		taxData.append('percent', String(taxForm.data.percent));
 		taxData.append('active', 'true');
 		if (locals.user?.company) {
@@ -61,5 +77,35 @@ export const actions = {
 				return setError(taxForm, 'name', 'Name already exists.');
 			}
 		}
+		return { taxForm };
+	},
+	createService: async ({ locals, request }) => {
+		const serviceForm = await superValidate(request, ServiceValidation);
+
+		if (!serviceForm.valid) {
+			return { serviceForm };
+		}
+
+		const serviceData = new FormData();
+		serviceData.append('name', serviceForm.data.name.toUpperCase());
+		if (locals.user?.company) {
+			serviceData.append('company', locals.user.company);
+		} else {
+			locals.pb?.authStore.clear();
+		}
+		serviceData.append('active', 'true');
+
+		serviceForm.data.tax.map((t) => {
+			serviceData.append('tax', t.value);
+		});
+
+		try {
+			await locals.pb?.collection('service').create(serviceData);
+		} catch (e) {
+			if (e instanceof Error) {
+				return setError(serviceForm, 'name', e.message);
+			}
+		}
+		return { serviceForm };
 	}
 };

@@ -2,6 +2,7 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
+import type Record from 'pocketbase';
 
 const ClientValidation = z.object({
 	first_name: z.string().min(1, 'First name is required'),
@@ -27,15 +28,34 @@ const ClientValidation = z.object({
 });
 export type ClientSchema = typeof ClientValidation;
 
+export interface IClientList extends Record {
+	id: string;
+	first_name: string;
+	last_name: string;
+	expand: {
+		'address(client)': {
+			address: string;
+			id: string;
+		}[];
+	};
+}
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, ClientValidation);
-	const clientList = await locals.pb?.collection('client').getFullList({
-		expand: 'address',
-		fields: 'first_name, last_name, id, expand'
-	});
+	const clientList = (
+		await locals.pb?.collection('client').getFullList<IClientList>({
+			expand: 'address(client)',
+			fields: 'first_name, last_name, id, expand'
+		})
+	)?.map((c) => ({
+		id: c.id,
+		first_name: c.first_name,
+		last_name: c.last_name,
+		address: c.expand?.['address(client)']
+	}));
 	return {
 		clientForm,
-		clientList
+		clientList: clientList
 	};
 };
 
@@ -54,7 +74,7 @@ export const actions = {
 				newClient.append(key, String(value));
 			}
 
-			// Used to seperate the from for Address
+			// Used to seperate the form for Address
 			if (key === 'addr') {
 				newClientAddress.append('address', String(value));
 			}
@@ -72,6 +92,13 @@ export const actions = {
 		}
 
 		try {
+			const client = await locals.pb?.collection('client').create(newClient);
+			if (client) {
+				newClientAddress.append('client', client?.id);
+			} else {
+				return fail(400, { error: 'failed to create client address' });
+			}
+
 			const addr = await locals.pb?.collection('address').create(newClientAddress);
 
 			if (addr) {
@@ -79,7 +106,6 @@ export const actions = {
 			} else {
 				return fail(400, { error: 'Could not create address' });
 			}
-			await locals.pb?.collection('client').create(newClient);
 			return { clientForm };
 		} catch (e) {
 			console.log(e);
