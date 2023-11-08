@@ -4,6 +4,9 @@
 	import cright from '$lib/photos/cright.svg?raw';
 
 	export let date = dayjs();
+	export let multiSelect: boolean = false;
+
+	export let selectedDates: Dayjs[] = [];
 
 	const getCells = (selectedDate: Dayjs) => {
 		return new Array(selectedDate.daysInMonth())
@@ -29,6 +32,18 @@
 			})
 			.flat();
 	};
+
+	const hasDate = (date: Dayjs) => {
+		return !!selectedDates.find((d) => d.isSame(date, 'day'));
+	};
+
+	const addDate = (cellDate: Dayjs) => {
+		selectedDates = [...selectedDates, cellDate];
+	};
+	const removeDate = (cellDate: Dayjs) => {
+		selectedDates = [...selectedDates.filter((d) => !d.isSame(cellDate, 'day'))];
+	};
+
 	$: cells = getCells(date);
 </script>
 
@@ -52,14 +67,23 @@
 			</button>
 		</div>
 	</div>
-	<div class="grid grid-cols-7 rounded-lg">
-		{#each cells as cell}
+	<div class="grid grid-cols-7 rounded-lg h-full">
+		{#each cells as cell, idx (idx)}
 			<button
-				on:click={() => (date = cell)}
-				class="hover:bg-secondary-300 rounded-md text-md font-semibold {cell.isSame(date, 'day') &&
-					'!bg-secondary-400 text-black'} {cell.month() !== date.month() && 'bg-gray-700'}"
+				on:click={() => {
+					date = cell;
+					if (multiSelect) {
+						hasDate(cell) ? removeDate(cell) : addDate(cell);
+					}
+				}}
+				class="hover:bg-secondary-300 rounded-md text-md font-semibold
+				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
+				{!multiSelect && cell.isSame(date, 'day') && '!bg-secondary-400 text-black'}
+				{cell.month() !== date.month() && 'bg-gray-700'}
+				{multiSelect && selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-secondary-400 text-black'}
+				"
 			>
-				<p class="">
+				<p>
 					{cell.format('D')}
 				</p>
 			</button>
