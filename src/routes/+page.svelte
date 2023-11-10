@@ -53,22 +53,22 @@
 	<a href="/signup" class="btn btn-xl variant-filled-tertiary !bg-gray-900">Start Here</a>
 </div>
 
-<div class="bg-surface-800 w-full flex flex-wrap justify-around">
+<div class="card w-full flex flex-wrap justify-around">
 	<div class="flex flex-col m-5">
 		<h5 class="h5">Who we are</h5>
-		<a href="/" class="text-gray-400">About us</a>
+		<a href="/" class="text-gray-500">About us</a>
 	</div>
 	<div class="flex flex-col m-5">
 		<h5 class="h5">Support</h5>
-		<a href="/" class="text-gray-400">Contact us</a>
+		<a href="/" class="text-gray-500">Contact us</a>
 	</div>
 	<div class="flex flex-col m-5 justify-center">
 		<h5 class="h5">Policies</h5>
-		<a href="/" class="text-gray-400">Terms and conditions</a>
-		<a href="/" class="text-gray-400">Privacy policy</a>
+		<a href="/" class="text-gray-500">Terms and conditions</a>
+		<a href="/" class="text-gray-500">Privacy policy</a>
 	</div>
 	<div class="flex flex-col m-5">
 		<h5 class="h5">Resources</h5>
-		<a href="/" class="text-gray-400">Documentation</a>
+		<a href="/" class="text-gray-500">Documentation</a>
 	</div>
 </div>

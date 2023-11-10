@@ -47,7 +47,7 @@
 	$: cells = getCells(date);
 </script>
 
-<div>
+<div class="h-fit">
 	<div class="flex justify-between">
 		<h5 class="h5 text-secondary-300">
 			{date.format('MMMM YYYY')}
@@ -67,7 +67,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="grid grid-cols-7 rounded-lg h-full">
+	<div class="grid grid-cols-7 rounded-lg h-full gap-1">
 		{#each cells as cell, idx (idx)}
 			<button
 				on:click={() => {
@@ -78,9 +78,9 @@
 				}}
 				class="hover:bg-secondary-300 rounded-md text-md font-semibold
 				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
-				{!multiSelect && cell.isSame(date, 'day') && '!bg-secondary-400 text-black'}
+				{!multiSelect && cell.isSame(date, 'day') && '!bg-success-400 text-black'}
 				{cell.month() !== date.month() && 'bg-gray-700'}
-				{multiSelect && selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-secondary-400 text-black'}
+				{multiSelect && selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-success-400 text-black'}
 				"
 			>
 				<p>

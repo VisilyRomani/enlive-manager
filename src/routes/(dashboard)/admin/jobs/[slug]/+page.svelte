@@ -99,9 +99,6 @@
 					</div>
 				</td>
 			</tr>
-			<!-- <td class="col-start-2">
-					<p>Tax</p>
-				</td> -->
 		</tfoot>
 	</table>
 </div>

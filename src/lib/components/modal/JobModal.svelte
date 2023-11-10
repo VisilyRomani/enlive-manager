@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import {
-		Autocomplete,
-		getModalStore,
-		type AutocompleteOption,
-		type PopupSettings,
-		popup
-	} from '@skeletonlabs/skeleton';
+	import { Autocomplete, getModalStore, type PopupSettings, popup } from '@skeletonlabs/skeleton';
 	import Dinero from 'dinero.js';
 	import type { PageData } from '../../../routes/(dashboard)/admin/jobs/$types';
 	import { superForm } from 'sveltekit-superforms/client';
@@ -105,7 +99,7 @@
 		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateJob" method="post" use:enhance>
 			<div class="flex flex-col gap-3">
 				<input type="text" style="display:none" />
-				<div bind:offsetWidth={offsetAddressWidth}>
+				<div bind:offsetWidth={offsetClientWidth}>
 					<input
 						class="input variant-form-material"
 						type="search"
