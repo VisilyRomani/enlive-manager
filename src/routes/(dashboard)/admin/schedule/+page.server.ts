@@ -1,4 +1,3 @@
-import dayjs, { Dayjs } from 'dayjs';
 import type { PageServerLoad } from './$types';
 import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
@@ -10,11 +9,39 @@ type TUser = {
 	last_name: string;
 };
 
+// type TJob = {
+// 	address: string;
+// 	expand: {
+
+// 	};
+// };
+
 const ScheduleValidate = z.object({
 	title: z.string(),
-	employee: z.array(z.string()).min(1),
-	job: z.array(z.object({ id: z.string() })),
-	dates: z.array(z.instanceof(dayjs as unknown as typeof Dayjs)).min(1)
+	employee: z.array(z.string()).min(1, 'Must select at least one employee'),
+	job: z
+		.map(
+			z.string(),
+			z.object({
+				address: z.string(),
+				id: z.string(),
+				notes: z.string(),
+				order: z.number(),
+				expand: z.object({
+					address: z.object({ address: z.string() }),
+					task: z.array(
+						z.object({
+							service: z.string(),
+							price: z.number(),
+							count: z.number()
+						})
+					)
+				})
+			})
+		)
+		.refine((t) => t.size > 0, { message: 'Must select at least one Job' })
+		.default(new Map()),
+	dates: z.array(z.date()).min(1, 'Must select at least one date').default([])
 });
 
 export const load: PageServerLoad = async ({ locals, request }) => {
@@ -35,6 +62,8 @@ export const load: PageServerLoad = async ({ locals, request }) => {
 export const actions = {
 	createSchedule: async ({ locals, request }) => {
 		const scheduleForm = await superValidate(request, ScheduleValidate);
+
+		console.log(scheduleForm.errors);
 
 		if (!scheduleForm.valid) {
 			return fail(400, { scheduleForm });

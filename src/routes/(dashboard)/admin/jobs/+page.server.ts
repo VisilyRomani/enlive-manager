@@ -17,7 +17,7 @@ const JobValidation = z.object({
 				count: z.number().default('' as unknown as number)
 			})
 		)
-		.refine((t) => (t.size < 0 ? { message: 'Must have at least one Task' } : true))
+		.refine((t) => (t.size <= 0 ? { message: 'Must have at least one Task' } : true))
 		.default(new Map())
 });
 

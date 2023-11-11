@@ -3,6 +3,8 @@
 	import cleft from '$lib/photos/cleft.svg?raw';
 	import cright from '$lib/photos/cright.svg?raw';
 
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher<{ selection: { dates: Dayjs[] } }>();
 	export let date = dayjs();
 	export let multiSelect: boolean = false;
 
@@ -54,12 +56,14 @@
 		</h5>
 		<div>
 			<button
+				type="button"
 				class="hover:fill-secondary-500 fill-secondary-300"
 				on:click={() => (date = date.subtract(1, 'month'))}
 			>
 				<svg class="mx-auto" width="2em" viewBox="0 0 24 24">{@html cleft}</svg>
 			</button>
 			<button
+				type="button"
 				class="hover:fill-secondary-500 fill-secondary-300"
 				on:click={() => (date = date.add(1, 'month'))}
 			>
@@ -70,17 +74,20 @@
 	<div class="grid grid-cols-7 rounded-lg h-full gap-1">
 		{#each cells as cell, idx (idx)}
 			<button
+				type="button"
 				on:click={() => {
 					date = cell;
 					if (multiSelect) {
 						hasDate(cell) ? removeDate(cell) : addDate(cell);
+					} else {
+						selectedDates = [cell];
 					}
+					dispatch('selection', { dates: selectedDates });
 				}}
 				class="hover:bg-secondary-300 rounded-md text-md font-semibold
 				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
-				{!multiSelect && cell.isSame(date, 'day') && '!bg-success-400 text-black'}
 				{cell.month() !== date.month() && 'bg-gray-700'}
-				{multiSelect && selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-success-400 text-black'}
+				{selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-success-400 text-black'}
 				"
 			>
 				<p>
