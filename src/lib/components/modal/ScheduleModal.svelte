@@ -13,7 +13,7 @@
 	import dayjs from 'dayjs';
 	import type { PageData } from '../../../routes/(dashboard)/admin/schedule/$types';
 	import { superForm } from 'sveltekit-superforms/client';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
+	import type { TJob } from '../../../routes/(dashboard)/admin/schedule/+page.server';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
@@ -76,8 +76,7 @@
 			{ taint: false }
 		);
 	};
-
-	const jobSelect = (job) => {
+	const jobSelect = (job: TJob) => {
 		form.update(
 			($form) => {
 				$form.job.has(job.id) ? $form.job.delete(job.id) : $form.job.set(job.id, job);

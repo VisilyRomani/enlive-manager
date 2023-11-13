@@ -9,12 +9,37 @@ type TUser = {
 	last_name: string;
 };
 
-// type TJob = {
-// 	address: string;
-// 	expand: {
-
-// 	};
-// };
+export type TJob = {
+	id: string;
+	address: string;
+	notes: string;
+	order: number;
+	status: string;
+	expand: {
+		address: {
+			active: boolean;
+			address: string;
+			expand: {
+				client: {
+					email: string;
+					first_name: string;
+					last_name: string;
+				};
+			};
+		};
+		task: {
+			price: number;
+			service: string;
+			count: number;
+			expand: {
+				service: {
+					active: true;
+					name: string;
+				};
+			};
+		}[];
+	};
+};
 
 const ScheduleValidate = z.object({
 	title: z.string(),
@@ -45,7 +70,7 @@ const ScheduleValidate = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals, request }) => {
-	const jobList = await locals.pb?.collection('job').getFullList({
+	const jobList = await locals.pb?.collection('job').getFullList<TJob>({
 		filter: 'status = "PENDING" || status = "RESCHEDULE"',
 		expand: 'address, task, address.client, task.service'
 	});
