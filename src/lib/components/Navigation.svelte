@@ -8,7 +8,6 @@
 	};
 
 	const logout = async () => {
-		// console.log($page.data);
 		try {
 			await fetch('/auth/logout', { method: 'GET' });
 			goto('/login');
@@ -18,7 +17,6 @@
 			}
 		}
 	};
-	$: console.log($page.url.pathname);
 </script>
 
 <nav class="list-nav p-4 flex flex-col justify-between h-full">

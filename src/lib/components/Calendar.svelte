@@ -3,12 +3,9 @@
 	import cleft from '$lib/photos/cleft.svg?raw';
 	import cright from '$lib/photos/cright.svg?raw';
 
-	import { createEventDispatcher } from 'svelte';
-	const dispatch = createEventDispatcher<{ selection: { dates: Dayjs[] } }>();
 	export let date = dayjs();
 	export let multiSelect: boolean = false;
-
-	export let selectedDates: Dayjs[] = [];
+	export let selectedDates: Date[] = [];
 
 	const getCells = (selectedDate: Dayjs) => {
 		return new Array(selectedDate.daysInMonth())
@@ -36,15 +33,21 @@
 	};
 
 	const hasDate = (date: Dayjs) => {
-		return !!selectedDates.find((d) => d.isSame(date, 'day'));
+		return !!selectedDates.find((d) => dayjs(d).isSame(date, 'day'));
 	};
 
 	const addDate = (cellDate: Dayjs) => {
-		selectedDates = [...selectedDates, cellDate];
+		selectedDates = [...selectedDates, cellDate.toDate()];
 	};
 	const removeDate = (cellDate: Dayjs) => {
-		selectedDates = [...selectedDates.filter((d) => !d.isSame(cellDate, 'day'))];
+		selectedDates = [...selectedDates.filter((d) => !dayjs(d).isSame(cellDate, 'day'))];
 	};
+
+	// Used to clear the selected when multi select changes
+	$: multiSelect ||
+		(() => {
+			selectedDates = [];
+		})();
 
 	$: cells = getCells(date);
 </script>
@@ -80,14 +83,13 @@
 					if (multiSelect) {
 						hasDate(cell) ? removeDate(cell) : addDate(cell);
 					} else {
-						selectedDates = [cell];
+						selectedDates = [cell.toDate()];
 					}
-					dispatch('selection', { dates: selectedDates });
 				}}
 				class="hover:bg-secondary-300 rounded-md text-md font-semibold
 				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
 				{cell.month() !== date.month() && 'bg-gray-700'}
-				{selectedDates.find((d) => d.isSame(cell, 'day')) && '!bg-success-400 text-black'}
+				{selectedDates.find((d) => dayjs(d).isSame(cell, 'day')) && '!bg-success-400 text-black'}
 				"
 			>
 				<p>

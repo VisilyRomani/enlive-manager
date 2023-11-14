@@ -26,7 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.url.pathname.startsWith('/admin' || '/app')) {
 		if (!event.locals.user) {
-			console.log('missing user');
+			console.error('missing user');
 			throw redirect(303, '/login');
 		}
 		if (

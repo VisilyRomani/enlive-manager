@@ -8,7 +8,7 @@ export const load = async ({ params, locals }) => {
 		return { client, slug: params.slug };
 	} catch (e) {
 		if (e instanceof Error) {
-			console.log(e.message);
+			console.error(e.message);
 		}
 		throw redirect(300, '/admin/client');
 		// return {

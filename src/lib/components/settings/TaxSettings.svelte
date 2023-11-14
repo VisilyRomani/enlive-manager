@@ -55,7 +55,8 @@
 							name="slide"
 							bind:checked={row.active}
 							on:change={(e) => {
-								console.log(row.id);
+								// TODO: update active status
+								// console.log(row.id);
 							}}
 						/>
 					</td>

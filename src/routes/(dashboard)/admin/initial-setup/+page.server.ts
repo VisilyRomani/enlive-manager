@@ -93,7 +93,7 @@ export const actions = {
 			return { companyForm };
 		} catch (err) {
 			if (err instanceof Error) {
-				console.log(err.message);
+				console.error(err.message);
 				return fail(400, { companyForm, error: err.message });
 			}
 		}

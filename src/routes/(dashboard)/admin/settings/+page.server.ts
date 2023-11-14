@@ -73,7 +73,7 @@ export const actions = {
 			return { taxForm, newTax };
 		} catch (e) {
 			if (e instanceof Error) {
-				console.log(e);
+				console.error(e);
 				return setError(taxForm, 'name', 'Name already exists.');
 			}
 		}

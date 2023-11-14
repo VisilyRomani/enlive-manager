@@ -108,7 +108,6 @@ export const actions = {
 			}
 			return { clientForm };
 		} catch (e) {
-			console.log(e);
 			if (e instanceof Error) {
 				return fail(400, { error: e.message });
 			}

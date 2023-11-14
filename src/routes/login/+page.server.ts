@@ -51,9 +51,7 @@ export const actions = {
 				?.collection('users')
 				.authWithPassword(loginForm.data.email, loginForm.data.password);
 		} catch (err) {
-			console.log(err);
 			loginForm.errors.email = ["Email and/or password didn't match"];
-			loginForm.errors.password = ["Email and/or password didn't match"];
 
 			return fail(401, { loginForm });
 		}

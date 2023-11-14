@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		});
 		return { job };
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 	return {};
 };

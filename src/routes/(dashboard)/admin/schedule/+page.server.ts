@@ -43,30 +43,31 @@ export type TJob = {
 
 const ScheduleValidate = z.object({
 	title: z.string(),
-	employee: z.array(z.string()).min(1, 'Must select at least one employee'),
-	job: z
-		.map(
-			z.string(),
-			z.object({
-				address: z.string(),
-				id: z.string(),
-				notes: z.string(),
-				order: z.number(),
-				expand: z.object({
-					address: z.object({ address: z.string() }),
-					task: z.array(
-						z.object({
-							service: z.string(),
-							price: z.number(),
-							count: z.number()
-						})
-					)
-				})
-			})
-		)
-		.refine((t) => t.size > 0, { message: 'Must select at least one Job' })
+	employee: z
+		.map(z.string(), z.string())
+		.refine((u) => u.size > 0, { message: 'Must select at least one User' })
 		.default(new Map()),
-	dates: z.array(z.date()).min(1, 'Must select at least one date').default([])
+	job: z
+		.object({
+			address: z.string(),
+			id: z.string(),
+			notes: z.string(),
+			order: z.number(),
+			expand: z.object({
+				address: z.object({ address: z.string() }),
+				task: z.array(
+					z.object({
+						service: z.string(),
+						price: z.number(),
+						count: z.number()
+					})
+				)
+			})
+		})
+		.array()
+		.min(1)
+		.default([]),
+	dates: z.date().array().min(1, 'Must select at least one date').default([])
 });
 
 export const load: PageServerLoad = async ({ locals, request }) => {
@@ -88,11 +89,14 @@ export const actions = {
 	createSchedule: async ({ locals, request }) => {
 		const scheduleForm = await superValidate(request, ScheduleValidate);
 
-		console.log(scheduleForm.errors);
+		console.log(scheduleForm.data);
 
 		if (!scheduleForm.valid) {
 			return fail(400, { scheduleForm });
 		}
+
 		locals.pb;
+
+		return { scheduleForm };
 	}
 };
