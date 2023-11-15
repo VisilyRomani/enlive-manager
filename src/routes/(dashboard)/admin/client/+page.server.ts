@@ -70,7 +70,7 @@ export const actions = {
 		const newClientAddress = new FormData();
 
 		for (const [key, value] of Object.entries(clientForm.data)) {
-			if (!(key === 'email' && !value)) {
+			if (!(key === 'email' && !value) && !!value) {
 				newClient.append(key, String(value));
 			}
 

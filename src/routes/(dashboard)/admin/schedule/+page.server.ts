@@ -71,10 +71,11 @@ const ScheduleValidate = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals, request }) => {
-	const jobList = await locals.pb?.collection('job').getFullList<TJob>({
-		filter: 'status = "PENDING" || status = "RESCHEDULE"',
-		expand: 'address, task, address.client, task.service'
-	});
+	const jobList =
+		(await locals.pb?.collection('job').getFullList<TJob>({
+			filter: 'status = "PENDING" || status = "RESCHEDULE"',
+			expand: 'address, task, address.client, task.service'
+		})) ?? [];
 
 	const userList = await locals.pb
 		?.collection('users')

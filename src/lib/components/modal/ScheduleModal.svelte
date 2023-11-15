@@ -14,12 +14,25 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { TJob } from '../../../routes/(dashboard)/admin/schedule/+page.server';
 	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
+	import { onMount } from 'svelte';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
 	let multiSelect = false;
 	const data = $page.data as PageData;
 	export let parent: any;
+
+	let currentLocation: { lat: number; lng: number };
+	onMount(() => {
+		navigator.geolocation.getCurrentPosition(
+			(pos) => {
+				currentLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+			},
+			(err) => {
+				console.error(err.message);
+			}
+		);
+	});
 
 	let userSearch = '';
 	let offsetWidth = 0;
@@ -63,31 +76,48 @@
 			return $errors;
 		});
 
-	$: sortedJobs = data.jobList?.sort((a, b) => (a.order > b.order ? 1 : 0));
+	$: sortedJobs = [
+		...$form.job,
+		...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))
+	] as TJob[];
 
-	$: getWaypoints = () => {
+	$: googleEmbeddedParams = () => {
 		const JobRef = [...$form.job];
-		JobRef.pop();
+		const lastJob = JobRef.pop();
 		if (JobRef.length) {
-			return `&waypoints=${encodeURIComponent(
-				JobRef.map((j) => {
-					return j.expand.address.address;
-				}).join('|')
-			)}`;
+			return (
+				`&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}` +
+				`&waypoints=${encodeURIComponent(
+					JobRef.map((j) => {
+						return j.expand.address.address;
+					}).join('|')
+				)}`
+			);
 		} else {
-			return '';
+			return `&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}`;
 		}
 	};
-	$: console.log(getWaypoints());
-	$: destinationString = `&destination=${encodeURIComponent($form.job[0]?.expand.address.address)}`;
 
 	const jobSelect = (job: TJob) => {
 		form.update(
 			($form) => {
-				$form.job.push(job);
-				// $form.job.has(job.id)
-				// 	? $form.job.delete(job.id)
-				// 	: $form.job.set(job.id, { ...job, order: $form.job.size });
+				const jobElem = $form.job.find((j) => job.id === j.id);
+				if (jobElem) {
+					$form.job = $form.job.filter((j) => !(j.id === jobElem.id));
+				} else {
+					$form.job.push(job);
+				}
+				$form.job = $form.job.map((j, idx) => ({ ...j, order: idx + 1 }));
+				return $form;
+			},
+			{ taint: false }
+		);
+	};
+
+	const sortJobForm = () => {
+		form.update(
+			($form) => {
+				$form.job.sort();
 				return $form;
 			},
 			{ taint: false }
@@ -165,7 +195,7 @@
 				</div>
 			</div>
 			<footer class="modal-footer flex justify-between">
-				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
+				<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>
 				<button
@@ -175,7 +205,7 @@
 				>
 			</footer>
 		{:else}
-			<div class="flex flex-row justify-between flex-wrap-reverse gap-3">
+			<div class="grid lg:grid-cols-2 gap-3">
 				<div>
 					<ul
 						class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
@@ -185,32 +215,43 @@
 						{#each sortedJobs ?? [] as job}
 							<button
 								type="button"
-								class="flex flex-row items-center hover:bg-primary-300 group group-hover:text-primary-900 rounded-md"
+								class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
+								{job.order && 'bg-primary-300'}
+								"
 								on:click={() => jobSelect(job)}
 							>
 								<p class="w-3 text-primary-900 font-bold p-2">
-									{#if [...$form.job.values()].findIndex((i) => i.id === job.id) !== -1}
-										{[...$form.job.values()].find((i) => i.id === job.id)}
+									{#if job.order}
+										{job.order}
 									{/if}
 								</p>
 								<div class="divider-vertical h-9 mx-2" />
-								<li value={job.id} class="grid grid-cols-2 text-left">
+								<li value={job.id} class="grid grid-cols-2 text-left w-full">
 									<div>
-										<h5 class="h4 group-hover:text-primary-900">
+										<h5
+											class="h4 group-hover:text-primary-900
+										{job.order && 'text-primary-900 '}"
+										>
 											{job.expand.address.expand.client.first_name}
 											{job.expand.address.expand.client.last_name} |
-											<span class="text-secondary-400 group-hover:text-secondary-700"
-												>{job.id.slice(-4)}</span
+											<span
+												class="text-secondary-400 group-hover:text-secondary-700
+											{job.order && 'text-secondary-700'}
+											">{job.id.slice(-4)}</span
 											>
 										</h5>
-										<p class="text-gray-400 text-sm group-hover:text-gray-800">
+										<p
+											class="text-gray-400 text-sm group-hover:text-gray-800
+									{job.order && 'text-gray-700'}"
+										>
 											{job.expand.address.address}
 										</p>
 									</div>
 									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
 										{#each job.expand.task as task}
 											<p
-												class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800"
+												class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800
+											{job.order && '!bg-primary-500 !text-surface-800'}"
 											>
 												{task.expand.service.name}
 											</p>
@@ -226,7 +267,7 @@
 						</div>
 					{/if}
 				</div>
-				<div>
+				<div class="w-full">
 					{#if $form.job.length}
 						<iframe
 							width="100%"
@@ -235,12 +276,13 @@
 							frameborder="0"
 							style="border:0"
 							referrerpolicy="no-referrer-when-downgrade"
+							allowfullscreen
 							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
 							&mode=driving
-							&origin=My+Location
-							{destinationString}
-							{getWaypoints()}"
-							allowfullscreen
+							{currentLocation
+								? `&origin=${currentLocation.lat},${currentLocation.lng}`
+								: '&origin=Current%20Location'}
+							{googleEmbeddedParams()}"
 						/>
 					{/if}
 				</div>
@@ -249,7 +291,10 @@
 				<button class="btn {parent.buttonNeutral}" on:click={() => (showFirst = !showFirst)}
 					>Back</button
 				>
-				<button type="submit" class="btn {parent.buttonPositive}">Create</button>
+				<div>
+					<button type="button" class="btn {parent.buttonPositive}">Sort Location</button>
+					<button type="submit" class="btn {parent.buttonPositive}">Create</button>
+				</div>
 			</footer>
 		{/if}
 	</form>
