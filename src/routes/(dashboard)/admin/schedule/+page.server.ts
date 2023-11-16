@@ -19,6 +19,8 @@ export type TJob = {
 		address: {
 			active: boolean;
 			address: string;
+			lat: number;
+			lng: number;
 			expand: {
 				client: {
 					email: string;
@@ -54,7 +56,7 @@ const ScheduleValidate = z.object({
 			notes: z.string(),
 			order: z.number(),
 			expand: z.object({
-				address: z.object({ address: z.string() }),
+				address: z.object({ address: z.string(), lat: z.number(), lng: z.number() }),
 				task: z.array(
 					z.object({
 						service: z.string(),

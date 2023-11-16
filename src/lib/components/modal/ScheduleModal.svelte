@@ -15,6 +15,7 @@
 	import type { TJob } from '../../../routes/(dashboard)/admin/schedule/+page.server';
 	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
 	import { onMount } from 'svelte';
+	import { haversine } from '$lib/helper/LocationHelper';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
@@ -117,11 +118,57 @@
 	const sortJobForm = () => {
 		form.update(
 			($form) => {
-				$form.job.sort();
+				const sortedResult: TJob[] = [];
+
+				const firstJob = nearestJob(
+					$form.job as TJob[],
+					{ expand: { address: { lat: currentLocation.lat, lng: currentLocation.lng } } } as TJob
+				);
+
+				if (firstJob) {
+					sortedResult.push({ ...firstJob, order: sortedResult.length + 1 });
+					$form.job = $form.job.filter((j) => j.id !== firstJob.id);
+				} else {
+					console.error('failed to find fist elem');
+					return $form;
+				}
+
+				while ($form.job.length > 0) {
+					const lastSorted = sortedResult.at(-1);
+					if (lastSorted) {
+						const closestJob = nearestJob($form.job as TJob[], lastSorted);
+						if (closestJob) {
+							sortedResult.push({ ...closestJob, order: sortedResult.length + 1 });
+							$form.job = $form.job.filter((j) => j.id !== closestJob.id);
+						}
+					} else {
+						console.error('failed to find last closest elem');
+						return $form;
+					}
+				}
+				$form.job = sortedResult;
 				return $form;
 			},
 			{ taint: false }
 		);
+	};
+
+	const nearestJob = (list: TJob[], curSmallest: TJob) => {
+		const distArray = list.map((i) => {
+			const dist = haversine(
+				curSmallest.expand.address.lat,
+				curSmallest.expand.address.lng,
+				i.expand.address.lat,
+				i.expand.address.lng
+			);
+			return { id: i.id, dist };
+		});
+
+		const smallestElem = distArray.reduce((min, current) => {
+			return current.dist < min.dist ? current : min;
+		});
+
+		return list.find((i) => i.id === smallestElem.id);
 	};
 </script>
 
@@ -205,7 +252,7 @@
 				>
 			</footer>
 		{:else}
-			<div class="grid lg:grid-cols-2 gap-3">
+			<div class="grid {$form.job.length && 'lg:grid-cols-2'} gap-3">
 				<div>
 					<ul
 						class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
@@ -267,8 +314,8 @@
 						</div>
 					{/if}
 				</div>
-				<div class="w-full">
-					{#if $form.job.length}
+				{#if $form.job.length}
+					<div class="w-full min-h-[300px]">
 						<iframe
 							width="100%"
 							height="100%"
@@ -284,15 +331,20 @@
 								: '&origin=Current%20Location'}
 							{googleEmbeddedParams()}"
 						/>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			</div>
 			<footer class="modal-footer flex justify-between">
 				<button class="btn {parent.buttonNeutral}" on:click={() => (showFirst = !showFirst)}
 					>Back</button
 				>
 				<div>
-					<button type="button" class="btn {parent.buttonPositive}">Sort Location</button>
+					<button
+						type="button"
+						disabled={!$form.job.length}
+						class="btn {parent.buttonPositive}"
+						on:click={sortJobForm}>Sort Location</button
+					>
 					<button type="submit" class="btn {parent.buttonPositive}">Create</button>
 				</div>
 			</footer>
