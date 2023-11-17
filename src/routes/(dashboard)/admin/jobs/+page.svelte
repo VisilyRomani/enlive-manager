@@ -8,6 +8,25 @@
 	const newJobModal = () => {
 		modalStore.trigger({ type: 'component', component: 'JobModal', title: 'Create Job' });
 	};
+
+	const statusColor = (status: string) => {
+		switch (status) {
+			case (status = 'PENDING'):
+				return 'variant-ghost-secondary';
+			case (status = 'SCHEDULED'):
+				return 'variant-ghost-success';
+			case (status = 'IN_PROGRESS'):
+				return 'variant-ghost-success';
+			case (status = 'COMPLETED'):
+				return 'variant-ghost-success';
+			case (status = 'CANCELED'):
+				return 'variant-ghost-error';
+			case (status = 'RESCHEUDLE'):
+				return 'variant-ghost-warning';
+			default:
+				return 'variant-ghost-primary';
+		}
+	};
 </script>
 
 <div class="flex sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10">
@@ -18,31 +37,41 @@
 </div>
 
 <nav>
-	<dl class="list-dl">
+	<ul>
 		{#each data.jobList ?? [] as job}
-			<li class="hover:bg-surface-900 rounded-sm m-1 p-3">
+			<li class="hover:bg-surface-600 rounded-md p-3">
 				<a href="/admin/jobs/{job.id}">
-					<span>
-						<dt>
-							<p class="text-lg">
-								{job.expand.address.expand.client.first_name}
+					<div class="grid grid-cols-2 justify-items-start justify-start">
+						<div class="flex flex-col">
+							<h3 class="h3">
+								<span>{job.job_number}</span>
+								| {job.expand.address.expand.client.first_name}
 								{job.expand.address.expand.client.last_name} |
-								<span class="text-primary-300">{job.id.slice(-4)}</span>
+								<span class="text-secondary-400 group-hover:text-secondary-700">
+									{job.id.slice(-4)}
+								</span>
+							</h3>
+							<p>
+								{job.expand.address.address}
 							</p>
-							{job.expand.address.address}
-						</dt>
-						<ul>
-							{#each job.expand?.task ?? [] as task}
-								<li>
-									<dd class="text-gray-500 break-all w-100% flex flex-col">
-										{task.expand.service.name}
-									</dd>
-								</li>
-							{/each}
-						</ul>
-					</span>
+							<ul class="space-x-2">
+								{#each job.expand?.task ?? [] as task}
+									<li class="chip variant-ghost-primary">
+										<p>
+											{task.expand.service.name}
+										</p>
+									</li>
+								{/each}
+							</ul>
+						</div>
+						<div class="justify-self-end self-center">
+							<p class="chip text-xl {statusColor(job.status)}">
+								{job.status}
+							</p>
+						</div>
+					</div>
 				</a>
 			</li>
 		{/each}
-	</dl>
+	</ul>
 </nav>

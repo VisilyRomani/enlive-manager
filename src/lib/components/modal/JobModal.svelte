@@ -64,17 +64,20 @@
 		form.update(
 			($form) => {
 				if (!selectTask.service_name) {
-					$errors.task = [...($errors.task ?? []), 'Missing Service Name'];
+					$errors.task = ['Missing Service Name'];
 					return $form;
 				}
 
 				if (!selectTask.service_id) {
-					$errors.task = [...($errors.task ?? []), 'Missing Service ID'];
+					$errors.task = ['Missing Service ID'];
 					return $form;
 				}
 				if (+selectTask.price < 0) {
-					$errors.task = [...($errors.task ?? []), 'Price Must Be Positive'];
-
+					$errors.task = ['Price Must Be Positive'];
+					return $form;
+				}
+				if (+selectTask.count < 0) {
+					$errors.task = ['Count Must Be Positive'];
 					return $form;
 				}
 
@@ -195,7 +198,7 @@
 				</div>
 
 				<div class="flex flex-col">
-					{#if $errors.task}
+					{#if $errors.task?.length}
 						{#each $errors.task as error}
 							<span class="text-xs text-red-500">{error}</span>
 						{/each}
@@ -228,10 +231,10 @@
 							</div>
 						</div>
 						<input
-							class="input variant-form-material"
+							class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
+							placeholder="Count"
 							type="number"
 							bind:value={selectTask.count}
-							placeholder="Count"
 						/>
 
 						<input

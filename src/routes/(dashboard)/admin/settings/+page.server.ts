@@ -1,8 +1,8 @@
 import { setError, superValidate } from 'sveltekit-superforms/client';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
-import { fail } from 'assert';
 import type Record from 'pocketbase';
+import { fail } from '@sveltejs/kit';
 
 const TaxValidation = z.object({
 	name: z.string().min(1),
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		return { taxForm, taxes, serviceForm, services };
 	} catch (e) {
 		if (e instanceof Error) {
-			return fail(400, e.message);
+			return fail(400, { message: e.message });
 		}
 	}
 

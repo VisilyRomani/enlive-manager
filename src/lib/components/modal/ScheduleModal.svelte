@@ -15,15 +15,26 @@
 	import type { TJob } from '../../../routes/(dashboard)/admin/schedule/+page.server';
 	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
 	import { onMount } from 'svelte';
-	import { haversine } from '$lib/helper/LocationHelper';
+	import { nearestJob } from '$lib/helper/LocationHelper';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
 	let multiSelect = false;
-	const data = $page.data as PageData;
-	export let parent: any;
+	let userSearch = '';
+	let offsetWidth = 0;
+	let showFirst = true;
 
+	const data = $page.data as PageData;
+	const { form, enhance, errors } = superForm(data.scheduleForm, {
+		dataType: 'json',
+		onResult: (res) => {
+			res.result.type === 'success' && modalStore.close();
+		}
+	});
+
+	export let parent: any;
 	let currentLocation: { lat: number; lng: number };
+
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
@@ -35,10 +46,6 @@
 		);
 	});
 
-	let userSearch = '';
-	let offsetWidth = 0;
-	let showFirst = true;
-
 	const popupSettings: PopupSettings = {
 		event: 'focus-click',
 		target: 'userPopup',
@@ -49,11 +56,6 @@
 		value: u.id,
 		label: `${u.first_name} ${u.last_name}`
 	}));
-
-	let { form, enhance, errors } = superForm(data.scheduleForm, {
-		dataType: 'json'
-	});
-	$: (!!$errors.employee?.length || !!$errors.dates?._errors?.length) && (showFirst = true);
 
 	const userSelect = (e: CustomEvent<AutocompleteOption<string, unknown>>) => {
 		errors.update(($errors) => {
@@ -69,34 +71,6 @@
 			},
 			{ taint: false }
 		);
-	};
-
-	$: !!$form.dates.length &&
-		errors.update(($errors) => {
-			$errors.dates = undefined;
-			return $errors;
-		});
-
-	$: sortedJobs = [
-		...$form.job,
-		...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))
-	] as TJob[];
-
-	$: googleEmbeddedParams = () => {
-		const JobRef = [...$form.job];
-		const lastJob = JobRef.pop();
-		if (JobRef.length) {
-			return (
-				`&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}` +
-				`&waypoints=${encodeURIComponent(
-					JobRef.map((j) => {
-						return j.expand.address.address;
-					}).join('|')
-				)}`
-			);
-		} else {
-			return `&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}`;
-		}
 	};
 
 	const jobSelect = (job: TJob) => {
@@ -138,7 +112,10 @@
 					if (lastSorted) {
 						const closestJob = nearestJob($form.job as TJob[], lastSorted);
 						if (closestJob) {
-							sortedResult.push({ ...closestJob, order: sortedResult.length + 1 });
+							sortedResult.push({
+								...closestJob,
+								order: sortedResult.length + 1
+							});
 							$form.job = $form.job.filter((j) => j.id !== closestJob.id);
 						}
 					} else {
@@ -153,22 +130,40 @@
 		);
 	};
 
-	const nearestJob = (list: TJob[], curSmallest: TJob) => {
-		const distArray = list.map((i) => {
-			const dist = haversine(
-				curSmallest.expand.address.lat,
-				curSmallest.expand.address.lng,
-				i.expand.address.lat,
-				i.expand.address.lng
+	$: (!!$errors.employee?.length || !!$errors.dates?._errors?.length) && (showFirst = true);
+
+	$: !!$form.dates.length &&
+		errors.update(($errors) => {
+			$errors.dates = undefined;
+			return $errors;
+		});
+
+	$: !!$form.job.length &&
+		errors.update(($errors) => {
+			$errors.job = undefined;
+			return $errors;
+		});
+
+	$: sortedJobs = [
+		...$form.job,
+		...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))
+	] as TJob[];
+
+	$: googleEmbeddedParams = () => {
+		const JobRef = [...$form.job];
+		const lastJob = JobRef.pop();
+		if (JobRef.length) {
+			return (
+				`&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}` +
+				`&waypoints=${encodeURIComponent(
+					JobRef.map((j) => {
+						return j.expand.address.address;
+					}).join('|')
+				)}`
 			);
-			return { id: i.id, dist };
-		});
-
-		const smallestElem = distArray.reduce((min, current) => {
-			return current.dist < min.dist ? current : min;
-		});
-
-		return list.find((i) => i.id === smallestElem.id);
+		} else {
+			return `&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}`;
+		}
 	};
 </script>
 
@@ -310,7 +305,7 @@
 					</ul>
 					{#if $errors.job}
 						<div class="variant-soft-error">
-							<span class="text-xs text-error-200 font-bold ml-3">{$errors.job}</span>
+							<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
 						</div>
 					{/if}
 				</div>
@@ -335,7 +330,7 @@
 				{/if}
 			</div>
 			<footer class="modal-footer flex justify-between">
-				<button class="btn {parent.buttonNeutral}" on:click={() => (showFirst = !showFirst)}
+				<button type="button" class="btn {parent.buttonNeutral}" on:click={() => (showFirst = true)}
 					>Back</button
 				>
 				<div>

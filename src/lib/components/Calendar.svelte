@@ -5,8 +5,8 @@
 
 	export let date = dayjs();
 	export let multiSelect: boolean = false;
+	export let itemsOnDay: Dayjs[] = [];
 	export let selectedDates: Date[] = [];
-
 	const getCells = (selectedDate: Dayjs) => {
 		return new Array(selectedDate.daysInMonth())
 			.fill('')
@@ -88,6 +88,7 @@
 				}}
 				class="hover:bg-secondary-300 rounded-md text-md font-semibold
 				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
+				{!!itemsOnDay.find((i) => i.isSame(cell, 'day')) && 'bg-tertiary-500'}
 				{cell.month() !== date.month() && 'bg-gray-700'}
 				{selectedDates.find((d) => dayjs(d).isSame(cell, 'day')) && '!bg-success-400 text-black'}
 				"
