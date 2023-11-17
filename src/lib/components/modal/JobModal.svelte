@@ -247,11 +247,11 @@
 					</div>
 				</div>
 			</div>
-			<footer class="modal-footer float-right">
+			<footer class="flex justify-between col-span-2">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>
-				<button type="submit" class="btn {parent.buttonPositive}">Submit Form</button>
+				<button type="submit" class="btn {parent.buttonPositive}">Create Job</button>
 			</footer>
 		</form>
 	</div>

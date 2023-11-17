@@ -149,11 +149,11 @@
 				{#if $errors.notes}
 					<span class="text-xs text-red-500">{$errors.notes}</span>{/if}
 			</div>
-			<footer class="modal-footer float-right">
+			<footer class="flex justify-between col-span-2">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>
-				<button type="submit" class="btn {parent.buttonPositive}">Submit Form</button>
+				<button type="submit" class="btn {parent.buttonPositive}">Create Client</button>
 			</footer>
 		</form>
 	</div>

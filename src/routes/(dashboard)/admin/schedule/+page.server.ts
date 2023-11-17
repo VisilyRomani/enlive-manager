@@ -127,7 +127,7 @@ export const actions = {
 			return fail(400, { scheduleForm });
 		}
 
-		// TODO: Job in schedule is used twice.
+		// TODO: Move this into the if statement.fcedr
 		try {
 			pb.collection('schedule').create({
 				scheduled_date: scheduleForm.data.dates[0],
@@ -151,46 +151,47 @@ export const actions = {
 		}
 
 		if (scheduleForm.data.dates.length > 1) {
-			const jobDuplicates = await Promise.all(
-				scheduleForm.data.job.map(async (j, idx) => {
-					const tasks = await Promise.all(
-						j.expand.task.map((t) => {
-							try {
-								return pb.collection('task').create(
-									{
-										service: t.service,
-										price: t.price,
-										count: t.count,
-										company: locals.user?.company
-									},
-									{ requestKey: null }
-								);
-							} catch (e) {
-								return Promise.reject(new Error('Failed to create Duplicate task'));
-							}
-						})
-					);
-					const job = pb.collection('job').create(
-						{
-							status: 'SCHEDULED',
-							company: String(locals.user?.company),
-							notes: j.notes,
-							address: j.address,
-							task: tasks.map((t) => t?.id),
-							order: j.order,
-							job_number: company.job_count + idx + 1
-						},
-						{ requestKey: null }
-					);
+			const duplicateSchedules = scheduleForm.data.dates.slice(1).map(async (date) => {
+				const jobDuplicates = await Promise.all(
+					scheduleForm.data.job.map(async (j, idx) => {
+						const tasks = await Promise.all(
+							j.expand.task.map((t) => {
+								try {
+									return pb.collection('task').create(
+										{
+											service: t.service,
+											price: t.price,
+											count: t.count,
+											company: locals.user?.company
+										},
+										{ requestKey: null }
+									);
+								} catch (e) {
+									return Promise.reject(new Error('Failed to create Duplicate task'));
+								}
+							})
+						);
+						const job = pb.collection('job').create(
+							{
+								status: 'SCHEDULED',
+								company: String(locals.user?.company),
+								notes: j.notes,
+								address: j.address,
+								task: tasks.map((t) => t?.id),
+								order: j.order,
+								job_number: company.job_count + idx + 1
+							},
+							{ requestKey: null }
+						);
 
-					return job;
-				})
-			);
-			await pb.collection('company').update(locals.user?.company, {
-				job_count: company.job_count + jobDuplicates.length
-			});
+						return job;
+					})
+				);
 
-			const duplicateSchedules = scheduleForm.data.dates.slice(1).map((date) => {
+				await pb.collection('company').update(locals.user?.company, {
+					job_count: company.job_count + jobDuplicates.length
+				});
+
 				return pb.collection('schedule').create(
 					{
 						scheduled_date: date,

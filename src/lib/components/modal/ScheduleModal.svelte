@@ -16,6 +16,7 @@
 	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
 	import { onMount } from 'svelte';
 	import { nearestJob } from '$lib/helper/LocationHelper';
+	import { invalidate } from '$app/navigation';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
@@ -27,10 +28,12 @@
 	const data = $page.data as PageData;
 	const { form, enhance, errors } = superForm(data.scheduleForm, {
 		dataType: 'json',
-		onResult: (res) => {
+		onResult: async (res) => {
 			res.result.type === 'success' && modalStore.close();
+			await invalidate('/admin/schedule');
 		}
 	});
+	// Show message on failure
 
 	export let parent: any;
 	let currentLocation: { lat: number; lng: number };
