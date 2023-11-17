@@ -24,22 +24,24 @@
 			<Calendar bind:date {itemsOnDay} />
 		</div>
 	{:else}
-		<input
-			type="date"
-			class="input variant-form-material variant-glass-tertiary w-full h-fit"
-			bind:value={date}
-		/>
+		<div class="flex sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10">
+			<button class="btn variant-form-material" on:click={newScheduleModal}>
+				Create Schedule
+			</button>
+			<input type="date" class="input w-full h-fit" bind:value={date} />
+		</div>
 	{/if}
-	<nav class="w-full">
-		<ul>
+	<nav class="w-full mt-1">
+		<ul class="space-y-1">
 			{#each data.scheduleList.filter( (s) => dayjs(s.scheduled_date).isSame(date, 'day') ) as schedule}
-				<li class="hover:bg-surface-800 rounded-md p-3">
+				<li
+					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
+				>
 					<a href="/admin/schedule/{schedule.id}">
 						<div class="grid grid-cols-2 justify-items-start justify-start">
 							<div class="flex flex-col">
 								<h3 class="h3">
-									Schedule
-									{schedule.title}
+									{schedule.title} |
 									<span class="text-secondary-400 group-hover:text-secondary-700">
 										{schedule.id.slice(-4)}
 									</span>

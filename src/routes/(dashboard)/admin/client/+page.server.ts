@@ -1,7 +1,7 @@
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type Record from 'pocketbase';
 
 const ClientValidation = z.object({
@@ -13,14 +13,14 @@ const ClientValidation = z.object({
 	lat: z
 		.number({
 			errorMap: () => ({
-				message: 'Require latitude number'
+				message: 'Latitude is required'
 			})
 		})
 		.default('' as unknown as number),
 	lng: z
 		.number({
 			errorMap: () => ({
-				message: 'Require longitude number'
+				message: 'longitude is required'
 			})
 		})
 		.default('' as unknown as number),
@@ -61,51 +61,39 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	CreateClient: async ({ locals, request }) => {
+		const pb = locals.pb;
+
+		if (!pb) {
+			throw redirect(300, '/');
+		}
+
 		const clientForm = await superValidate(request, ClientValidation);
+
 		if (!clientForm.valid) {
 			return fail(400, { clientForm });
 		}
 
-		const newClient = new FormData();
-		const newClientAddress = new FormData();
-
-		for (const [key, value] of Object.entries(clientForm.data)) {
-			if (!(key === 'email' && !value) && !!value) {
-				newClient.append(key, String(value));
-			}
-
-			// Used to seperate the form for Address
-			if (key === 'addr') {
-				newClientAddress.append('address', String(value));
-			}
-			if (key === 'lat' || key === 'lng') {
-				newClientAddress.append(key, String(value));
-			}
-		}
-
-		newClientAddress.append('active', 'true');
-
-		if (locals.user?.company) {
-			newClient.append('company', locals.user?.company);
-		} else {
-			locals.pb?.authStore.clear();
-		}
-
 		try {
-			const client = await locals.pb?.collection('client').create(newClient);
-			if (client) {
-				newClientAddress.append('client', client?.id);
-			} else {
-				return fail(400, { error: 'failed to create client address' });
-			}
+			const client = await pb.collection('client').create({
+				first_name:
+					clientForm.data.first_name.at(0)?.toUpperCase() + clientForm.data.first_name.slice(1),
+				last_name: clientForm.data.last_name
+					? clientForm.data.last_name.at(0)?.toUpperCase() + clientForm.data.last_name.slice(1)
+					: '',
+				email: clientForm.data.email,
+				phone: clientForm.data.phone,
+				notes: clientForm.data.notes,
+				company: locals.user?.company
+			});
 
-			const addr = await locals.pb?.collection('address').create(newClientAddress);
+			await pb.collection('address').create({
+				address: clientForm.data.addr,
+				lat: clientForm.data.lat,
+				lng: clientForm.data.lng,
+				active: true,
+				client: client.id
+			});
 
-			if (addr) {
-				newClient.append('address', addr.id);
-			} else {
-				return fail(400, { error: 'Could not create address' });
-			}
 			return { clientForm };
 		} catch (e) {
 			if (e instanceof Error) {

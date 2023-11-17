@@ -254,54 +254,63 @@
 							'border-2 border-error-500'}"
 					>
 						<input name="job" class="hidden" />
-						{#each sortedJobs ?? [] as job}
-							<button
-								type="button"
-								class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
+						{#if sortedJobs.length}
+							{#each sortedJobs ?? [] as job}
+								<button
+									type="button"
+									class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
 								{job.order && 'bg-primary-300'}
 								"
-								on:click={() => jobSelect(job)}
-							>
-								<p class="w-3 text-primary-900 font-bold p-2">
-									{#if job.order}
-										{job.order}
-									{/if}
-								</p>
-								<div class="divider-vertical h-9 mx-2" />
-								<li value={job.id} class="grid grid-cols-2 text-left w-full">
-									<div>
-										<h5
-											class="h4 group-hover:text-primary-900
+									on:click={() => jobSelect(job)}
+								>
+									<p class="w-3 text-primary-900 font-bold p-2">
+										{#if job.order}
+											{job.order}
+										{/if}
+									</p>
+									<div class="divider-vertical h-9 mx-2" />
+									<li value={job.id} class="grid grid-cols-2 text-left w-full">
+										<div>
+											<h5
+												class="h4 group-hover:text-primary-900
 										{job.order && 'text-primary-900 '}"
-										>
-											{job.expand.address.expand.client.first_name}
-											{job.expand.address.expand.client.last_name} |
-											<span
-												class="text-secondary-400 group-hover:text-secondary-700
+											>
+												{job.expand.address.expand.client.first_name}
+												{job.expand.address.expand.client.last_name} |
+												<span
+													class="text-secondary-400 group-hover:text-secondary-700
 											{job.order && 'text-secondary-700'}
 											">{job.id.slice(-4)}</span
-											>
-										</h5>
-										<p
-											class="text-gray-400 text-sm group-hover:text-gray-800
-									{job.order && 'text-gray-700'}"
-										>
-											{job.expand.address.address}
-										</p>
-									</div>
-									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-										{#each job.expand.task as task}
+												>
+											</h5>
 											<p
-												class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800
-											{job.order && '!bg-primary-500 !text-surface-800'}"
+												class="text-gray-400 text-sm group-hover:text-gray-800
+									{job.order && 'text-gray-700'}"
 											>
-												{task.expand.service.name}
+												{job.expand.address.address}
 											</p>
-										{/each}
-									</div>
-								</li>
-							</button>
-						{/each}
+										</div>
+										<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+											{#each job.expand.task as task}
+												<p
+													class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800
+											{job.order && '!bg-primary-500 !text-surface-800'}"
+												>
+													{task.expand.service.name}
+												</p>
+											{/each}
+										</div>
+									</li>
+								</button>
+							{/each}
+						{:else}
+							<div class="flex justify-center items-center flex-col h-full">
+								<p class="text-center text-3xl font-bold">No Jobs Found</p>
+								<p class="text-center text-primary-500-400-token">
+									Please create a job to scheudle
+								</p>
+							</div>
+						{/if}
 					</ul>
 					{#if $errors.job}
 						<div class="variant-soft-error">

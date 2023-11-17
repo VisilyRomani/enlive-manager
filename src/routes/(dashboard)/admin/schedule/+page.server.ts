@@ -127,6 +127,7 @@ export const actions = {
 			return fail(400, { scheduleForm });
 		}
 
+		// TODO: Job in schedule is used twice.
 		try {
 			pb.collection('schedule').create({
 				scheduled_date: scheduleForm.data.dates[0],

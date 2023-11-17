@@ -36,38 +36,37 @@
 	<input bind:value={jobFilter} placeholder="Search" class="input variant-form-material" />
 </div>
 
-<nav>
-	<ul>
+<nav class="mt-1">
+	<ul class="space-y-1">
 		{#each data.jobList ?? [] as job}
-			<li class="hover:bg-surface-600 rounded-md p-3">
+			<li
+				class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
+			>
 				<a href="/admin/jobs/{job.id}">
 					<div class="grid grid-cols-2 justify-items-start justify-start">
 						<div class="flex flex-col">
 							<h3 class="h3">
 								<span>{job.job_number}</span>
 								| {job.expand.address.expand.client.first_name}
-								{job.expand.address.expand.client.last_name} |
-								<span class="text-secondary-400 group-hover:text-secondary-700">
-									{job.id.slice(-4)}
-								</span>
+								{job.expand.address.expand.client.last_name}
 							</h3>
-							<p>
-								{job.expand.address.address}
+							<p class="text-secondary-400 break-all flex flex-col">
+								{job.expand.address.address.split(',').slice(0, 2)}
 							</p>
 							<ul class="space-x-2">
-								{#each job.expand?.task ?? [] as task}
-									<li class="chip variant-ghost-primary">
-										<p>
-											{task.expand.service.name}
-										</p>
-									</li>
-								{/each}
+								<p class="chip {statusColor(job.status)}">
+									{job.status}
+								</p>
 							</ul>
 						</div>
 						<div class="justify-self-end self-center">
-							<p class="chip text-xl {statusColor(job.status)}">
-								{job.status}
-							</p>
+							{#each job.expand?.task ?? [] as task}
+								<li class="chip variant-ghost-primary">
+									<p>
+										{task.expand.service.name}
+									</p>
+								</li>
+							{/each}
 						</div>
 					</div>
 				</a>

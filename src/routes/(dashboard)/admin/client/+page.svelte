@@ -24,22 +24,25 @@
 		</div>
 	{/if}
 
-	<nav>
-		<dl class="list-dl">
+	<nav class="mt-1">
+		<ul class="space-y-1">
 			{#each data.clientList ?? [] as client}
-				<li class="hover:bg-surface-900 rounded-sm">
+				<li
+					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
+				>
 					<a href="/admin/client/{client.id}">
-						<p class="p-3 m-1">
-							<dt>{client.first_name} {client.last_name}</dt>
-							{#each client.address ?? [] as addr}
-								<dd class="text-gray-500 break-all w-100% flex flex-col">
-									{addr.address}
-								</dd>
-							{/each}
-						</p>
+						<h3 class="h3">
+							{client.first_name}
+							{client.last_name}
+						</h3>
+						{#each client.address ?? [] as addr}
+							<p class="text-secondary-400 break-all flex flex-col">
+								{addr.address.split(',').slice(0, 2)}
+							</p>
+						{/each}
 					</a>
 				</li>
 			{/each}
-		</dl>
+		</ul>
 	</nav>
 </div>
