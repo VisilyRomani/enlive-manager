@@ -1,8 +1,7 @@
 import type { PageServerLoad } from './$types';
 import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
-import { error, fail, redirect } from '@sveltejs/kit';
-import dayjs from 'dayjs';
+import { fail, redirect } from '@sveltejs/kit';
 
 type TUser = {
 	id: string;
@@ -57,7 +56,7 @@ type TSchedule = {
 };
 
 const ScheduleValidate = z.object({
-	title: z.string(),
+	title: z.string().min(1, 'Schedule Requires a title'),
 	employee: z
 		.map(z.string(), z.string())
 		.refine((u) => u.size > 0, { message: 'Must select at least one User' })
@@ -127,93 +126,168 @@ export const actions = {
 			return fail(400, { scheduleForm });
 		}
 
-		// TODO: Move this into the if statement.fcedr
-		try {
+		if (scheduleForm.data.dates.length === 1) {
 			pb.collection('schedule').create({
 				scheduled_date: scheduleForm.data.dates[0],
 				job: scheduleForm.data.job.map((j) => j.id),
-				title:
-					scheduleForm.data.dates.length > 1
-						? `📋 | ${
-								scheduleForm.data.title || dayjs(scheduleForm.data.dates[0]).format('DD/MM/YYYY')
-						  }`
-						: scheduleForm.data.title,
+				title: scheduleForm.data.title,
 				employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
 				company: String(locals.user?.company)
 			});
 
-			const updateJobs = scheduleForm.data.job.map((j) => {
-				return pb.collection('job').update(j.id, { order: j.order, status: 'SCHEDULED' });
-			});
-			await Promise.all(updateJobs);
-		} catch (e) {
-			return fail(400, { message: 'Failed to create Schedule' });
-		}
-
-		if (scheduleForm.data.dates.length > 1) {
-			const duplicateSchedules = scheduleForm.data.dates.slice(1).map(async (date) => {
-				const jobDuplicates = await Promise.all(
-					scheduleForm.data.job.map(async (j, idx) => {
-						const tasks = await Promise.all(
-							j.expand.task.map((t) => {
-								try {
-									return pb.collection('task').create(
-										{
-											service: t.service,
-											price: t.price,
-											count: t.count,
-											company: locals.user?.company
-										},
-										{ requestKey: null }
-									);
-								} catch (e) {
-									return Promise.reject(new Error('Failed to create Duplicate task'));
-								}
+			await Promise.all(
+				scheduleForm.data.job.map((j) => {
+					return pb
+						.collection('job')
+						.update(j.id, { order: j.order, status: 'SCHEDULED' }, { requestKey: null });
+				})
+			);
+		} else {
+			let jobIncrement = 0;
+			await Promise.all(
+				scheduleForm.data.dates.map(async (date, dateIdx) => {
+					if (dateIdx === 0) {
+						await Promise.all(
+							scheduleForm.data.job.map((j) => {
+								return pb
+									.collection('job')
+									.update(j.id, { order: j.order, status: 'SCHEDULED' }, { requestKey: null });
 							})
 						);
-						const job = pb.collection('job').create(
+						return pb.collection('schedule').create(
 							{
-								status: 'SCHEDULED',
-								company: String(locals.user?.company),
-								notes: j.notes,
-								address: j.address,
-								task: tasks.map((t) => t?.id),
-								order: j.order,
-								job_number: company.job_count + idx + 1
+								scheduled_date: date,
+								job: scheduleForm.data.job.map((j) => j.id),
+								title: `📋 | ${scheduleForm.data.title}`,
+								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
+								company: String(locals.user?.company)
 							},
 							{ requestKey: null }
 						);
+					} else {
+						const jobDuplicates = await Promise.all(
+							scheduleForm.data.job.map(async (j) => {
+								const tasks = await Promise.all(
+									j.expand.task.map((t) => {
+										try {
+											return pb.collection('task').create(
+												{
+													service: t.service,
+													price: t.price,
+													count: t.count,
+													company: locals.user?.company
+												},
+												{ requestKey: null }
+											);
+										} catch (e) {
+											return Promise.reject(new Error('Failed to create Duplicate task'));
+										}
+									})
+								);
+								jobIncrement = jobIncrement + 1;
+								const job = await pb.collection('job').create(
+									{
+										status: 'SCHEDULED',
+										company: String(locals.user?.company),
+										notes: j.notes,
+										address: j.address,
+										task: tasks.map((t) => t?.id),
+										order: j.order,
+										job_number: company.job_count + jobIncrement
+									},
+									{ requestKey: null }
+								);
 
-						return job;
-					})
-				);
+								return job;
+							})
+						);
 
-				await pb.collection('company').update(locals.user?.company, {
-					job_count: company.job_count + jobDuplicates.length
-				});
-
-				return pb.collection('schedule').create(
-					{
-						scheduled_date: date,
-						job: jobDuplicates.map((j) => j.id),
-						title: `📋 | ${
-							scheduleForm.data.title || dayjs(scheduleForm.data.dates[0]).format('DD/MM/YYYY')
-						}`,
-						employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
-						company: String(locals.user?.company)
-					},
-					{ requestKey: null }
-				);
-			});
-
-			const duplicateScheduleResult = await Promise.allSettled(duplicateSchedules);
-
-			duplicateScheduleResult.map((res) => {
-				if (res.status === 'rejected') {
-					throw error(400, { message: 'Found rejected during duplicate schedule creation' });
-				}
-			});
+						return pb.collection('schedule').create(
+							{
+								scheduled_date: date,
+								job: jobDuplicates.map((j) => j.id),
+								title: `📋 | ${scheduleForm.data.title}`,
+								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
+								company: String(locals.user?.company)
+							},
+							{ requestKey: null }
+						);
+					}
+				})
+			);
+			await pb.collection('company').update(
+				locals.user?.company,
+				{
+					job_count:
+						company.job_count + scheduleForm.data.dates.length * scheduleForm.data.job.length
+				},
+				{ requestKey: null }
+			);
 		}
+		// if (scheduleForm.data.dates.length > 1) {
+		// 	const duplicateSchedules = scheduleForm.data.dates.slice(1).map(async (date) => {
+		// 		const jobDuplicates = await Promise.all(
+		// 			scheduleForm.data.job.map(async (j, idx) => {
+		// 				const tasks = await Promise.all(
+		// 					j.expand.task.map((t) => {
+		// 						try {
+		// 							return pb.collection('task').create(
+		// 								{
+		// 									service: t.service,
+		// 									price: t.price,
+		// 									count: t.count,
+		// 									company: locals.user?.company
+		// 								},
+		// 								{ requestKey: null }
+		// 							);
+		// 						} catch (e) {
+		// 							return Promise.reject(new Error('Failed to create Duplicate task'));
+		// 						}
+		// 					})
+		// 				);
+		// 				const job = pb.collection('job').create(
+		// 					{
+		// 						status: 'SCHEDULED',
+		// 						company: String(locals.user?.company),
+		// 						notes: j.notes,
+		// 						address: j.address,
+		// 						task: tasks.map((t) => t?.id),
+		// 						order: j.order,
+		// 						job_number: company.job_count + idx + 1
+		// 					},
+		// 					{ requestKey: null }
+		// 				);
+
+		// 				return job;
+		// 			})
+		// 		);
+
+		// 		await pb.collection('company').update(locals.user?.company, {
+		// 			job_count: company.job_count + jobDuplicates.length
+		// 		});
+
+		// 		return pb.collection('schedule').create(
+		// 			{
+		// 				scheduled_date: date,
+		// 				job: jobDuplicates.map((j) => j.id),
+		// 				title: `📋 | ${
+		// 					scheduleForm.data.title || dayjs(scheduleForm.data.dates[0]).format('DD/MM/YYYY')
+		// 				}`,
+		// 				employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
+		// 				company: String(locals.user?.company)
+		// 			},
+		// 			{ requestKey: null }
+		// 		);
+		// 	});
+
+		// 	const duplicateScheduleResult = await Promise.allSettled(duplicateSchedules);
+
+		// 	duplicateScheduleResult.map((res) => {
+		// 		if (res.status === 'rejected') {
+		// 			throw error(400, { message: 'Found rejected during duplicate schedule creation' });
+		// 		}
+		// 	});
+		// }
 
 		return { scheduleForm };
 	}

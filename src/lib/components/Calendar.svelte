@@ -11,7 +11,9 @@
 		return new Array(selectedDate.daysInMonth())
 			.fill('')
 			.map((a, idx) => {
-				const date = selectedDate.set('date', idx + 1);
+				const date = selectedDate
+					.set('date', idx + 1)
+					.add(new Date().getTimezoneOffset(), 'minute');
 				if (idx === 0 && date.day() !== 0) {
 					const values: Dayjs[] = [];
 					for (let i = 0; i < date.day(); i++) {
@@ -53,11 +55,11 @@
 </script>
 
 <div class="h-fit">
-	<div class="flex justify-between">
+	<div class="flex justify-between whitespace-nowrap">
 		<h5 class="h5 text-secondary-300">
 			{date.format('MMMM YYYY')}
 		</h5>
-		<div>
+		<div class="whitespace-nowrap">
 			<button
 				type="button"
 				class="hover:fill-secondary-500 fill-secondary-300"

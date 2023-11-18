@@ -33,7 +33,6 @@
 			await invalidate('/admin/schedule');
 		}
 	});
-	// Show message on failure
 
 	export let parent: any;
 	let currentLocation: { lat: number; lng: number };
@@ -133,7 +132,8 @@
 		);
 	};
 
-	$: (!!$errors.employee?.length || !!$errors.dates?._errors?.length) && (showFirst = true);
+	$: (!!$errors.employee?.length || !!$errors.dates?._errors?.length || !!$errors.title) &&
+		(showFirst = true);
 
 	$: !!$form.dates.length &&
 		errors.update(($errors) => {
@@ -186,7 +186,18 @@
 			</div>
 			<div class="grid lg:grid-cols-2 gap-3">
 				<div class="space-y-3">
-					<input class="input" placeholder="Title" bind:value={$form.title} />
+					<div>
+						<input
+							class="input {$errors.title && 'input-error'}"
+							placeholder="Title"
+							bind:value={$form.title}
+						/>
+						{#if $errors.title}
+							<div class="variant-soft-error">
+								<span class="text-xs text-error-200 font-bold ml-3">{$errors.title}</span>
+							</div>
+						{/if}
+					</div>
 					<div bind:offsetWidth>
 						<input
 							class="input {$errors.employee ? 'input-error' : undefined}"
@@ -341,7 +352,7 @@
 					</div>
 				{/if}
 			</div>
-			<footer class="modal-footer flex justify-between">
+			<footer class="modal-footer flex justify-between gap-6">
 				<button type="button" class="btn {parent.buttonNeutral}" on:click={() => (showFirst = true)}
 					>Back</button
 				>
@@ -349,10 +360,12 @@
 					<button
 						type="button"
 						disabled={!$form.job.length}
-						class="btn {parent.buttonPositive}"
+						class="btn {parent.buttonPositive} "
 						on:click={sortJobForm}>Sort Location</button
 					>
-					<button type="submit" class="btn {parent.buttonPositive}">Create</button>
+					<button type="submit" disabled={!sortedJobs.length} class="btn {parent.buttonPositive}"
+						>Create</button
+					>
 				</div>
 			</footer>
 		{/if}
