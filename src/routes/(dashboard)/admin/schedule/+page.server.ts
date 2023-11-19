@@ -218,8 +218,7 @@ export const actions = {
 			await pb.collection('company').update(
 				locals.user?.company,
 				{
-					job_count:
-						company.job_count + scheduleForm.data.dates.length * scheduleForm.data.job.length
+					job_count: company.job_count + jobIncrement
 				},
 				{ requestKey: null }
 			);

@@ -4,6 +4,7 @@
 	import dayjs from 'dayjs';
 	import type { PageData } from './$types';
 	import { Avatar } from '@skeletonlabs/skeleton';
+	import { statusColor } from '$lib/helper/StyleHelper';
 	export let data: PageData;
 </script>
 
@@ -115,13 +116,13 @@
 							</td>
 							<td>
 								<div class="flex gap-1 flex-wrap">
-									<p class="chip variant-ghost-primary">
+									<p class="chip {statusColor(job.status)}">
 										{job.status}
 									</p>
 								</div>
 							</td>
 							<td>
-								<a href="/admin/jobs/{job.id}" class="btn variant-ghost-tertiary">Info</a>
+								<a href="/admin/jobs/{job.id}" class="btn variant-ghost-primary">Info</a>
 							</td>
 						</tr>
 					{/each}
