@@ -36,41 +36,61 @@
 	<input bind:value={jobFilter} placeholder="Search" class="input variant-form-material" />
 </div>
 
-<nav class="mt-1">
-	<ul class="space-y-1">
-		{#each data.jobList ?? [] as job}
-			<li
-				class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
-			>
-				<a href="/admin/jobs/{job.id}">
-					<div class="grid grid-cols-2 justify-items-start justify-start">
-						<div class="flex flex-col">
-							<h3 class="h3">
-								<span>{job.job_number}</span>
-								| {job.expand.address.expand.client.first_name}
-								{job.expand.address.expand.client.last_name}
-							</h3>
-							<p class="text-secondary-400 break-all flex flex-col">
-								{job.expand.address.address.split(',').slice(0, 2)}
-							</p>
-							<ul class="space-x-2">
-								<p class="chip {statusColor(job.status)}">
-									{job.status}
+{#await data.streamed.jobList}
+	<section class="card w-full flex flex-row">
+		<div class="p-4 space-y-4 w-full">
+			<div class="grid grid-cols-5 gap-8">
+				<div class="placeholder animate-pulse" />
+				<div class="placeholder animate-pulse" />
+			</div>
+			<div class="grid grid-cols-2 gap-8">
+				<div class="placeholder animate-pulse" />
+			</div>
+			<div class="grid grid-cols-7 gap-4">
+				<div class="placeholder animate-pulse" />
+			</div>
+		</div>
+		<div class="grid grid-cols-1 p-4 w-32 m-3 items-center">
+			<div class="placeholder animate-pulse" />
+		</div>
+	</section>
+{:then jobList}
+	<nav class="mt-1">
+		<ul class="space-y-1">
+			{#each jobList as job}
+				<li
+					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
+				>
+					<a href="/admin/jobs/{job.id}">
+						<div class="grid grid-cols-2 justify-items-start justify-start">
+							<div class="flex flex-col">
+								<h3 class="h3">
+									<span>{job.job_number}</span>
+									| {job.expand.address.expand.client.first_name}
+									{job.expand.address.expand.client.last_name}
+								</h3>
+								<p class="text-secondary-400 break-all flex flex-col">
+									{job.expand.address.address.split(',').slice(0, 2)}
 								</p>
+								<ul class="space-x-2">
+									<p class="chip {statusColor(job.status)}">
+										{job.status}
+									</p>
+								</ul>
+							</div>
+							<ul class="flex flex-wrap justify-end items-center gap-1 w-full">
+								{#each job.expand?.task ?? [] as task}
+									<li class="chip variant-ghost-primary">
+										<p>
+											{task.expand.service.name}
+										</p>
+									</li>
+								{/each}
 							</ul>
 						</div>
-						<div class="justify-self-end self-center">
-							{#each job.expand?.task ?? [] as task}
-								<li class="chip variant-ghost-primary">
-									<p>
-										{task.expand.service.name}
-									</p>
-								</li>
-							{/each}
-						</div>
-					</div>
-				</a>
-			</li>
-		{/each}
-	</ul>
-</nav>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</nav>
+{/await}

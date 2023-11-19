@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		filter: 'active=true',
 		fields: 'name,id'
 	});
-	const jobList = await pb.collection('job').getFullList<TJobList>({
+	const jobList = pb.collection('job').getFullList<TJobList>({
 		expand: 'task.service, address.client',
 		fields:
 			'expand.task.expand.service.name,id,notes,status, expand.address.address, expand.address.expand.client.first_name, expand.address.expand.client.last_name, job_number',
@@ -73,8 +73,10 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	return {
 		jobForm,
 		clientList,
-		jobList,
-		serviceList
+		serviceList,
+		streamed: {
+			jobList
+		}
 	};
 };
 
