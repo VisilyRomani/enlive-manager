@@ -67,7 +67,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	const jobList = pb.collection('job').getFullList<TJobList>({
 		expand: 'task.service, address.client',
 		fields:
-			'expand.task.expand.service.name,id,notes,status, expand.address.address, expand.address.expand.client.first_name, expand.address.expand.client.last_name, job_number',
+			'expand.task.expand.service.name,id,notes,status, expand.address.address, expand.address.expand.client.first_name,expand.address.expand.client.last_name,job_number',
 		sort: '-job_number'
 	});
 	return {

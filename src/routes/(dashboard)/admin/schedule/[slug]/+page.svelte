@@ -27,22 +27,18 @@
 	<div class="grid lg:grid-cols-2">
 		<div class="card m-3 p-3">
 			<div class="grid grid-cols-2 gap-1">
-				<div class="flex items-center">
-					<h5 class="h5">Schedule Details</h5>
-				</div>
+				<h5 class="self-center h5">Schedule Details</h5>
 				<div class="flex justify-end">
 					<button class="btn variant-form-material" type="button">Edit</button>
 				</div>
 				<hr class="hr col-span-2" />
 			</div>
 			<p>Title: {schedule.title}</p>
-			<p>Date: {dayjs(schedule.scheduled_date).format('DD-MM-YYYY')}</p>
+			<p>Scheduled Date: {dayjs(schedule.scheduled_date).format('DD-MM-YYYY')}</p>
 		</div>
 		<div class="card m-3 p-3">
 			<div class="grid grid-cols-2 gap-1">
-				<div class="flex items-center">
-					<h5 class="h5">Employees</h5>
-				</div>
+				<h5 class="h5 self-center">Employees</h5>
 				<div class="flex justify-end">
 					<button class="btn variant-form-material" type="button">Edit</button>
 				</div>
@@ -62,9 +58,7 @@
 	</div>
 	<div class="card flex gap-3 flex-col m-3 p-3">
 		<div class="grid grid-cols-2 gap-1">
-			<div class="flex items-center">
-				<h5 class="h5">Jobs</h5>
-			</div>
+			<h5 class="h5 self-center">Jobs</h5>
 			<div class="flex justify-end">
 				<button class="btn variant-form-material" type="button">Edit</button>
 			</div>
