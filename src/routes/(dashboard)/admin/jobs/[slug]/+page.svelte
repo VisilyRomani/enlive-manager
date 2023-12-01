@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { statusColor } from '$lib/helper/StyleHelper.js';
 	import Dinero from 'dinero.js';
 	export let data;
 	$: calcCost = data.job?.expand.task.reduce(
@@ -20,7 +21,7 @@
 	);
 </script>
 
-<ol class="breadcrumb">
+<ol class="breadcrumb mx-3 px-3">
 	<li class="crumb">
 		<a class="anchor" href="/admin/jobs">
 			<h3 class="h3">Jobs</h3>
@@ -29,14 +30,18 @@
 	<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
 	<li>
 		<h3 class="h3">
-			{data.job?.id.slice(-4)}
+			{data.job?.job_number}
 		</h3>
 	</li>
 </ol>
 
 <div class="card m-3 p-3">
-	<div class="mb-3">
-		<h5 class="h5">Client Details</h5>
+	<div class="mb-3 flex justify-between">
+		<h5 class="h5 text-center self-center">Client Details</h5>
+		<a
+			href="/admin/client/{data.job?.expand.address.expand.client.id}"
+			class="btn variant-outline-primary">More Details</a
+		>
 	</div>
 	<hr />
 	<div class="grid lg:grid-cols-2 gap-3 m-3">
@@ -56,7 +61,7 @@
 <div class="card m-3 p-3">
 	<div class="flex flex-row justify-between mb-3">
 		<h5 class="h5">Job Tasks</h5>
-		<span class="badge variant-filled">
+		<span class="badge {statusColor(data.job?.status ?? '')}">
 			{data.job?.status}
 		</span>
 	</div>
@@ -99,9 +104,6 @@
 					</div>
 				</td>
 			</tr>
-			<!-- <td class="col-start-2">
-					<p>Tax</p>
-				</td> -->
 		</tfoot>
 	</table>
 </div>

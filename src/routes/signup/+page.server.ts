@@ -60,7 +60,7 @@ export const actions = {
 			if (err instanceof Error) {
 				return fail(400, { form, error: err.message });
 			}
-			console.log(err);
+			console.error(err);
 		}
 		throw redirect(303, '/login');
 	}

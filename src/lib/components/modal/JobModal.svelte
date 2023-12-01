@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import {
-		Autocomplete,
-		getModalStore,
-		type AutocompleteOption,
-		type PopupSettings,
-		popup
-	} from '@skeletonlabs/skeleton';
+	import { Autocomplete, getModalStore, type PopupSettings, popup } from '@skeletonlabs/skeleton';
 	import Dinero from 'dinero.js';
 	import type { PageData } from '../../../routes/(dashboard)/admin/jobs/$types';
 	import { superForm } from 'sveltekit-superforms/client';
@@ -70,17 +64,20 @@
 		form.update(
 			($form) => {
 				if (!selectTask.service_name) {
-					$errors.task = [...($errors.task ?? []), 'Missing Service Name'];
+					$errors.task = ['Missing Service Name'];
 					return $form;
 				}
 
 				if (!selectTask.service_id) {
-					$errors.task = [...($errors.task ?? []), 'Missing Service ID'];
+					$errors.task = ['Missing Service ID'];
 					return $form;
 				}
 				if (+selectTask.price < 0) {
-					$errors.task = [...($errors.task ?? []), 'Price Must Be Positive'];
-
+					$errors.task = ['Price Must Be Positive'];
+					return $form;
+				}
+				if (+selectTask.count < 0) {
+					$errors.task = ['Count Must Be Positive'];
 					return $form;
 				}
 
@@ -105,7 +102,7 @@
 		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateJob" method="post" use:enhance>
 			<div class="flex flex-col gap-3">
 				<input type="text" style="display:none" />
-				<div bind:offsetWidth={offsetAddressWidth}>
+				<div bind:offsetWidth={offsetClientWidth}>
 					<input
 						class="input variant-form-material"
 						type="search"
@@ -201,7 +198,7 @@
 				</div>
 
 				<div class="flex flex-col">
-					{#if $errors.task}
+					{#if $errors.task?.length}
 						{#each $errors.task as error}
 							<span class="text-xs text-red-500">{error}</span>
 						{/each}
@@ -234,10 +231,10 @@
 							</div>
 						</div>
 						<input
-							class="input variant-form-material"
+							class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
+							placeholder="Count"
 							type="number"
 							bind:value={selectTask.count}
-							placeholder="Count"
 						/>
 
 						<input
@@ -250,11 +247,11 @@
 					</div>
 				</div>
 			</div>
-			<footer class="modal-footer float-right">
+			<footer class="flex justify-between col-span-2">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>
-				<button type="submit" class="btn {parent.buttonPositive}">Submit Form</button>
+				<button type="submit" class="btn {parent.buttonPositive}">Create Job</button>
 			</footer>
 		</form>
 	</div>

@@ -120,7 +120,8 @@
 							name="slide"
 							bind:checked={row.active}
 							on:change={(e) => {
-								console.log(row.id);
+								// TODO: add update for active
+								// console.error(row.id);
 							}}
 						/>
 					</td>

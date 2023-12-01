@@ -86,6 +86,7 @@ export const actions = {
 			}
 		}
 
+		companyData.append('job_count', String(2000));
 		try {
 			const company = await locals.pb?.collection('company').create(companyData);
 			await locals.pb?.collection('users').update(locals.user?.id, { company: company?.id });
@@ -93,7 +94,7 @@ export const actions = {
 			return { companyForm };
 		} catch (err) {
 			if (err instanceof Error) {
-				console.log(err.message);
+				console.error(err.message);
 				return fail(400, { companyForm, error: err.message });
 			}
 		}
