@@ -51,7 +51,12 @@
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title}</header>
-		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateClient" method="post" use:enhance>
+		<form
+			class="grid grid-cols-1 lg:grid-cols-2 gap-4"
+			action="?/CreateClient"
+			method="post"
+			use:enhance
+		>
 			<div>
 				<input
 					class="input variant-form-material {$errors.first_name ? 'input-error' : undefined}"
@@ -149,7 +154,7 @@
 				{#if $errors.notes}
 					<span class="text-xs text-red-500">{$errors.notes}</span>{/if}
 			</div>
-			<footer class="flex justify-between col-span-2">
+			<footer class="flex justify-between lg:col-span-2">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button
 				>

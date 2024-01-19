@@ -10,6 +10,7 @@ type TClient = {
 	expand: {
 		'address(client)': {
 			address: string;
+			active: boolean;
 			lat: number;
 			lng: number;
 			id: string;
