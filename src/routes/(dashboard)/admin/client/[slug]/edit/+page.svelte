@@ -28,6 +28,14 @@
 			meta: address
 		});
 	};
+	const handleAddAddress = (client_id: string) => {
+		modalStore.trigger({
+			type: 'component',
+			title: 'Add Address',
+			component: 'AddAddressModal',
+			meta: client_id
+		});
+	};
 </script>
 
 <ol class="breadcrumb m-3">
@@ -102,11 +110,11 @@
 	<div class="flex flex-col gap-3">
 		<h3 class="h3">Addresses</h3>
 		{#each data.client.expand['address(client)'] as address}
-			<div class="flex justify-between items-center">
+			<div class="grid grid-cols-3 items-center">
 				<p>
 					{address.address}
 				</p>
-				<div>
+				<div class="justify-self-center">
 					<p>
 						<span class="text-gray-400">Lat:</span>
 						{address.lat}
@@ -117,7 +125,7 @@
 						{address.lng}
 					</p>
 				</div>
-				<div>
+				<div class="justify-self-end">
 					<button
 						type="button"
 						class="btn btn-sm variant-ghost-primary"
@@ -125,8 +133,15 @@
 					>
 				</div>
 			</div>
+			<hr />
 		{/each}
-		<button type="button" class="p-1 btn btn-sm variant-ghost-primary"> + </button>
+		<button
+			type="button"
+			class="p-1 btn btn-sm variant-ghost-primary"
+			on:click={() => handleAddAddress(data.client.id)}
+		>
+			+
+		</button>
 	</div>
 
 	<button type="submit" form="save_client" class="btn variant-ghost-success">Save</button>

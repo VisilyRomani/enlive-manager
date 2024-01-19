@@ -27,12 +27,19 @@ const ClientValidation = z.object({
 	phone: z.string().optional(),
 	notes: z.string().optional()
 });
-const AddressValidation = z.object({
+const EditAddressValidation = z.object({
 	id: z.string().min(1, 'id is requred'),
-	address: z.string().min(1, 'id is requred'),
+	address: z.string().min(1, 'Address is requred'),
 	lat: z.number().min(-90).max(90),
 	lng: z.number().min(-180).max(180),
 	active: z.boolean()
+});
+
+const AddAddressValidation = z.object({
+	client: z.string().min(1),
+	address: z.string().min(1, 'Address must not be empty!'),
+	lat: z.number().min(-90).max(90),
+	lng: z.number().min(-180).max(180)
 });
 
 export const load = async ({ params, locals }) => {
@@ -45,12 +52,14 @@ export const load = async ({ params, locals }) => {
 		.collection('client')
 		.getOne<TClient>(params.slug, { expand: 'address(client)' });
 	const editClient = superValidate(client, ClientValidation);
-	const editAddress = superValidate(AddressValidation);
+	const editAddress = superValidate(EditAddressValidation);
+	const addAddress = superValidate(AddAddressValidation);
 
 	return {
 		client,
 		editClient,
 		editAddress,
+		addAddress,
 		slug: params.slug
 	};
 };
@@ -72,7 +81,7 @@ export const actions = {
 		return { editClient };
 	},
 	editAddress: async ({ locals, request }) => {
-		const editAddress = await superValidate(request, AddressValidation);
+		const editAddress = await superValidate(request, EditAddressValidation);
 		const pb = locals.pb;
 		if (!editAddress.valid || !pb) {
 			return fail(400, { editAddress });
@@ -80,9 +89,23 @@ export const actions = {
 
 		try {
 			await pb.collection('address').update(editAddress.data.id, editAddress.data);
-		} catch {
+		} catch (e) {
 			return fail(400, { editAddress });
 		}
 		return { editAddress };
+	},
+	addAddress: async ({ locals, request }) => {
+		const addAddress = await superValidate(request, AddAddressValidation);
+		const pb = locals.pb;
+		if (!addAddress.valid || !pb) {
+			return fail(400, { addAddress });
+		}
+
+		try {
+			await pb.collection('address').create({ ...addAddress.data, active: true });
+		} catch (e) {
+			return fail(400, { addAddress });
+		}
+		return { addAddress };
 	}
 };
