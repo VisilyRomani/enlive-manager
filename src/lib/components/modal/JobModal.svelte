@@ -215,7 +215,7 @@
 								id="task-popup"
 								bind:value={selectTask.service_name}
 								use:popup={popupTask}
-								placeholder="Select Task"
+								placeholder="Select Service"
 							/>
 							<div data-popup="task-popup" class="w-full z-50">
 								<div class="card max-h-60 overflow-auto w-[${offsetTaskWidth + 'px'}]">

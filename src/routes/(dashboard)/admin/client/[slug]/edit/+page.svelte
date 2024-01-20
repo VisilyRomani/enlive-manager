@@ -69,33 +69,47 @@
 		method="post"
 	>
 		<input name="id" hidden value={data.client.id} />
-		<div>
-			<label for="first">First Name</label>
-			<input
-				name="first_name"
-				id="first"
-				bind:value={$form.first_name}
-				class="input variant-form-material {$errors.first_name ? 'input-error' : undefined}"
-			/>
-			{#if $errors.first_name}
-				<span class="text-xs text-red-500">{$errors.first_name}</span>{/if}
+		<div class="flex lg:flex-row flex-col gap-3">
+			<div class="w-full">
+				<label for="first">First Name</label>
+				<input
+					name="first_name"
+					id="first"
+					bind:value={$form.first_name}
+					class="input variant-form-material {$errors.first_name ? 'input-error' : undefined}"
+				/>
+				{#if $errors.first_name}
+					<span class="text-xs text-red-500">{$errors.first_name}</span>{/if}
+			</div>
+			<div class="w-full">
+				<label for="last">Last Name</label>
+				<input
+					name="last_name"
+					id="last"
+					class="input variant-form-material"
+					bind:value={$form.last_name}
+				/>
+			</div>
 		</div>
-		<div>
-			<label for="last">Last Name</label>
-			<input
-				name="last_name"
-				id="last"
-				class="input variant-form-material"
-				bind:value={$form.last_name}
-			/>
-		</div>
-		<div>
-			<label for="email">Email</label>
-			<input id="email" name="email" class="input variant-form-material" bind:value={$form.email} />
-		</div>
-		<div>
-			<label for="phone">Phone</label>
-			<input id="phone" name="phone" class="input variant-form-material" bind:value={$form.phone} />
+		<div class="flex lg:flex-row flex-col gap-3">
+			<div class="w-full">
+				<label for="email">Email</label>
+				<input
+					id="email"
+					name="email"
+					class="input variant-form-material"
+					bind:value={$form.email}
+				/>
+			</div>
+			<div class="w-full">
+				<label for="phone">Phone</label>
+				<input
+					id="phone"
+					name="phone"
+					class="input variant-form-material"
+					bind:value={$form.phone}
+				/>
+			</div>
 		</div>
 		<div>
 			<label for="notes">Notes</label>
