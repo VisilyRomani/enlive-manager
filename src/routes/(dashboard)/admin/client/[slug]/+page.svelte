@@ -90,42 +90,44 @@
 		<h4 class="h4 self-center">Addresses</h4>
 	</div>
 	<hr class="hr" />
-	<dl class="list-dl">
+	<ol class="list">
 		{#each data.client?.expand?.['address(client)'] as addr}
-			<a
-				class="hover:bg-primary-900 flex items-center flex-row p-1 bg-surface-700 rounded-lg my-3"
-				href="https://maps.google.com/?q={addr.address}
-					"
-				target="_blank"
-			>
-				<div>
-					<span class="badge bg-primary-500">📍</span>
-				</div>
-				<span class="flex-auto">
-					<dt>{addr.address}</dt>
-					<dd>
-						<p>
-							<span class="text-gray-400">Lat:</span>
-							{addr.lat}
-						</p>
-						<p>
-							<span class="text-gray-400">Lng:</span>
-							{addr.lng}
-						</p>
-					</dd>
-				</span>
-				<div class="flex items-center justify-start">
-					{#if addr.active}
-						<Dot fill="green" size={15} />
-						<p>Active</p>
-					{:else}
-						<Dot fill="gray" size={15} />
-						<p>Inactive</p>
-					{/if}
-				</div>
-			</a>
+			<li class="w-full">
+				<a
+					class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"
+					href="https://maps.google.com/?q={addr.address}
+			"
+					target="_blank"
+				>
+					<div>
+						<span class="badge bg-primary-500">📍</span>
+					</div>
+					<span class="flex-auto">
+						<dt>{addr.address}</dt>
+						<dd>
+							<p>
+								<span class="text-gray-400">Lat:</span>
+								{addr.lat}
+							</p>
+							<p>
+								<span class="text-gray-400">Lng:</span>
+								{addr.lng}
+							</p>
+						</dd>
+					</span>
+					<div class="flex items-center justify-start">
+						{#if addr.active}
+							<Dot fill="green" size={15} />
+							<p>Active</p>
+						{:else}
+							<Dot fill="gray" size={15} />
+							<p>Inactive</p>
+						{/if}
+					</div>
+				</a>
+			</li>
 		{/each}
-	</dl>
+	</ol>
 </div>
 
 <div class="card m-3 p-3">
@@ -134,30 +136,31 @@
 	{#await data.streamed.jobs}
 		<p>loading</p>
 	{:then jobs}
-		<div class="overflow-auto max-h-96">
+		<ul class="overflow-auto max-h-96">
 			{#each jobs.flat().sort((a, b) => (a.job_number > b.job_number ? -1 : 0)) as job}
-				<a
-					href="/admin/jobs/{job.id}"
-					class="flex items-center gap-3 hover:bg-primary-800 p-1 rounded-md"
+				<li
+					class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"
 				>
-					<p>
-						{job.job_number}
-					</p>
-					<div class="flex flex-col">
-						<div class="flex flex-row flex-wrap gap-3">
-							{#each job.expand.task as task}
-								<p class="chip variant-outline-tertiary">
-									{task.expand.service.name}
-								</p>
-							{/each}
-						</div>
+					<a href="/admin/jobs/{job.id}" class="flex items-center gap-3 w-full p-1 rounded-md">
 						<p>
-							{job.expand.address.address.split(',').slice(0, 2)}
+							{job.job_number}
 						</p>
-					</div>
-				</a>
+						<div class="flex flex-col">
+							<div class="flex flex-row flex-wrap gap-3">
+								{#each job.expand.task as task}
+									<p class="chip variant-outline-tertiary">
+										{task.expand.service.name}
+									</p>
+								{/each}
+							</div>
+							<p>
+								{job.expand.address.address.split(',').slice(0, 2)}
+							</p>
+						</div>
+					</a>
+				</li>
 				<hr class="hr" />
 			{/each}
-		</div>
+		</ul>
 	{/await}
 </div>
