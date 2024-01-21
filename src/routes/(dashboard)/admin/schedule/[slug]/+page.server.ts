@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import z from 'zod';
+import type { TUser } from '../+page.server';
 
 type TSchedule = {
 	id: string;
@@ -49,11 +50,12 @@ const DetailValidation = z.object({
 	scheduled_date: z.date()
 });
 const EmployeeValidation = z.object({
-	employees: z.array(z.object({ id: z.string().min(1), name: z.string() }))
+	schedule_id: z.string().min(1),
+	employees: z.array(z.string()).min(1, 'Schedule must contain at least 1 employee')
 });
 
 const JobValiation = z.object({
-	jobs: z.array(z.object({ id: z.string() }))
+	jobs: z.array(z.string())
 });
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const pb = locals.pb;
@@ -65,18 +67,29 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		fields: ' id, title, scheduled_date,expand'
 	});
 
+	const userList = await pb
+		.collection('users')
+		.getFullList<TUser>({ fields: 'id,first_name,last_name' });
+
 	const EditScheduleDetails = superValidate(
 		{ title: schedule.title, scheduled_date: new Date(schedule.scheduled_date), id: schedule.id },
 		DetailValidation
 	);
-	const EditScheduleEmployee = superValidate(EmployeeValidation);
-	const EditScheduleJobs = superValidate(JobValiation);
+	const EditScheduleEmployee = superValidate(
+		{ schedule_id: schedule.id, employees: schedule.expand.employee.map((e) => e.id) },
+		EmployeeValidation
+	);
+	const EditScheduleJobs = superValidate(
+		{ jobs: schedule.expand.job.map((j) => j.id) },
+		JobValiation
+	);
 
 	return {
 		EditScheduleDetails,
 		EditScheduleEmployee,
 		EditScheduleJobs,
-		schedule
+		schedule,
+		userList
 	};
 };
 
@@ -94,5 +107,21 @@ export const actions = {
 			return fail(400, { EditScheduleDetails });
 		}
 		return { EditScheduleDetails };
+	},
+	editEmployee: async ({ request, locals }) => {
+		const EditScheduleEmployee = await superValidate(request, EmployeeValidation);
+		const pb = locals.pb;
+		if (!EditScheduleEmployee.valid || !pb) {
+			return fail(400, { EditScheduleEmployee });
+		}
+
+		try {
+			await pb.collection('schedule').update(EditScheduleEmployee.data.schedule_id, {
+				employee: EditScheduleEmployee.data.employees
+			});
+		} catch (e) {
+			return fail(400, { EditScheduleEmployee });
+		}
+		return { EditScheduleEmployee };
 	}
 };
