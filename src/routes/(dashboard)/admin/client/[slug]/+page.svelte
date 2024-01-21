@@ -49,12 +49,6 @@
 				</div>
 			</div>
 		</div>
-		<!-- <div class="w-full flex flex-row-reverse">
-			<div class="flex flex-col justify-between">
-				<button class="btn variant-outline-secondary">Edit</button>
-				<SlideToggle name="slider-large" active="bg-primary-500" size="sm">Inactive</SlideToggle>
-			</div>
-		</div> -->
 	</div>
 
 	<div class="card m-3 p-3">
