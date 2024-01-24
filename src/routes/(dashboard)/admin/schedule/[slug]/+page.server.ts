@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import z from 'zod';
-import type { TUser } from '../+page.server';
+import type { TJob, TUser } from '../+page.server';
 
 type TSchedule = {
 	id: string;
@@ -55,6 +55,7 @@ const EmployeeValidation = z.object({
 });
 
 const JobValiation = z.object({
+	schedule_id: z.string().min(1),
 	jobs: z.array(z.string())
 });
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -62,14 +63,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!pb) {
 		throw redirect(300, '/');
 	}
+
 	const schedule = await pb.collection('schedule').getOne<TSchedule>(params.slug, {
 		expand: 'job, employee, job.task, job.task.service, job.address, job.address.client',
-		fields: ' id, title, scheduled_date,expand'
+		fields: ' id, title, scheduled_date, expand'
 	});
 
 	const userList = await pb
 		.collection('users')
 		.getFullList<TUser>({ fields: 'id,first_name,last_name' });
+
+	const jobList = await pb.collection('job').getFullList<TJob>({
+		filter: 'status = "PENDING" || status = "RESCHEDULE"',
+		expand: 'address, task, address.client, task.service'
+	});
 
 	const EditScheduleDetails = superValidate(
 		{ title: schedule.title, scheduled_date: new Date(schedule.scheduled_date), id: schedule.id },
@@ -80,16 +87,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		EmployeeValidation
 	);
 	const EditScheduleJobs = superValidate(
-		{ jobs: schedule.expand.job.map((j) => j.id) },
+		{ schedule_id: schedule.id, jobs: schedule.expand.job.map((j) => j.id) },
 		JobValiation
 	);
 
+	const allJobs = [...jobList, ...schedule.expand.job];
+
+	const unique = allJobs.filter((obj, index) => {
+		return index === allJobs.findIndex((o) => obj.id === o.id);
+	});
 	return {
 		EditScheduleDetails,
 		EditScheduleEmployee,
 		EditScheduleJobs,
 		schedule,
-		userList
+		userList,
+		jobList: unique
 	};
 };
 
@@ -123,5 +136,27 @@ export const actions = {
 			return fail(400, { EditScheduleEmployee });
 		}
 		return { EditScheduleEmployee };
+	},
+	editJob: async ({ request, locals }) => {
+		const EditScheduleJobs = await superValidate(request, JobValiation);
+		const pb = locals.pb;
+		if (!EditScheduleJobs.valid || !pb) {
+			return fail(400, { EditScheduleJobs });
+		}
+
+		// :TODO pass in data in delete and update arrays
+		try {
+			await pb.collection('schedule').update(EditScheduleJobs.data.schedule_id, {
+				job: EditScheduleJobs.data.jobs
+			});
+
+			// Promise.all(EditScheduleJobs.data.jobs.map(job => {
+
+			// }))
+
+			// Each Job update order, update Status
+		} catch (e) {
+			return fail(400, { EditScheduleJobs });
+		}
 	}
 };

@@ -8,6 +8,8 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	export let data: PageData;
 	const modalStore = getModalStore();
+	import Trash from '$lib/photos/trash.svelte';
+	import Info from '$lib/photos/info.svelte';
 </script>
 
 <ol class="breadcrumb mx-3 px-3">
@@ -29,7 +31,7 @@
 			<h5 class="self-center h5">Schedule Details</h5>
 			<div class="flex justify-end">
 				<button
-					class="btn variant-form-material"
+					class="btn variant-ghost-primary"
 					type="button"
 					on:click={() => {
 						modalStore.trigger({
@@ -61,7 +63,7 @@
 			<h5 class="h5 self-center">Employees</h5>
 			<div class="flex justify-end">
 				<button
-					class="btn variant-form-material"
+					class="btn variant-ghost-primary"
 					type="button"
 					on:click={() => {
 						modalStore.trigger({
@@ -94,7 +96,7 @@
 		<h5 class="h5 self-center">Jobs</h5>
 		<div class="flex justify-end">
 			<button
-				class="btn variant-form-material"
+				class="btn variant-ghost-primary"
 				type="button"
 				on:click={() => {
 					modalStore.trigger({
@@ -118,51 +120,56 @@
 					<th class="table-cell-fit">Job No.</th>
 					<th>Client</th>
 					<th>Status</th>
-					<th>More</th>
+					<th class="table-cell-fit">More</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each data.schedule.expand.job as job}
 					<tr>
-						<td class="flex gap-4 items-center">
-							<p>
+						<td class="!align-middle"
+							><div class="flex items-center gap-1 !align-middle">
 								{job.order}
-							</p>
-							<div class="flex flex-col items-center">
-								<button class="group">
-									<svg
-										class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
-										width="2em"
-										viewBox="0 0 24 24">{@html up}</svg
-									>
-								</button>
-								<button class="group">
-									<svg
-										class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
-										width="2em"
-										viewBox="0 0 24 24">{@html down}</svg
-									>
-								</button>
+								<div class="flex flex-col">
+									<button class="group">
+										<svg
+											class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
+											width="2em"
+											viewBox="0 0 24 24">{@html up}</svg
+										>
+									</button>
+									<button class="group">
+										<svg
+											class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
+											width="2em"
+											viewBox="0 0 24 24">{@html down}</svg
+										>
+									</button>
+								</div>
 							</div>
 						</td>
-						<td>
+						<td class="!align-middle">
 							{job.job_number}
 						</td>
-						<td>
+						<td class="!align-middle">
 							<p class="whitespace-normal">
 								{job.expand.address.expand.client.first_name}
 								{job.expand.address.expand.client.last_name}
 							</p>
 						</td>
-						<td>
-							<div class="flex gap-1 flex-wrap">
-								<p class="chip {statusColor(job.status)}">
-									{job.status}
-								</p>
+						<td class="!align-middle">
+							<div class="chip {statusColor(job.status)}">
+								{job.status}
 							</div>
 						</td>
-						<td>
-							<a href="/admin/jobs/{job.id}" class="btn variant-ghost-primary">Info</a>
+						<td class="!align-middle">
+							<div class="flex gap-1">
+								<a href="/admin/jobs/{job.id}" class="hover:fill-primary-500 fill-primary-300"
+									><Info size={30} /></a
+								>
+								<button class="hover:fill-primary-500 fill-primary-300" type="button"
+									><Trash size={30} /></button
+								>
+							</div>
 						</td>
 					</tr>
 				{/each}

@@ -50,12 +50,29 @@
 		}
 	});
 
+	const {
+		form: editJobForm,
+		enhance: editJobEnhance,
+		errors: editJobErrors
+	} = superForm(data.EditScheduleJobs, {
+		dataType: 'json',
+		onResult({ result }) {
+			if (result.type === 'success') {
+				toastStore.trigger({
+					message: 'Successfully updated schedule jobs',
+					background: 'bg-success-500'
+				});
+				modalStore.close();
+			}
+		}
+	});
+
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 </script>
 
 <div class="absolute left-0 top-0">
-	<SuperDebug data={$employeeForm} />
+	<SuperDebug data={$editJobForm} />
 </div>
 
 {#if $modalStore[0]}
@@ -147,7 +164,64 @@
 				</div>
 			</form>
 		{:else if $modalStore[0].meta === 'Jobs'}
-			tes
+			<form use:editJobEnhance class="flex gap-3 flex-col" method="post" action="?/editJob">
+				<input name="schedule_id" hidden bind:value={$editJobForm.schedule_id} />
+				<ul>
+					{#each data.jobList as job}
+						<li class="flex gap-3 items-center">
+							<input
+								class="checkbox"
+								type="checkbox"
+								checked={!!$editJobForm.jobs.find((j) => j === job.id)}
+								on:click={(e) => {
+									editJobForm.update(
+										($editJobForm) => {
+											if (e.currentTarget.checked) {
+												$editJobForm.jobs.push(job.id);
+											} else {
+												$editJobForm.jobs = $editJobForm.jobs.filter((e) => e != job.id);
+											}
+											return $editJobForm;
+										},
+										{ taint: false }
+									);
+								}}
+							/>
+
+							<div class="flex flex-col">
+								<h3 class="h3">
+									{job.expand.address.expand.client.first_name}
+									{job.expand.address.expand.client.last_name} |
+									<span class="text-secondary-400">
+										{job.id.slice(-4)}
+									</span>
+								</h3>
+								<p class="text-gray-400">
+									{job.expand.address.address}
+								</p>
+
+								<div>
+									{#each job.expand.task as task}
+										<p class="chip variant-ghost-tertiary">
+											{task.expand.service.name}
+										</p>
+									{/each}
+								</div>
+							</div>
+						</li>
+					{/each}
+				</ul>
+				<div class="flex justify-between">
+					<button
+						type="button"
+						on:click={() => {
+							modalStore.close();
+						}}
+						class="btn variant-ghost-primary">Close</button
+					>
+					<button class="btn variant-ghost-success">Submit</button>
+				</div>
+			</form>
 		{/if}
 	</div>
 {/if}
