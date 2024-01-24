@@ -10,6 +10,9 @@
 	const modalStore = getModalStore();
 	import Trash from '$lib/photos/trash.svelte';
 	import Info from '$lib/photos/info.svelte';
+	import { superForm } from 'sveltekit-superforms/client';
+
+	const { form, enhance, errors } = superForm(data.OrderScheduleJob);
 </script>
 
 <ol class="breadcrumb mx-3 px-3">
@@ -101,13 +104,13 @@
 				on:click={() => {
 					modalStore.trigger({
 						type: 'component',
-						title: 'Edit Schedule Jobs',
+						title: 'Add Schedule Jobs',
 						meta: 'Jobs',
 						component: 'EditScheduleModal'
 					});
 				}}
 			>
-				Edit</button
+				Add</button
 			>
 		</div>
 		<hr class="hr col-span-2" />
@@ -124,26 +127,58 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.schedule.expand.job as job}
+				{#each data.schedule.expand.job.sort( (a, b) => (a.order > b.order ? 1 : a.order < b.order ? -1 : 0) ) as job}
 					<tr>
 						<td class="!align-middle"
 							><div class="flex items-center gap-1 !align-middle">
 								{job.order}
 								<div class="flex flex-col">
-									<button class="group">
-										<svg
-											class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
-											width="2em"
-											viewBox="0 0 24 24">{@html up}</svg
+									<form method="post" action="?/editJobOrder" use:enhance>
+										<input bind:value={$form.schedule_id} name="schedule_id" hidden />
+										<input bind:value={$form.job_id} name="job_id" hidden />
+										<input bind:value={$form.order} name="order" hidden />
+										<input bind:value={$form.type} name="type" hidden />
+										<button
+											class="group"
+											on:click={() => {
+												form.update(
+													($form) => {
+														$form.order = job.order;
+														$form.job_id = job.id;
+														$form.type = 'INCREASE';
+														return $form;
+													},
+													{ taint: false }
+												);
+											}}
 										>
-									</button>
-									<button class="group">
-										<svg
-											class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
-											width="2em"
-											viewBox="0 0 24 24">{@html down}</svg
+											<svg
+												class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
+												width="2em"
+												viewBox="0 0 24 24">{@html up}</svg
+											>
+										</button>
+										<button
+											class="group"
+											on:click={() => {
+												form.update(
+													($form) => {
+														$form.order = job.order;
+														$form.job_id = job.id;
+														$form.type = 'DECREASE';
+														return $form;
+													},
+													{ taint: false }
+												);
+											}}
 										>
-									</button>
+											<svg
+												class="mx-auto fill-secondary-500 group-hover:fill-secondary-200"
+												width="2em"
+												viewBox="0 0 24 24">{@html down}</svg
+											>
+										</button>
+									</form>
 								</div>
 							</div>
 						</td>

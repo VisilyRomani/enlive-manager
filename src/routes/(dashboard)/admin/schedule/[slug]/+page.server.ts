@@ -58,6 +58,13 @@ const JobValiation = z.object({
 	schedule_id: z.string().min(1),
 	jobs: z.array(z.string())
 });
+
+const ChangeOrderValidation = z.object({
+	schedule_id: z.string(),
+	job_id: z.string(),
+	order: z.number(),
+	type: z.enum(['INCREASE', 'DECREASE'])
+});
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const pb = locals.pb;
 	if (!pb) {
@@ -78,6 +85,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		expand: 'address, task, address.client, task.service'
 	});
 
+	const OrderScheduleJob = superValidate({ schedule_id: schedule.id }, ChangeOrderValidation);
+
 	const EditScheduleDetails = superValidate(
 		{ title: schedule.title, scheduled_date: new Date(schedule.scheduled_date), id: schedule.id },
 		DetailValidation
@@ -86,23 +95,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		{ schedule_id: schedule.id, employees: schedule.expand.employee.map((e) => e.id) },
 		EmployeeValidation
 	);
-	const EditScheduleJobs = superValidate(
-		{ schedule_id: schedule.id, jobs: schedule.expand.job.map((j) => j.id) },
-		JobValiation
-	);
+	const AddScheduleJobs = superValidate({ schedule_id: schedule.id }, JobValiation);
 
-	const allJobs = [...jobList, ...schedule.expand.job];
-
-	const unique = allJobs.filter((obj, index) => {
-		return index === allJobs.findIndex((o) => obj.id === o.id);
-	});
 	return {
 		EditScheduleDetails,
 		EditScheduleEmployee,
-		EditScheduleJobs,
+		OrderScheduleJob,
+		AddScheduleJobs,
 		schedule,
 		userList,
-		jobList: unique
+		jobList
 	};
 };
 
@@ -110,7 +112,6 @@ export const actions = {
 	editDetails: async ({ request, locals }) => {
 		const EditScheduleDetails = await superValidate(request, DetailValidation);
 		const pb = locals.pb;
-		console.log(EditScheduleDetails.data);
 		if (!pb || !EditScheduleDetails.valid) {
 			return fail(400, { EditScheduleDetails });
 		}
@@ -137,26 +138,95 @@ export const actions = {
 		}
 		return { EditScheduleEmployee };
 	},
-	editJob: async ({ request, locals }) => {
-		const EditScheduleJobs = await superValidate(request, JobValiation);
+	editJobOrder: async ({ request, locals }) => {
+		const OrderScheduleJob = await superValidate(request, ChangeOrderValidation);
 		const pb = locals.pb;
-		if (!EditScheduleJobs.valid || !pb) {
-			return fail(400, { EditScheduleJobs });
+		console.log(OrderScheduleJob.data);
+		if (!pb || !OrderScheduleJob.valid) {
+			return fail(400, { OrderScheduleJob });
 		}
 
-		// :TODO pass in data in delete and update arrays
 		try {
-			await pb.collection('schedule').update(EditScheduleJobs.data.schedule_id, {
-				job: EditScheduleJobs.data.jobs
-			});
+			const schedule_jobs = (
+				await pb.collection('schedule').getOne<{
+					expand: {
+						job: {
+							id: string;
+							order: number;
+						}[];
+					};
+				}>(OrderScheduleJob.data.schedule_id, { expand: 'job', fields: 'expand.job' })
+			).expand.job.sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0));
 
-			// Promise.all(EditScheduleJobs.data.jobs.map(job => {
-
-			// }))
-
-			// Each Job update order, update Status
+			const cur_job_idx = schedule_jobs.findIndex((i) => i.id === OrderScheduleJob.data.job_id);
+			if (OrderScheduleJob.data.type === 'INCREASE') {
+				if (cur_job_idx === 0) {
+					return { OrderScheduleJob };
+				}
+				// change order for job ahead
+				await pb.collection('job').update(schedule_jobs[cur_job_idx - 1].id, {
+					order: schedule_jobs[cur_job_idx - 1].order + 1
+				});
+				// change current job
+				await pb.collection('job').update(schedule_jobs[cur_job_idx].id, {
+					order: schedule_jobs[cur_job_idx].order - 1
+				});
+			} else if (OrderScheduleJob.data.type === 'DECREASE') {
+				if (cur_job_idx === schedule_jobs.length - 1) {
+					return { OrderScheduleJob };
+				}
+				// change order for job behind
+				await pb.collection('job').update(schedule_jobs[cur_job_idx + 1].id, {
+					order: schedule_jobs[cur_job_idx + 1].order - 1
+				});
+				// change current job
+				await pb.collection('job').update(schedule_jobs[cur_job_idx].id, {
+					order: schedule_jobs[cur_job_idx].order + 1
+				});
+			} else {
+				return fail(400, { OrderScheduleJob });
+			}
 		} catch (e) {
-			return fail(400, { EditScheduleJobs });
+			return fail(400, { OrderScheduleJob });
+		}
+	},
+	addSchduleJob: async ({ request, locals }) => {
+		const AddScheduleJobs = await superValidate(request, JobValiation);
+		const pb = locals.pb;
+		if (!AddScheduleJobs.valid || !pb) {
+			return fail(400, { AddScheduleJobs });
+		}
+
+		try {
+			const job_order_detail = await pb.collection('schedule').getOne<{
+				expand: {
+					job: {
+						id: string;
+						order: number;
+					}[];
+				};
+			}>(AddScheduleJobs.data.schedule_id, { expand: 'job', fields: 'expand.job' });
+
+			const last_job = job_order_detail.expand?.job
+				.sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+				.at(-1);
+
+			console.log(last_job);
+
+			await Promise.all(
+				AddScheduleJobs.data.jobs.map((job, index) => {
+					return pb.collection('job').update(job, {
+						order: (last_job?.order ? last_job.order : 0) + (index + 1),
+						status: 'SCHEDULED'
+					});
+				})
+			);
+
+			await pb
+				.collection('schedule')
+				.update(AddScheduleJobs.data.schedule_id, { 'job+': AddScheduleJobs.data.jobs });
+		} catch (e) {
+			return fail(400, { AddScheduleJobs });
 		}
 	}
 };

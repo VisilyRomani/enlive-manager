@@ -54,7 +54,7 @@
 		form: editJobForm,
 		enhance: editJobEnhance,
 		errors: editJobErrors
-	} = superForm(data.EditScheduleJobs, {
+	} = superForm(data.AddScheduleJobs, {
 		dataType: 'json',
 		onResult({ result }) {
 			if (result.type === 'success') {
@@ -164,9 +164,15 @@
 				</div>
 			</form>
 		{:else if $modalStore[0].meta === 'Jobs'}
-			<form use:editJobEnhance class="flex gap-3 flex-col" method="post" action="?/editJob">
+			<form use:editJobEnhance class="flex gap-3 flex-col" method="post" action="?/addSchduleJob">
 				<input name="schedule_id" hidden bind:value={$editJobForm.schedule_id} />
 				<ul>
+					{#if !data.jobList.length}
+						<div class="flex justify-center items-center flex-col h-full">
+							<p class="text-center text-3xl font-bold">No Jobs Found</p>
+							<p class="text-center text-primary-500-400-token">Please create a job to scheudle</p>
+						</div>
+					{/if}
 					{#each data.jobList as job}
 						<li class="flex gap-3 items-center">
 							<input
