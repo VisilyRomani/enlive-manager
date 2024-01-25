@@ -11,11 +11,11 @@
 	};
 
 	$: itemsOnDay = data.scheduleList.map((s) => dayjs(s.scheduled_date));
+	$: console.log(data.scheduleList);
 	let date = dayjs();
-	$: windowWidth = 0;
 </script>
 
-<div class="flex flex-col lg:flex-row h-full" bind:offsetWidth={windowWidth}>
+<div class="flex flex-col lg:flex-row h-full">
 	<div class="card p-4 h-full w-64 flex-col gap-2 hidden lg:flex">
 		<button class="btn variant-form-material w-full btn-sm" on:click={newScheduleModal}>
 			Create Schedule
@@ -26,7 +26,14 @@
 		class="flex lg:hidden sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10"
 	>
 		<button class="btn variant-form-material" on:click={newScheduleModal}> Create Schedule </button>
-		<input type="date" class="input w-full h-fit" bind:value={date} />
+		<input
+			class="input variant-outline-primary"
+			value={date.format('YYYY-MM-DD')}
+			on:change={(e) => {
+				date = dayjs(e.currentTarget.value);
+			}}
+			type="date"
+		/>
 	</div>
 	<nav class="w-full mt-1">
 		<ul class="space-y-1">
@@ -44,7 +51,7 @@
 									</span>
 								</h3>
 								<div class="space-x-1">
-									{#each schedule.expand.job.sort( (a, b) => (a.job_number < b.job_number ? -1 : 0) ) as job}
+									{#each schedule.expand?.job.sort( (a, b) => (a.job_number < b.job_number ? -1 : 0) ) ?? [] as job}
 										<a href="/admin/jobs/{job.id}">
 											<p class="chip variant-ghost-tertiary">
 												Job: {job.job_number}

@@ -248,10 +248,31 @@ export const actions = {
 		}
 
 		try {
-			await pb.collection('job').update(job_id, { status: 'RESCHEDULE', order: null });
-			await pb
-				.collection('schedule')
-				.update(DeleteScheduleJobs.data.schedule_id, { 'job-': [job_id] });
+			const job_order_detail = await pb.collection('schedule').getOne<{
+				expand: {
+					job: {
+						id: string;
+						order: number;
+					}[];
+				};
+			}>(DeleteScheduleJobs.data.schedule_id, { expand: 'job', fields: 'expand.job' });
+
+			const job_idx = job_order_detail.expand?.job.findIndex((j) => j.id === job_id);
+			const last_job = job_order_detail.expand?.job.sort((a, b) =>
+				a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+			);
+
+			const reorder_jobs = last_job.slice(job_idx);
+
+			await Promise.all([
+				await pb.collection('job').update(job_id, { status: 'RESCHEDULE', order: null }),
+				await pb
+					.collection('schedule')
+					.update(DeleteScheduleJobs.data.schedule_id, { 'job-': [job_id] }),
+				...reorder_jobs.map(async (j) => {
+					return await pb.collection('job').update(j.id, { order: j.order - 1 });
+				})
+			]);
 		} catch (e) {
 			return fail(400, { DeleteScheduleJobs });
 		}
