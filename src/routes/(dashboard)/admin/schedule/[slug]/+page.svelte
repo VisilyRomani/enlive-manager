@@ -5,14 +5,40 @@
 	import type { PageData } from './$types';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { statusColor } from '$lib/helper/StyleHelper';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { getToastStore, getModalStore } from '@skeletonlabs/skeleton';
 	export let data: PageData;
 	const modalStore = getModalStore();
 	import Trash from '$lib/photos/trash.svelte';
 	import Info from '$lib/photos/info.svelte';
 	import { superForm } from 'sveltekit-superforms/client';
+	const toastStore = getToastStore();
 
-	const { form, enhance, errors } = superForm(data.OrderScheduleJob);
+	const { form, enhance, errors } = superForm(data.OrderScheduleJob, {
+		dataType: 'json',
+		onResult: ({ result }) => {
+			if (result.type === 'error') {
+				toastStore.trigger({
+					message: 'Error: failed to change job order',
+					background: 'bg-error-500'
+				});
+			}
+		}
+	});
+	const {
+		form: deleteForm,
+		enhance: deleteFormEnhance,
+		errors: deleteFormErrors
+	} = superForm(data.DeleteScheduleJobs, {
+		dataType: 'json',
+		onResult: ({ result }) => {
+			if (result.type === 'error') {
+				toastStore.trigger({
+					message: 'Error: failed to delete job',
+					background: 'bg-error-500'
+				});
+			}
+		}
+	});
 </script>
 
 <ol class="breadcrumb mx-3 px-3">
@@ -127,7 +153,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.schedule.expand.job.sort( (a, b) => (a.order > b.order ? 1 : a.order < b.order ? -1 : 0) ) as job}
+				{#each data.schedule.expand.job?.sort( (a, b) => (a.order > b.order ? 1 : a.order < b.order ? -1 : 0) ) ?? [] as job}
 					<tr>
 						<td class="!align-middle"
 							><div class="flex items-center gap-1 !align-middle">
@@ -201,9 +227,19 @@
 								<a href="/admin/jobs/{job.id}" class="hover:fill-primary-500 fill-primary-300"
 									><Info size={30} /></a
 								>
-								<button class="hover:fill-primary-500 fill-primary-300" type="button"
-									><Trash size={30} /></button
-								>
+								<form action="?/deleteScheduleJob" use:deleteFormEnhance method="post">
+									<input bind:value={$deleteForm.schedule_id} name="schedule_id" hidden />
+									<input bind:value={$deleteForm.jobs} name="job_id" hidden />
+									<button
+										class="hover:fill-primary-500 fill-primary-300"
+										on:click={() => {
+											deleteForm.update(($deleteForm) => {
+												$deleteForm.jobs = [job.id];
+												return $deleteForm;
+											});
+										}}><Trash size={30} /></button
+									>
+								</form>
 							</div>
 						</td>
 					</tr>

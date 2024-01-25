@@ -96,12 +96,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		EmployeeValidation
 	);
 	const AddScheduleJobs = superValidate({ schedule_id: schedule.id }, JobValiation);
-
+	const DeleteScheduleJobs = superValidate({ schedule_id: schedule.id }, JobValiation);
 	return {
 		EditScheduleDetails,
 		EditScheduleEmployee,
 		OrderScheduleJob,
 		AddScheduleJobs,
+		DeleteScheduleJobs,
 		schedule,
 		userList,
 		jobList
@@ -163,11 +164,11 @@ export const actions = {
 				if (cur_job_idx === 0) {
 					return { OrderScheduleJob };
 				}
-				// change order for job ahead
+				// Decrease priority for job infront of current
 				await pb.collection('job').update(schedule_jobs[cur_job_idx - 1].id, {
 					order: schedule_jobs[cur_job_idx - 1].order + 1
 				});
-				// change current job
+				// Increase priority for current job
 				await pb.collection('job').update(schedule_jobs[cur_job_idx].id, {
 					order: schedule_jobs[cur_job_idx].order - 1
 				});
@@ -175,11 +176,11 @@ export const actions = {
 				if (cur_job_idx === schedule_jobs.length - 1) {
 					return { OrderScheduleJob };
 				}
-				// change order for job behind
+				// Increase priority for job behind of current
 				await pb.collection('job').update(schedule_jobs[cur_job_idx + 1].id, {
 					order: schedule_jobs[cur_job_idx + 1].order - 1
 				});
-				// change current job
+				// Decrease priority for current job
 				await pb.collection('job').update(schedule_jobs[cur_job_idx].id, {
 					order: schedule_jobs[cur_job_idx].order + 1
 				});
@@ -215,10 +216,14 @@ export const actions = {
 
 			await Promise.all(
 				AddScheduleJobs.data.jobs.map((job, index) => {
-					return pb.collection('job').update(job, {
-						order: (last_job?.order ? last_job.order : 0) + (index + 1),
-						status: 'SCHEDULED'
-					});
+					return pb.collection('job').update(
+						job,
+						{
+							order: (last_job?.order ? last_job.order : 0) + (index + 1),
+							status: 'SCHEDULED'
+						},
+						{ requestKey: null }
+					);
 				})
 			);
 
@@ -228,5 +233,29 @@ export const actions = {
 		} catch (e) {
 			return fail(400, { AddScheduleJobs });
 		}
+	},
+	deleteScheduleJob: async ({ locals, request }) => {
+		const DeleteScheduleJobs = await superValidate(request, JobValiation);
+		const pb = locals.pb;
+
+		if (!pb || !DeleteScheduleJobs.valid) {
+			return fail(400, { DeleteScheduleJobs });
+		}
+
+		const job_id = DeleteScheduleJobs.data.jobs.at(0);
+		if (!job_id) {
+			return fail(400, { DeleteScheduleJobs });
+		}
+
+		try {
+			await pb.collection('job').update(job_id, { status: 'RESCHEDULE', order: null });
+			await pb
+				.collection('schedule')
+				.update(DeleteScheduleJobs.data.schedule_id, { 'job-': [job_id] });
+		} catch (e) {
+			return fail(400, { DeleteScheduleJobs });
+		}
+
+		return { DeleteScheduleJobs };
 	}
 };
