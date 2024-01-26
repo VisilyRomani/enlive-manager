@@ -4,9 +4,8 @@
 </script>
 
 <AppShell>
-	<svelte:fragment slot="pageFooter">
+	<slot />
+	<svelte:fragment slot="footer">
 		<BottomNav />
 	</svelte:fragment>
 </AppShell>
-
-<slot />
