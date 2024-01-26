@@ -3,7 +3,7 @@ import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import { fail, redirect } from '@sveltejs/kit';
 
-type TUser = {
+export type TUser = {
 	id: string;
 	first_name: string;
 	last_name: string;
@@ -223,70 +223,6 @@ export const actions = {
 				{ requestKey: null }
 			);
 		}
-		// if (scheduleForm.data.dates.length > 1) {
-		// 	const duplicateSchedules = scheduleForm.data.dates.slice(1).map(async (date) => {
-		// 		const jobDuplicates = await Promise.all(
-		// 			scheduleForm.data.job.map(async (j, idx) => {
-		// 				const tasks = await Promise.all(
-		// 					j.expand.task.map((t) => {
-		// 						try {
-		// 							return pb.collection('task').create(
-		// 								{
-		// 									service: t.service,
-		// 									price: t.price,
-		// 									count: t.count,
-		// 									company: locals.user?.company
-		// 								},
-		// 								{ requestKey: null }
-		// 							);
-		// 						} catch (e) {
-		// 							return Promise.reject(new Error('Failed to create Duplicate task'));
-		// 						}
-		// 					})
-		// 				);
-		// 				const job = pb.collection('job').create(
-		// 					{
-		// 						status: 'SCHEDULED',
-		// 						company: String(locals.user?.company),
-		// 						notes: j.notes,
-		// 						address: j.address,
-		// 						task: tasks.map((t) => t?.id),
-		// 						order: j.order,
-		// 						job_number: company.job_count + idx + 1
-		// 					},
-		// 					{ requestKey: null }
-		// 				);
-
-		// 				return job;
-		// 			})
-		// 		);
-
-		// 		await pb.collection('company').update(locals.user?.company, {
-		// 			job_count: company.job_count + jobDuplicates.length
-		// 		});
-
-		// 		return pb.collection('schedule').create(
-		// 			{
-		// 				scheduled_date: date,
-		// 				job: jobDuplicates.map((j) => j.id),
-		// 				title: `📋 | ${
-		// 					scheduleForm.data.title || dayjs(scheduleForm.data.dates[0]).format('DD/MM/YYYY')
-		// 				}`,
-		// 				employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
-		// 				company: String(locals.user?.company)
-		// 			},
-		// 			{ requestKey: null }
-		// 		);
-		// 	});
-
-		// 	const duplicateScheduleResult = await Promise.allSettled(duplicateSchedules);
-
-		// 	duplicateScheduleResult.map((res) => {
-		// 		if (res.status === 'rejected') {
-		// 			throw error(400, { message: 'Found rejected during duplicate schedule creation' });
-		// 		}
-		// 	});
-		// }
 
 		return { scheduleForm };
 	}

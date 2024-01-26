@@ -11,12 +11,12 @@
 
 <div class="w-full my-40 flex justify-center items-center flex-col">
 	<div class="space-y-10 text-center flex flex-col items-center max-w-2xl">
-		<h2 class="h1">An Efficient Way To Manage Your Buisness</h2>
+		<h2 class="h1">An Efficient Way To Manage Your Business</h2>
 		<p>
 			Unlock the Power of Relationship Intelligence: Seamlessly Navigate Your Path to Success with
 			Precision, Purpose, and Personalized Client Relations Management
 		</p>
-		<a class="btn btn-lg variant-ghost-primary" href="/login">Start your buisness today</a>
+		<a class="btn btn-lg variant-ghost-primary" href="/login">Start your business today</a>
 	</div>
 </div>
 
@@ -49,7 +49,7 @@
 
 <div class="bg-primary-500 w-full flex flex-col gap-5 justify-center p-20 text-center">
 	<h1 class="h1 text-gray-900">Get Started Today</h1>
-	<p class="text-gray-800 text-xl h5">Manage your buisness quickly and easily.</p>
+	<p class="text-gray-800 text-xl h5">Manage your business quickly and easily.</p>
 	<a href="/signup" class="btn btn-xl variant-filled-tertiary !bg-gray-900">Start Here</a>
 </div>
 
