@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 						address: string;
 						lat: number;
 						lng: number;
-						expand: { client: { first_name: string; last_name: string } };
+						expand: { client: { first_name: string; last_name: string; id: string } };
 					};
 					task: {
 						expand: {
@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}>(params.slug, {
 		expand: 'job, job.address, job.address.client, job.task.service',
 		fields:
-			'expand.job.id, expand.job.order, expand.job.notes, expand.job.expand.task.expand.service.name, expand.job.expand.address.address,expand.job.expand.address.lat,expand.job.expand.address.lng,expand.job.expand.address.expand.client.first_name,expand.job.expand.address.expand.client.last_name'
+			'expand.job.id, expand.job.order, expand.job.notes, expand.job.expand.task.expand.service.name, expand.job.expand.address.address,expand.job.expand.address.lat,expand.job.expand.address.lng,expand.job.expand.address.expand.client.first_name,expand.job.expand.address.expand.client.last_name,expand.job.expand.address.expand.client.id'
 	});
 
 	return { schedule };

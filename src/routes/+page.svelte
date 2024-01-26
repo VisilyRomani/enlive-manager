@@ -1,5 +1,5 @@
 <script lang="ts">
-	import people from '$lib/photos/people.svg?raw';
+	import People from '$lib/photos/people.svelte';
 	import charts from '$lib/photos/charts.svg?raw';
 	import payment from '$lib/photos/payment.svg?raw';
 </script>
@@ -21,9 +21,11 @@
 </div>
 
 <div class="flex flex-row gap-10 justify-center my-40 flex-wrap">
-	<div class="card p-5 max-w-[20em] space-y-5 flex flex-col justify-items-center text-center">
+	<div
+		class="card p-5 max-w-[20em] space-y-5 flex flex-col justify-items-center items-center text-center"
+	>
 		<h4 class="h4">Clients</h4>
-		<svg class="mx-auto fill-secondary-500" width="5em" viewBox="0 0 24 24">{@html people}</svg>
+		<People size={80} fill="rgb(var(--color-secondary-500) / 1)" />
 		<p>
 			Enhanced client management with simplified task delegation, interaction tracking, and
 			insightful analytics.
