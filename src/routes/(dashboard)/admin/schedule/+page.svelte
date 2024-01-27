@@ -42,23 +42,21 @@
 					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
 				>
 					<a href="/admin/schedule/{schedule.id}">
-						<div class="grid grid-cols-2 justify-items-start justify-start">
-							<div class="flex flex-col">
-								<h3 class="h3">
-									{schedule.title} |
-									<span class="text-secondary-400 group-hover:text-secondary-700">
-										{schedule.id.slice(-4)}
-									</span>
-								</h3>
-								<div class="space-x-1">
-									{#each schedule.expand?.job.sort( (a, b) => (a.job_number < b.job_number ? -1 : 0) ) ?? [] as job}
-										<a href="/admin/jobs/{job.id}">
-											<p class="chip variant-ghost-tertiary">
-												Job: {job.job_number}
-											</p>
-										</a>
-									{/each}
-								</div>
+						<div class="flex flex-col">
+							<h3 class="h3">
+								{schedule.title} |
+								<span class="text-secondary-400 group-hover:text-secondary-700">
+									{schedule.id.slice(-4)}
+								</span>
+							</h3>
+							<div class="space-x-1">
+								{#each schedule.expand?.job.sort( (a, b) => (a.job_number < b.job_number ? -1 : 0) ) ?? [] as job}
+									<a href="/admin/jobs/{job.id}">
+										<p class="chip variant-ghost-tertiary">
+											Job: {job.job_number}
+										</p>
+									</a>
+								{/each}
 							</div>
 						</div>
 					</a>

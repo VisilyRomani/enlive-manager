@@ -1,16 +1,28 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { superValidate } from 'sveltekit-superforms/server';
+import z from 'zod';
+
+const ScheduleJobValidation = z.object({
+	schedule_id: z.string(),
+	job_id: z.string().min(1),
+	status: z.enum(['COMPLETED', 'CANCELED', 'RESCHEDULE']),
+	update_description: z.string()
+});
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	const pb = locals.pb;
 	if (!pb) {
 		throw redirect(300, '/');
 	}
+
 	const schedule = await pb.collection('schedule').getOne<{
+		id: string;
 		expand: {
 			job: {
 				id: string;
 				notes: string;
+				status: string;
 				order: number;
 				expand: {
 					address: {
@@ -32,8 +44,59 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}>(params.slug, {
 		expand: 'job, job.address, job.address.client, job.task.service',
 		fields:
-			'expand.job.id, expand.job.order, expand.job.notes, expand.job.expand.task.expand.service.name, expand.job.expand.address.address,expand.job.expand.address.lat,expand.job.expand.address.lng,expand.job.expand.address.expand.client.first_name,expand.job.expand.address.expand.client.last_name,expand.job.expand.address.expand.client.id'
+			'id, expand.job.id, expand.job.order,expand.job.status, expand.job.notes, expand.job.expand.task.expand.service.name, expand.job.expand.address.address,expand.job.expand.address.lat,expand.job.expand.address.lng,expand.job.expand.address.expand.client.first_name,expand.job.expand.address.expand.client.last_name,expand.job.expand.address.expand.client.id'
 	});
 
-	return { schedule };
+	const filter_jobs = schedule.expand.job.filter((j) => {
+		return j.status !== 'CANCELED' && j.status !== 'COMPLETED';
+	});
+
+	if (!filter_jobs.length) {
+		throw redirect(300, '/app/daily');
+	}
+
+	const job = filter_jobs.reduce(function (prev, curr) {
+		return prev.order < curr.order ? prev : curr;
+	});
+
+	if (job.status !== 'IN_PROGRESS') {
+		pb.collection('job').update(job.id, { status: 'IN_PROGRESS' });
+	}
+	const nextJobForm = superValidate(
+		{ schedule_id: schedule.id, job_id: job.id },
+		ScheduleJobValidation
+	);
+
+	return {
+		job,
+		nextJobForm
+	};
+};
+
+export const actions = {
+	updateScheudleJob: async ({ request, locals }) => {
+		const nextJobForm = await superValidate(request, ScheduleJobValidation);
+		const pb = locals.pb;
+		console.log(nextJobForm);
+		if (!pb || !nextJobForm.valid) {
+			return fail(400, { nextJobForm });
+		}
+		try {
+			await pb.collection('job').update(nextJobForm.data.job_id, {
+				status: nextJobForm.data.status,
+				...(nextJobForm.data.status !== 'COMPLETED' && {
+					update_description: nextJobForm.data.update_description
+				})
+			});
+
+			if (nextJobForm.data.status === 'RESCHEDULE') {
+				await pb
+					.collection('schedule')
+					.update(nextJobForm.data.schedule_id, { 'job-': [nextJobForm.data.job_id] });
+			}
+		} catch (e) {
+			return fail(400, { nextJobForm });
+		}
+		return { nextJobForm };
+	}
 };
