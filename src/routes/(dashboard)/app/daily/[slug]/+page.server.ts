@@ -77,7 +77,6 @@ export const actions = {
 	updateScheudleJob: async ({ request, locals }) => {
 		const nextJobForm = await superValidate(request, ScheduleJobValidation);
 		const pb = locals.pb;
-		console.log(nextJobForm);
 		if (!pb || !nextJobForm.valid) {
 			return fail(400, { nextJobForm });
 		}
