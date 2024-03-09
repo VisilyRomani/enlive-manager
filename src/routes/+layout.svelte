@@ -30,11 +30,14 @@
 	};
 
 	$: classesSidebar =
-		($page.url.pathname === '/' ||
-			$page.url.pathname === '/admin/initial-setup' ||
-			$page.url.pathname === '/signup' ||
-			$page.url.pathname === '/login') &&
-		'!hidden';
+		[
+			'/signup',
+			'/login',
+			'/',
+			'/admin/initial-setup',
+			'/admin/initial-setup/create',
+			'/admin/initial-setup/connect'
+		].includes($page.url.pathname) && '!hidden';
 	let mapsScript;
 
 	onMount(() => {
