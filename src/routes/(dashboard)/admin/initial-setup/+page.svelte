@@ -1,18 +1,30 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	// check for name then check for company before allowing to show menu
 	import UserInfo from '$lib/components/setup/UserInfo.svelte';
 	import NewCompany from '$lib/components/setup/NewCompany.svelte';
-	import { Step, Stepper } from '@skeletonlabs/skeleton';
 	export let data;
 </script>
 
-<!-- Create Toast for Error Responses in User and company -->
-<Stepper class="lg:mx-28">
-	<Step locked={!$page.data.user.first_name}>
-		<UserInfo data={data.userForm} />
-	</Step>
-	<Step locked={!$page.data.user.company}>
-		<NewCompany data={data.companyForm} />
-	</Step>
-</Stepper>
+{#if !$page.data.user.first_name}
+	<UserInfo data={data.userForm} />
+{:else if !$page.data.user.company}
+	<div class="flex justify-center h-full items-center flex-col">
+		<h1 class="h1">Welcome to Enlive Manager</h1>
+		<div class="max-w-2xl mb-5">
+			<p class="p-4 text-lg text-center">
+				Choose between "Connect" to explore opportunities with existing businesses or "Create" to
+				start your entrepreneurial journey. We're here to support you, so let's begin!
+			</p>
+		</div>
+		<div class="gap-3 grid grid-cols-2">
+			<a
+				href="/admin/initial-setup/connect"
+				class="btn btn-xl variant-form-material variant-ghost-primary flex-1 flex">Connect</a
+			>
+			<a
+				href="/admin/initial-setup/create"
+				class="btn btn-xl variant-form-material variant-ghost-secondary flex-1 flex">Create</a
+			>
+		</div>
+	</div>
+{/if}

@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import dayjs from 'dayjs';
 	import type { PageData } from '../../../routes/(dashboard)/admin/schedule/[slug]/$types';
 	const data = $page.data as PageData;
@@ -70,10 +69,6 @@
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 </script>
-
-<div class="absolute left-0 top-0">
-	<SuperDebug data={$editJobForm} />
-</div>
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">

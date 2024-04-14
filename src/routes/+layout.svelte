@@ -30,11 +30,14 @@
 	};
 
 	$: classesSidebar =
-		($page.url.pathname === '/' ||
-			$page.url.pathname === '/admin/initial-setup' ||
-			$page.url.pathname === '/signup' ||
-			$page.url.pathname === '/login') &&
-		'!hidden';
+		[
+			'/signup',
+			'/login',
+			'/',
+			'/admin/initial-setup',
+			'/admin/initial-setup/create',
+			'/admin/initial-setup/connect'
+		].includes($page.url.pathname) && '!hidden';
 	let mapsScript;
 
 	onMount(() => {
@@ -49,7 +52,7 @@
 </script>
 
 <Drawer width="w-[20em]">
-	<h2 class="p-4">Enlive Manager</h2>
+	<h2 class="font-bold p-4">Enlive Manager</h2>
 	<hr />
 	<Navigation />
 </Drawer>

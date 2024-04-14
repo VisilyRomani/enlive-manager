@@ -5,7 +5,7 @@
 	export let data: PageData;
 </script>
 
-<h2 class="h2">Account Settings</h2>
+<h2 class="h2 m-3">Account Settings</h2>
 <form class="card p-4">
 	<h3 class="h3">General Info</h3>
 	<div class="flex flex-col lg:grid lg:grid-cols-2 gap-4">

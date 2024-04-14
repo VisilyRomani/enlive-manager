@@ -46,7 +46,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each data.taxes as row, i}
+			{#each data.taxes ?? [] as row, i}
 				<tr>
 					<td class="font-bold">{row.name}</td>
 					<td class="font-bold">{row.percent}%</td>

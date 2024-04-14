@@ -31,7 +31,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 		if (
 			(!event.locals.user.first_name || !event.locals.user.company) &&
-			event.url.pathname !== '/admin/initial-setup'
+			![
+				'/admin/initial-setup',
+				'/admin/initial-setup/create',
+				'/admin/initial-setup/connect'
+			].includes(event.url.pathname)
 		) {
 			throw redirect(303, '/admin/initial-setup');
 		}
@@ -39,7 +43,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (
 			event.locals.user.first_name &&
 			event.locals.user.company &&
-			event.url.pathname === '/admin/initial-setup'
+			[
+				'/admin/initial-setup',
+				'/admin/initial-setup/create',
+				'/admin/initial-setup/connect'
+			].includes(event.url.pathname)
 		) {
 			throw redirect(303, '/admin/dashboard');
 		}

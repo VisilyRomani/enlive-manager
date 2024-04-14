@@ -142,7 +142,6 @@ export const actions = {
 	editJobOrder: async ({ request, locals }) => {
 		const OrderScheduleJob = await superValidate(request, ChangeOrderValidation);
 		const pb = locals.pb;
-		console.log(OrderScheduleJob.data);
 		if (!pb || !OrderScheduleJob.valid) {
 			return fail(400, { OrderScheduleJob });
 		}
@@ -211,8 +210,6 @@ export const actions = {
 			const last_job = job_order_detail.expand?.job
 				.sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
 				.at(-1);
-
-			console.log(last_job);
 
 			await Promise.all(
 				AddScheduleJobs.data.jobs.map((job, index) => {

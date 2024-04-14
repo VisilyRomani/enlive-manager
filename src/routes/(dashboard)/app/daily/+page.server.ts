@@ -22,7 +22,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 	});
 
 	schedules = schedules?.map((s) => {
-		const completed = s.expand?.job.filter((j) => j.status === 'COMPLETED').length / s.job.length;
+		const completed =
+			s.expand?.job.filter((j) => j.status === 'COMPLETED' || j.status === 'CANCELED').length /
+			s.expand?.job.length;
 		return {
 			...s,
 			completed: completed * 100

@@ -4,7 +4,6 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from '../../../routes/(dashboard)/admin/jobs/[slug]/edit/$types';
 	const data = $page.data as PageData;
-	$: console.log(data);
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
 
