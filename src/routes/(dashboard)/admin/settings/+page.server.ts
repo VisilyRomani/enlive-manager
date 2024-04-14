@@ -17,6 +17,10 @@ const ServiceValidation = z.object({
 	tax: z.object({ label: z.string(), value: z.string() }).array().min(1)
 });
 
+const CodeValidation = z.object({
+	permission: z.enum(['MANAGER', 'WORKER'])
+});
+
 interface TTaxList extends Record {
 	active: boolean;
 	name: string;
@@ -38,20 +42,32 @@ interface TEmployeeList extends Record {
 	permission: string;
 }
 
+interface TCodeList extends Record {
+	id: string;
+	permission: string;
+	created: Date;
+}
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const taxForm = await superValidate(request, TaxValidation);
 	const serviceForm = await superValidate(request, ServiceValidation);
-	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
+	const codeForm = await superValidate(request, CodeValidation);
 
+	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
 	const services =
 		(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
 
 	if (locals.user?.permission == 'OWNER') {
 		const employees = (await locals.pb?.collection('users').getFullList<TEmployeeList>()) ?? [];
-		return { taxForm, taxes, serviceForm, services, employees };
+		const codes =
+			(await locals.pb
+				?.collection('code')
+				.getFullList<TCodeList>({ filter: `company="${locals.user.company}"` })) ?? [];
+
+		return { taxForm, taxes, serviceForm, services, employees, codes, codeForm };
 	}
 
-	return { taxForm, taxes, serviceForm, services };
+	return { taxForm, taxes, serviceForm, services, codeForm };
 };
 
 export const actions = {
@@ -87,7 +103,7 @@ export const actions = {
 		const serviceForm = await superValidate(request, ServiceValidation);
 
 		if (!serviceForm.valid) {
-			return { serviceForm };
+			return fail(400, { serviceForm });
 		}
 
 		const serviceData = new FormData();
@@ -111,5 +127,15 @@ export const actions = {
 			}
 		}
 		return { serviceForm };
+	},
+	createCode: async ({ locals, request }) => {
+		const codeForm = await superValidate(request, CodeValidation);
+		if (!codeForm.valid) {
+			return fail(400, { codeForm });
+		}
+
+		await locals.pb
+			?.collection('code')
+			.create({ permission: codeForm.data.permission, company: locals.user?.company });
 	}
 };

@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { Avatar, FileDropzone } from '@skeletonlabs/skeleton';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../../../routes/(dashboard)/admin/settings/$types';
-
+	import { superForm } from 'sveltekit-superforms/client';
 	export let data: PageData;
+
+	const { form, enhance, errors } = superForm(data.codeForm, {});
 </script>
 
 <div class="space-y-3">
 	<h2 class="h2 m-3">Company Settings</h2>
-	<form class="card p-4">
+	<form class="card p-4 space-y-3">
 		<h3 class="h3">Employees</h3>
 		<div class="table-container">
 			<table class="table">
@@ -23,6 +25,16 @@
 						<tr>
 							<td class="font-bold">{row.first_name} {row.last_name}</td>
 							<td class="font-bold">{row.permission}</td>
+							<td
+								><SlideToggle
+									name="slide"
+									checked={true}
+									on:change={(e) => {
+										// TODO: update active status
+										// console.log(row.id);
+									}}
+								/>
+							</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -30,7 +42,34 @@
 		</div>
 	</form>
 
-	<form class="card p-4">
+	<form class="card p-4 space-y-3" use:enhance action="?/createCode" method="post">
 		<h3 class="h3">Employee Connection Codes</h3>
+		<div class="flex gap-3">
+			<select name="permission" class="select" bind:value={$form.permission}>
+				<option value="MANAGER">Manager</option>
+				<option value="WORKER">Worker</option>
+			</select>
+			<button class="btn variant-outline-primary">New Code</button>
+		</div>
+		<div class="table-container">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Permission</th>
+						<th>Date Created</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.codes ?? [] as row}
+						<tr>
+							<td class="font-bold">{row.id}</td>
+							<td class="font-bold">{row.permission}</td>
+							<td class="font-bold">{new Date(row.created)}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</form>
 </div>
