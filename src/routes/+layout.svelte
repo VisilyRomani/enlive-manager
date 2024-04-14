@@ -52,7 +52,7 @@
 </script>
 
 <Drawer width="w-[20em]">
-	<h2 class="p-4">Enlive Manager</h2>
+	<h2 class="font-bold p-4">Enlive Manager</h2>
 	<hr />
 	<Navigation />
 </Drawer>

@@ -32,6 +32,8 @@ export const actions = {
 				await locals.pb
 					?.collection('users')
 					.update(companyForm.data.user, { company: code.company, permission: code.permission });
+
+				await locals.pb?.collection('code').delete(companyForm.data.code);
 			}
 		} catch (e) {
 			return setError(companyForm, 'code', 'Please enter a valid company code!');

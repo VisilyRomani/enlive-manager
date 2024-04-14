@@ -31,23 +31,27 @@ interface TServiceList extends Record {
 	id: string;
 }
 
+interface TEmployeeList extends Record {
+	id: string;
+	first_name: string;
+	last_name: string;
+	permission: string;
+}
+
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const taxForm = await superValidate(request, TaxValidation);
 	const serviceForm = await superValidate(request, ServiceValidation);
+	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
 
-	try {
-		const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
-		const services =
-			(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
+	const services =
+		(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
 
-		return { taxForm, taxes, serviceForm, services };
-	} catch (e) {
-		if (e instanceof Error) {
-			return fail(400, { message: e.message });
-		}
+	if (locals.user?.permission == 'OWNER') {
+		const employees = (await locals.pb?.collection('users').getFullList<TEmployeeList>()) ?? [];
+		return { taxForm, taxes, serviceForm, services, employees };
 	}
 
-	return { taxForm, serviceForm, taxes: [], services: [] };
+	return { taxForm, taxes, serviceForm, services };
 };
 
 export const actions = {
