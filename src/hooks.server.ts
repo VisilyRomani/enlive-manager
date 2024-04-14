@@ -29,14 +29,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			console.error('missing user');
 			throw redirect(303, '/login');
 		}
-
-		console.log(
-			[
-				'/admin/initial-setup',
-				'/admin/initial-setup/create',
-				'/admin/initial-setup/connect'
-			].includes(event.url.pathname)
-		);
 		if (
 			(!event.locals.user.first_name || !event.locals.user.company) &&
 			![
