@@ -8,7 +8,6 @@ const CompanyValidation = z.object({
 	phone: z.string().min(1, { message: 'Please enter phone number' }),
 	email: z.string().email(),
 	address: z.string().min(1, { message: 'Please enter address' }),
-	city: z.string().min(1, { message: 'Please enter city' }),
 	gst: z.string().optional(),
 	pst: z.string().optional(),
 	url: z.string().url(),
@@ -43,8 +42,6 @@ export const actions = {
 
 		const companyData = new FormData();
 
-		console.log(companyForm.data);
-
 		for (const [key, value] of Object.entries(companyForm.data)) {
 			if (typeof value === 'number') {
 				companyData.append(key, String(value));
@@ -65,7 +62,6 @@ export const actions = {
 			await locals.pb
 				?.collection('users')
 				.update(locals.user?.id, { company: company?.id, permission: 'OWNER' });
-			locals.user = structuredClone(locals.pb?.authStore.model) ?? undefined;
 			return { companyForm };
 		} catch (err) {
 			if (err instanceof Error) {

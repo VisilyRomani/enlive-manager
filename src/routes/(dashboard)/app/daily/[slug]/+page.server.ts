@@ -11,12 +11,7 @@ const ScheduleJobValidation = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-	const pb = locals.pb;
-	if (!pb) {
-		throw redirect(300, '/');
-	}
-
-	const schedule = await pb.collection('schedule').getOne<{
+	const schedule = await locals.pb.collection('schedule').getOne<{
 		id: string;
 		expand: {
 			job: {
@@ -51,6 +46,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		return j.status !== 'CANCELED' && j.status !== 'COMPLETED';
 	});
 
+	console.log(filter_jobs);
+
 	if (!filter_jobs.length) {
 		throw redirect(300, '/app/daily');
 	}
@@ -60,7 +57,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	});
 
 	if (job.status !== 'IN_PROGRESS') {
-		pb.collection('job').update(job.id, { status: 'IN_PROGRESS' });
+		locals.pb.collection('job').update(job.id, { status: 'IN_PROGRESS' });
 	}
 	const nextJobForm = superValidate(
 		{ schedule_id: schedule.id, job_id: job.id },
@@ -76,12 +73,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 export const actions = {
 	updateScheudleJob: async ({ request, locals }) => {
 		const nextJobForm = await superValidate(request, ScheduleJobValidation);
-		const pb = locals.pb;
-		if (!pb || !nextJobForm.valid) {
-			return fail(400, { nextJobForm });
-		}
+
 		try {
-			await pb.collection('job').update(nextJobForm.data.job_id, {
+			await locals.pb.collection('job').update(nextJobForm.data.job_id, {
 				status: nextJobForm.data.status,
 				...(nextJobForm.data.status !== 'COMPLETED' && {
 					update_description: nextJobForm.data.update_description
@@ -89,7 +83,7 @@ export const actions = {
 			});
 
 			if (nextJobForm.data.status === 'RESCHEDULE') {
-				await pb
+				await locals.pb
 					.collection('schedule')
 					.update(nextJobForm.data.schedule_id, { 'job-': [nextJobForm.data.job_id] });
 			}

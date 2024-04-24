@@ -10,7 +10,9 @@
 	}
 
 	export let data;
-	const { form, enhance, errors } = superForm(data.loginForm);
+	const { form, enhance, errors } = superForm(data.loginForm, {
+		taintedMessage: false
+	});
 </script>
 
 <svelte:head>

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms/client';
 	export let data;
-	const { form, enhance, errors } = superForm(data.form);
+	const { form, enhance, errors } = superForm(data.form, {
+		taintedMessage: false
+	});
 </script>
 
 <svelte:head>

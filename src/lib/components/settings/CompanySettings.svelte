@@ -4,12 +4,16 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	export let data: PageData;
 
-	const { form, enhance, errors } = superForm(data.codeForm, {});
+	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
+
+	const { form, enhance } = superForm(data.codeForm, {
+		taintedMessage: false
+	});
 </script>
 
 <div class="space-y-3">
 	<h2 class="h2 m-3">Company Settings</h2>
-	<form class="card p-4 space-y-3">
+	<div class="card p-4 space-y-3">
 		<h3 class="h3">Employees</h3>
 		<div class="table-container">
 			<table class="table">
@@ -40,17 +44,20 @@
 				</tbody>
 			</table>
 		</div>
-	</form>
+	</div>
 
-	<form class="card p-4 space-y-3" use:enhance action="?/createCode" method="post">
-		<h3 class="h3">Employee Connection Codes</h3>
-		<div class="flex gap-3">
-			<select name="permission" class="select" bind:value={$form.permission}>
-				<option value="MANAGER">Manager</option>
-				<option value="WORKER">Worker</option>
-			</select>
-			<button class="btn variant-outline-primary">New Code</button>
-		</div>
+	<div class="card p-4 space-y-3">
+		<form use:enhance action="?/createCode" method="post">
+			<h3 class="h3">Employee Connection Codes</h3>
+			<div class="flex gap-3">
+				<select name="permission" class="select" bind:value={$form.permission}>
+					<option value="MANAGER">Manager</option>
+					<option value="WORKER">Worker</option>
+				</select>
+				<button class="btn variant-outline-primary">New Code</button>
+			</div>
+		</form>
+
 		<div class="table-container">
 			<table class="table">
 				<thead>
@@ -71,5 +78,5 @@
 				</tbody>
 			</table>
 		</div>
-	</form>
+	</div>
 </div>

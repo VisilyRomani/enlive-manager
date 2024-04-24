@@ -51,20 +51,16 @@ type TJobList = {
 };
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const pb = locals.pb;
-	if (!pb) {
-		throw redirect(300, '/');
-	}
 	const jobForm = await superValidate(request, JobValidation);
-	const clientList = pb.collection('client').getFullList<IClientList>({
+	const clientList = locals.pb.collection('client').getFullList<IClientList>({
 		expand: 'address(client)',
 		fields: 'first_name, last_name, id, expand'
 	});
-	const serviceList = pb.collection('service').getFullList({
+	const serviceList = locals.pb.collection('service').getFullList({
 		filter: 'active=true',
 		fields: 'name,id'
 	});
-	const jobList = pb.collection('job').getFullList<TJobList>({
+	const jobList = locals.pb.collection('job').getFullList<TJobList>({
 		expand: 'task.service, address.client',
 		fields:
 			'expand.task.expand.service.name,id,notes,status, expand.address.address, expand.address.expand.client.first_name,expand.address.expand.client.last_name,job_number',
@@ -82,10 +78,6 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	CreateJob: async ({ request, locals }) => {
-		const pb = locals.pb;
-		if (!pb) {
-			throw redirect(300, '/');
-		}
 		const jobForm = await superValidate(request, JobValidation);
 		if (!jobForm.valid) {
 			return fail(400, { jobForm });
@@ -98,11 +90,11 @@ export const actions = {
 		jobData.append('status', 'PENDING');
 
 		if (!locals.user?.company) {
-			pb.authStore.clear();
+			locals.pb.authStore.clear();
 		}
 		jobData.append('company', locals.user?.company);
 
-		const company = await pb
+		const company = await locals.pb
 			.collection('company')
 			.getOne<{ job_count: number }>(locals.user?.company, { fields: 'job_count' });
 
@@ -110,12 +102,12 @@ export const actions = {
 
 		try {
 			const tasks = Array.from(jobForm.data.task).map((t) => {
-				return pb.collection('task').create(
+				return locals.pb.collection('task').create(
 					{
 						service: t[1].service_id,
 						price: t[1].price,
 						count: t[1].count,
-						company: locals.user?.company
+						company: locals.user.company
 					},
 					{ requestKey: null }
 				);
@@ -126,10 +118,10 @@ export const actions = {
 					jobData.append('task', task.id);
 				}
 			});
-			const job = await pb.collection('job').create(jobData);
+			const job = await locals.pb.collection('job').create(jobData);
 
-			await pb
-				?.collection('company')
+			await locals.pb
+				.collection('company')
 				.update(locals.user?.company, { job_count: company.job_count + 1 });
 			return { result: job, jobForm };
 		} catch (e) {

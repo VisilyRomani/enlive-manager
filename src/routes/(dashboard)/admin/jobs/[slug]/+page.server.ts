@@ -28,7 +28,7 @@ type TJobData = {
 export const load: PageServerLoad = async ({ locals, params }) => {
 	try {
 		const job = await locals.pb?.collection('job').getOne<TJobData>(params.slug, {
-			expand: 'job_number, address.client, task, task.service, task.service.tax'
+			expand: 'address.client, task.service.tax'
 		});
 		return { job, slug: params.slug };
 	} catch (e) {
