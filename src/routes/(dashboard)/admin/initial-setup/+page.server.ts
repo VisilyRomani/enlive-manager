@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const UserValidation = z.object({ first_name: z.string().min(4), last_name: z.string().min(4) });
 const CompanyValidation = z.object({
@@ -30,9 +31,9 @@ export type UserSchema = typeof UserValidation;
 export type CompanySchema = typeof CompanyValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const userForm = await superValidate(request, UserValidation);
+	const userForm = await superValidate(request, zod(UserValidation));
 	userForm.data = { first_name: locals.user?.first_name, last_name: locals.user?.last_name };
-	const companyForm = await superValidate(request, CompanyValidation);
+	const companyForm = await superValidate(request, zod(CompanyValidation));
 
 	return {
 		userForm,
@@ -42,7 +43,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	updateUser: async ({ request, locals }) => {
-		const userForm = await superValidate(request, UserValidation);
+		const userForm = await superValidate(request, zod(UserValidation));
 
 		if (!userForm.valid) {
 			return fail(400, { userForm });

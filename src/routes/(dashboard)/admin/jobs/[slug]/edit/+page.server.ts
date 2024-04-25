@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import { fail, redirect } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 enum StatusType {
 	PENDING,
 	IN_PROGRESS,
@@ -78,15 +79,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		notes: job.notes
 	};
 
-	const editJob = superValidate(initData, EditJobValidation);
-	const addTask = superValidate(AddTaskValidation);
+	const editJob = await superValidate(initData, zod(EditJobValidation));
+	const addTask = await superValidate(zod(AddTaskValidation));
 
 	return { job, editJob, services, addTask, slug: params.slug };
 };
 
 export const actions = {
 	editJob: async ({ locals, request }) => {
-		const editJob = await superValidate(request, EditJobValidation);
+		const editJob = await superValidate(request, zod(EditJobValidation));
 		const pb = locals.pb;
 		if (!editJob.valid || !pb) {
 			return fail(400, { editJob });
@@ -96,7 +97,7 @@ export const actions = {
 		return { editJob };
 	},
 	addTask: async ({ locals, request }) => {
-		const addTask = await superValidate(request, AddTaskValidation);
+		const addTask = await superValidate(request, zod(AddTaskValidation));
 		const pb = locals.pb;
 		if (!pb || !addTask.valid) {
 			return fail(400, { addTask });

@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import z from 'zod';
 import type { TJob, TUser } from '../+page.server';
+import { zod } from 'sveltekit-superforms/adapters';
 
 type TSchedule = {
 	id: string;
@@ -66,37 +67,35 @@ const ChangeOrderValidation = z.object({
 	type: z.enum(['INCREASE', 'DECREASE'])
 });
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const pb = locals.pb;
-	if (!pb) {
-		throw redirect(300, '/');
-	}
-
-	const schedule = await pb.collection('schedule').getOne<TSchedule>(params.slug, {
+	const schedule = await locals.pb.collection('schedule').getOne<TSchedule>(params.slug, {
 		expand: 'job, employee, job.task, job.task.service, job.address, job.address.client',
 		fields: ' id, title, scheduled_date, expand'
 	});
 
-	const userList = await pb
+	const userList = await locals.pb
 		.collection('users')
 		.getFullList<TUser>({ fields: 'id,first_name,last_name' });
 
-	const jobList = await pb.collection('job').getFullList<TJob>({
+	const jobList = await locals.pb.collection('job').getFullList<TJob>({
 		filter: 'status = "PENDING" || status = "RESCHEDULE"',
 		expand: 'address, task, address.client, task.service'
 	});
 
-	const OrderScheduleJob = superValidate({ schedule_id: schedule.id }, ChangeOrderValidation);
+	const OrderScheduleJob = await superValidate(
+		{ schedule_id: schedule.id },
+		zod(ChangeOrderValidation)
+	);
 
-	const EditScheduleDetails = superValidate(
+	const EditScheduleDetails = await superValidate(
 		{ title: schedule.title, scheduled_date: new Date(schedule.scheduled_date), id: schedule.id },
-		DetailValidation
+		zod(DetailValidation)
 	);
-	const EditScheduleEmployee = superValidate(
+	const EditScheduleEmployee = await superValidate(
 		{ schedule_id: schedule.id, employees: schedule.expand.employee.map((e) => e.id) },
-		EmployeeValidation
+		zod(EmployeeValidation)
 	);
-	const AddScheduleJobs = superValidate({ schedule_id: schedule.id }, JobValiation);
-	const DeleteScheduleJobs = superValidate({ schedule_id: schedule.id }, JobValiation);
+	const AddScheduleJobs = await superValidate({ schedule_id: schedule.id }, zod(JobValiation));
+	const DeleteScheduleJobs = await superValidate({ schedule_id: schedule.id }, zod(JobValiation));
 	return {
 		EditScheduleDetails,
 		EditScheduleEmployee,
@@ -111,7 +110,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions = {
 	editDetails: async ({ request, locals }) => {
-		const EditScheduleDetails = await superValidate(request, DetailValidation);
+		const EditScheduleDetails = await superValidate(request, zod(DetailValidation));
 		const pb = locals.pb;
 		if (!pb || !EditScheduleDetails.valid) {
 			return fail(400, { EditScheduleDetails });
@@ -124,7 +123,7 @@ export const actions = {
 		return { EditScheduleDetails };
 	},
 	editEmployee: async ({ request, locals }) => {
-		const EditScheduleEmployee = await superValidate(request, EmployeeValidation);
+		const EditScheduleEmployee = await superValidate(request, zod(EmployeeValidation));
 		const pb = locals.pb;
 		if (!EditScheduleEmployee.valid || !pb) {
 			return fail(400, { EditScheduleEmployee });
@@ -140,7 +139,7 @@ export const actions = {
 		return { EditScheduleEmployee };
 	},
 	editJobOrder: async ({ request, locals }) => {
-		const OrderScheduleJob = await superValidate(request, ChangeOrderValidation);
+		const OrderScheduleJob = await superValidate(request, zod(ChangeOrderValidation));
 		const pb = locals.pb;
 		if (!pb || !OrderScheduleJob.valid) {
 			return fail(400, { OrderScheduleJob });
@@ -191,7 +190,7 @@ export const actions = {
 		}
 	},
 	addSchduleJob: async ({ request, locals }) => {
-		const AddScheduleJobs = await superValidate(request, JobValiation);
+		const AddScheduleJobs = await superValidate(request, zod(JobValiation));
 		const pb = locals.pb;
 		if (!AddScheduleJobs.valid || !pb) {
 			return fail(400, { AddScheduleJobs });
@@ -232,7 +231,7 @@ export const actions = {
 		}
 	},
 	deleteScheduleJob: async ({ locals, request }) => {
-		const DeleteScheduleJobs = await superValidate(request, JobValiation);
+		const DeleteScheduleJobs = await superValidate(request, zod(JobValiation));
 		const pb = locals.pb;
 
 		if (!pb || !DeleteScheduleJobs.valid) {

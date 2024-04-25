@@ -10,7 +10,7 @@
 	const modalStore = getModalStore();
 	import Trash from '$lib/photos/trash.svelte';
 	import Info from '$lib/photos/info.svelte';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	const toastStore = getToastStore();
 
 	const { form, enhance, errors } = superForm(data.OrderScheduleJob, {

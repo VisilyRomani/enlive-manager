@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import UserInfo from '$lib/components/setup/UserInfo.svelte';
-	import NewCompany from '$lib/components/setup/NewCompany.svelte';
 	export let data;
 </script>
 

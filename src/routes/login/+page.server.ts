@@ -2,7 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
-import type { SuperValidated } from 'sveltekit-superforms';
+import type { Infer, SuperValidated } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const LoginValidation = z.object({
 	email: z.string().email(),
@@ -11,11 +12,11 @@ const LoginValidation = z.object({
 export type OutputType = {
 	authProviderRedirect: string;
 	authProviderState: string;
-	loginForm: SuperValidated<typeof LoginValidation>;
+	loginForm: SuperValidated<Infer<typeof LoginValidation>>;
 };
 
 export const load: PageServerLoad<OutputType> = async ({ locals, url, request }) => {
-	const loginForm = await superValidate(request, LoginValidation);
+	const loginForm = await superValidate(request, zod(LoginValidation));
 
 	const authMethods = await locals.pb?.collection('users').listAuthMethods();
 	if (!authMethods || !authMethods.authProviders.length) {
@@ -41,7 +42,7 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url, request })
 
 export const actions = {
 	passwordLogin: async ({ locals, cookies, request }) => {
-		const loginForm = await superValidate(request, LoginValidation);
+		const loginForm = await superValidate(request, zod(LoginValidation));
 		if (!loginForm.valid) {
 			return fail(400, { loginForm });
 		}

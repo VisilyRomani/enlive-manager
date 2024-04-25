@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const ConnectionValidation = z.object({
 	code: z.string().min(1, { message: 'Please enter a valid company code!' }),
@@ -11,7 +12,7 @@ const ConnectionValidation = z.object({
 export type ConnectionSchema = typeof ConnectionValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const connectionForm = await superValidate(request, ConnectionValidation);
+	const connectionForm = await superValidate(request, zod(ConnectionValidation));
 	return {
 		connectionForm
 	};
@@ -20,7 +21,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 export const actions = {
 	connectCompany: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const companyForm = await superValidate(formData, ConnectionValidation);
+		const companyForm = await superValidate(formData, zod(ConnectionValidation));
 		if (!companyForm.valid) {
 			return fail(400, { companyForm });
 		}

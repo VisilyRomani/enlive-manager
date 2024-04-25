@@ -2,14 +2,14 @@
 	import { page } from '$app/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import { superForm } from 'sveltekit-superforms/client';
-	import type { ClientSchema } from '../../../routes/(dashboard)/admin/client/proxy+page.server';
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { invalidate } from '$app/navigation';
+	import type { ClientSchema } from '../../../routes/(dashboard)/admin/client/+page.server';
 
 	export let parent: any;
 	const modalStore = getModalStore();
-	const clientform: SuperValidated<ClientSchema> = $page.data.clientForm;
+	const clientform: SuperValidated<Infer<ClientSchema>> = $page.data.clientForm;
 
 	const { form, errors, enhance } = superForm(clientform, {
 		resetForm: true,

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../../../routes/(dashboard)/admin/settings/$types';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	export let data: PageData;
 
 	const { form, enhance, errors } = superForm(data.taxForm, {

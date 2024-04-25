@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const CompanyValidation = z.object({
 	name: z.string().min(1, { message: 'Please enter company name' }),
@@ -26,7 +27,7 @@ const CompanyValidation = z.object({
 export type CompanySchema = typeof CompanyValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const companyForm = await superValidate(request, CompanyValidation);
+	const companyForm = await superValidate(request, zod(CompanyValidation));
 	return {
 		companyForm
 	};
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 export const actions = {
 	createCompany: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const companyForm = await superValidate(formData, CompanyValidation);
+		const companyForm = await superValidate(formData, zod(CompanyValidation));
 		if (!companyForm.valid) {
 			return fail(400, { companyForm });
 		}

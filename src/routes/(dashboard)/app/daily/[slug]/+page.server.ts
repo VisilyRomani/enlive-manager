@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import z from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const ScheduleJobValidation = z.object({
 	schedule_id: z.string(),
@@ -46,8 +47,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		return j.status !== 'CANCELED' && j.status !== 'COMPLETED';
 	});
 
-	console.log(filter_jobs);
-
 	if (!filter_jobs.length) {
 		throw redirect(300, '/app/daily');
 	}
@@ -59,9 +58,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	if (job.status !== 'IN_PROGRESS') {
 		locals.pb.collection('job').update(job.id, { status: 'IN_PROGRESS' });
 	}
-	const nextJobForm = superValidate(
+	const nextJobForm = await superValidate(
 		{ schedule_id: schedule.id, job_id: job.id },
-		ScheduleJobValidation
+		zod(ScheduleJobValidation)
 	);
 
 	return {
@@ -72,7 +71,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 export const actions = {
 	updateScheudleJob: async ({ request, locals }) => {
-		const nextJobForm = await superValidate(request, ScheduleJobValidation);
+		const nextJobForm = await superValidate(request, zod(ScheduleJobValidation));
 
 		try {
 			await locals.pb.collection('job').update(nextJobForm.data.job_id, {

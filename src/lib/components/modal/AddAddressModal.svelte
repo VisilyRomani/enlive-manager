@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from '../../../routes/(dashboard)/admin/client/[slug]/edit/$types';
 	import { onMount } from 'svelte';
 	const data = $page.data as PageData;

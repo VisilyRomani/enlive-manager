@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import type Record from 'pocketbase';
 import { fail } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const TaxValidation = z.object({
 	name: z.string().min(1),
@@ -49,9 +50,9 @@ interface TCodeList extends Record {
 }
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const taxForm = await superValidate(request, TaxValidation);
-	const serviceForm = await superValidate(request, ServiceValidation);
-	const codeForm = await superValidate(request, CodeValidation);
+	const taxForm = await superValidate(request, zod(TaxValidation));
+	const serviceForm = await superValidate(request, zod(ServiceValidation));
+	const codeForm = await superValidate(request, zod(CodeValidation));
 
 	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
 	const services =
@@ -72,7 +73,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	createTax: async ({ locals, request }) => {
-		const taxForm = await superValidate(request, TaxValidation);
+		const taxForm = await superValidate(request, zod(TaxValidation));
 		if (!taxForm.valid) {
 			return { taxForm };
 		}
@@ -100,7 +101,7 @@ export const actions = {
 		return { taxForm };
 	},
 	createService: async ({ locals, request }) => {
-		const serviceForm = await superValidate(request, ServiceValidation);
+		const serviceForm = await superValidate(request, zod(ServiceValidation));
 
 		if (!serviceForm.valid) {
 			return fail(400, { serviceForm });
@@ -129,7 +130,7 @@ export const actions = {
 		return { serviceForm };
 	},
 	createCode: async ({ locals, request }) => {
-		const codeForm = await superValidate(request, CodeValidation);
+		const codeForm = await superValidate(request, zod(CodeValidation));
 		if (!codeForm.valid) {
 			return fail(400, { codeForm });
 		}

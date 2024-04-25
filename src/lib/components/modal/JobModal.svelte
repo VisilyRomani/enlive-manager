@@ -3,7 +3,7 @@
 	import { Autocomplete, getModalStore, type PopupSettings, popup } from '@skeletonlabs/skeleton';
 	import Dinero from 'dinero.js';
 	import type { PageData } from '../../../routes/(dashboard)/admin/jobs/$types';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { invalidate } from '$app/navigation';
 	export let parent: any;
 

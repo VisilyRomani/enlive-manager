@@ -1,7 +1,9 @@
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate, withFiles } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import z from 'zod';
 import dayjs from 'dayjs';
+import { zod } from 'sveltekit-superforms/adapters';
+import { fail } from 'sveltekit-superforms';
 
 export interface TInvoiceData {
 	companyInvoiceDetails: TCompanyInvoce;
@@ -97,14 +99,14 @@ export const load: PageServerLoad = async ({ request, locals, fetch }) => {
             expand.task.expand.service.expand.tax.percent
             `
 	});
-	const createInvoiceForm = superValidate(
+	const createInvoiceForm = await superValidate(
 		{
 			issue_date: dayjs(new Date()).format('YYYY-MM-DD'),
 			due_date: dayjs(new Date())
 				.add(companyInvoiceDetails.days_until_due, 'days')
 				.format('YYYY-MM-DD')
 		},
-		InvoiceValidation
+		zod(InvoiceValidation)
 	);
 
 	return {
@@ -116,7 +118,11 @@ export const load: PageServerLoad = async ({ request, locals, fetch }) => {
 
 export const actions = {
 	CreateInvoice: async ({ request, locals }) => {
-		const createInvoiceForm = superValidate(request, InvoiceValidation);
-		return { createInvoiceForm };
+		const createInvoiceForm = await superValidate(request, zod(InvoiceValidation));
+		console.log(await createInvoiceForm.data);
+		if (!createInvoiceForm.valid) {
+			return fail(400, withFiles({ createInvoiceForm }));
+		}
+		return withFiles({ createInvoiceForm });
 	}
 };

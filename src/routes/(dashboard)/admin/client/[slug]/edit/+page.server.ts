@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
+import { zod } from 'sveltekit-superforms/adapters';
 import z from 'zod';
 type TClient = {
 	id: string;
@@ -43,17 +44,13 @@ const AddAddressValidation = z.object({
 });
 
 export const load = async ({ params, locals }) => {
-	const pb = locals.pb;
-	if (!pb) {
-		throw redirect(300, '/');
-	}
-
-	const client = await pb
+	const client = await locals.pb
 		.collection('client')
 		.getOne<TClient>(params.slug, { expand: 'address(client)' });
-	const editClient = superValidate(client, ClientValidation);
-	const editAddress = superValidate(EditAddressValidation);
-	const addAddress = superValidate(AddAddressValidation);
+
+	const editClient = await superValidate(client, zod(ClientValidation));
+	const editAddress = await superValidate(zod(EditAddressValidation));
+	const addAddress = await superValidate(zod(AddAddressValidation));
 
 	return {
 		client,
@@ -67,7 +64,7 @@ export const load = async ({ params, locals }) => {
 export const actions = {
 	saveClient: async ({ locals, request }) => {
 		const pb = locals.pb;
-		const editClient = await superValidate(request, ClientValidation);
+		const editClient = await superValidate(request, zod(ClientValidation));
 
 		if (!pb || !editClient.valid) {
 			return fail(400, { editClient });
@@ -81,7 +78,7 @@ export const actions = {
 		return { editClient };
 	},
 	editAddress: async ({ locals, request }) => {
-		const editAddress = await superValidate(request, EditAddressValidation);
+		const editAddress = await superValidate(request, zod(EditAddressValidation));
 		const pb = locals.pb;
 		if (!editAddress.valid || !pb) {
 			return fail(400, { editAddress });
@@ -95,7 +92,7 @@ export const actions = {
 		return { editAddress };
 	},
 	addAddress: async ({ locals, request }) => {
-		const addAddress = await superValidate(request, AddAddressValidation);
+		const addAddress = await superValidate(request, zod(AddAddressValidation));
 		const pb = locals.pb;
 		if (!addAddress.valid || !pb) {
 			return fail(400, { addAddress });

@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import { fail, redirect } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export type TUser = {
 	id: string;
@@ -85,26 +86,21 @@ const ScheduleValidate = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals, request }) => {
-	const pb = locals.pb;
-
-	if (!pb) {
-		throw redirect(300, '/');
-	}
-	const jobList = await pb.collection('job').getFullList<TJob>({
+	const jobList = await locals.pb.collection('job').getFullList<TJob>({
 		filter: 'status = "PENDING" || status = "RESCHEDULE"',
 		expand: 'address, task, address.client, task.service'
 	});
 
-	const userList = await pb
+	const userList = await locals.pb
 		.collection('users')
 		.getFullList<TUser>({ fields: 'id,first_name,last_name' });
 
-	const scheduleList = await pb.collection('schedule').getFullList<TSchedule>({
+	const scheduleList = await locals.pb.collection('schedule').getFullList<TSchedule>({
 		expand: 'job, ',
 		fields: 'id, expand,expand.job,title,scheduled_date'
 	});
 
-	const scheduleForm = await superValidate(request, ScheduleValidate);
+	const scheduleForm = await superValidate(request, zod(ScheduleValidate));
 
 	return { jobList, userList, scheduleForm, scheduleList };
 };
@@ -120,7 +116,7 @@ export const actions = {
 			.collection('company')
 			.getOne<{ job_count: number }>(locals.user?.company, { fields: 'job_count' });
 
-		const scheduleForm = await superValidate(request, ScheduleValidate);
+		const scheduleForm = await superValidate(request, zod(ScheduleValidate));
 
 		if (!scheduleForm.valid) {
 			return fail(400, { scheduleForm });

@@ -11,7 +11,7 @@
 	import { page } from '$app/stores';
 	import dayjs from 'dayjs';
 	import type { PageData } from '../../../routes/(dashboard)/admin/schedule/$types';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import type { TJob } from '../../../routes/(dashboard)/admin/schedule/+page.server';
 	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
 	import { onMount } from 'svelte';

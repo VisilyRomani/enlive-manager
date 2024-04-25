@@ -3,7 +3,7 @@
 	import Map from '$lib/photos/map.svelte';
 	import People from '$lib/photos/people.svelte';
 	import Task from '$lib/photos/task.svelte';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { invalidateAll } from '$app/navigation';
 	export let data: PageData;

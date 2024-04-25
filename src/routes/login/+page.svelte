@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { superForm } from 'sveltekit-superforms/client';
-
+	import { superForm } from 'sveltekit-superforms';
 	function gotoAuthProvider() {
 		if (browser) {
 			document.cookie = `state=${data?.authProviderState}`;

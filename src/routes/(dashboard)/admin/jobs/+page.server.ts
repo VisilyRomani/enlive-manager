@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import type { IClientList } from '../client/proxy+page.server';
 import { fail, redirect } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const JobValidation = z.object({
 	address: z.string().min(1, 'Job must have address'),
@@ -51,12 +52,12 @@ type TJobList = {
 };
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const jobForm = await superValidate(request, JobValidation);
-	const clientList = locals.pb.collection('client').getFullList<IClientList>({
+	const jobForm = await superValidate(request, zod(JobValidation));
+	const clientList = await locals.pb.collection('client').getFullList<IClientList>({
 		expand: 'address(client)',
 		fields: 'first_name, last_name, id, expand'
 	});
-	const serviceList = locals.pb.collection('service').getFullList({
+	const serviceList = await locals.pb.collection('service').getFullList({
 		filter: 'active=true',
 		fields: 'name,id'
 	});
@@ -78,7 +79,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	CreateJob: async ({ request, locals }) => {
-		const jobForm = await superValidate(request, JobValidation);
+		const jobForm = await superValidate(request, zod(JobValidation));
 		if (!jobForm.valid) {
 			return fail(400, { jobForm });
 		}

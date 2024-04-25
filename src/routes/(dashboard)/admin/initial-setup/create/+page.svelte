@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { FileDropzone, ProgressBar } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { CompanySchema } from '../+page.server';
 	import { onMount } from 'svelte';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
-	export let data: SuperValidated<CompanySchema>;
+	export let data: SuperValidated<Infer<CompanySchema>>;
 	const { form, enhance, errors, delayed } = superForm(data, {
 		dataType: 'json',
 		delayMs: 500,

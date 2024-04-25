@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 export type OutputType = { authProviderRedirect: string; authProviderState: string };
 
 const SignUpValidation = z
@@ -18,7 +19,7 @@ const SignUpValidation = z
 
 export const load: PageServerLoad<OutputType> = async ({ locals, url, request }) => {
 	const authMethods = await locals.pb?.collection('users').listAuthMethods();
-	const form = await superValidate(request, SignUpValidation);
+	const form = await superValidate(request, zod(SignUpValidation));
 	if (!authMethods || !authMethods.authProviders.length) {
 		return {
 			form,
@@ -42,7 +43,7 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url, request })
 
 export const actions = {
 	passwordSignUp: async ({ locals, request }) => {
-		const form = await superValidate(request, SignUpValidation);
+		const form = await superValidate(request, zod(SignUpValidation));
 
 		if (!form.valid) {
 			return fail(400, { form });

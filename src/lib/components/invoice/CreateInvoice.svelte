@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { Autocomplete, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
+	import { superForm } from 'sveltekit-superforms';
 	import type { TJobInvoice } from '../../../routes/(dashboard)/admin/invoice/+page.server';
-	import { superForm } from 'sveltekit-superforms/client';
 	import Dinero from 'dinero.js';
 	import dayjs from 'dayjs';
 	export let invoiceJobs: PageData['invoiceJobs'];
 	export let companyInvoiceDetails: PageData['companyInvoiceDetails'];
-	import PdfPrinter from 'pdfmake';
 	export let createInvoiceForm: PageData['createInvoiceForm'];
 	let selectedJobData: TJobInvoice | undefined;
 	let offsetJobWidth = 0;
@@ -53,7 +52,6 @@
 						price: t.price,
 						quantity: t.count
 					})) ?? [];
-
 				return $form;
 			},
 			{ taint: false }
@@ -67,10 +65,10 @@
 	};
 </script>
 
-<form use:enhance action="?/CreateInvoice" method="post">
+<form use:enhance action="?/CreateInvoice" method="post" enctype="multipart/form-data">
 	<input hidden name="jobId" bind:value={$form.jobId} />
 	<input hidden name="invoice_number" bind:value={$form.invoice_number} />
-	<input hidden name="invoice_data" bind:value={$form.invoice_data} />
+	<input hidden name="invoice_data" />
 	<input hidden name="invoice_pdf" bind:value={$form.invoice_pdf} />
 
 	<div class="space-y-3">
@@ -86,7 +84,7 @@
 						window.open(pdfURl, 'invoice_pdf', 'resizable');
 					}}>Preview</button
 				>
-				<button class="btn variant-ghost-success" disabled={!previewPDf}>Send</button>
+				<button class="btn variant-ghost-success" type="submit">Send</button>
 			</div>
 		</div>
 
