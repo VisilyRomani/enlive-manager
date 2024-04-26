@@ -4,6 +4,8 @@ import z from 'zod';
 import dayjs from 'dayjs';
 import { zod } from 'sveltekit-superforms/adapters';
 import { fail } from 'sveltekit-superforms';
+import { GenerateEmail } from '$lib/server/email/InvoiceEmail';
+import Dinero from 'dinero.js';
 
 export interface TInvoiceData {
 	companyInvoiceDetails: TCompanyInvoce;
@@ -77,6 +79,21 @@ const InvoiceValidation = z.object({
 	invoice_pdf: z.instanceof(File)
 });
 
+interface IInvoiceCreate {
+	id: string;
+	quantity: number;
+	price: number;
+	expand: {
+		service: {
+			expand: {
+				tax: {
+					percent: number;
+				}[];
+			};
+		};
+	};
+}
+
 export const load: PageServerLoad = async ({ request, locals, fetch }) => {
 	const companyInvoiceDetails = await locals.pb
 		.collection('company')
@@ -119,10 +136,73 @@ export const load: PageServerLoad = async ({ request, locals, fetch }) => {
 export const actions = {
 	CreateInvoice: async ({ request, locals }) => {
 		const createInvoiceForm = await superValidate(request, zod(InvoiceValidation));
-		console.log(await createInvoiceForm.data);
+
 		if (!createInvoiceForm.valid) {
 			return fail(400, withFiles({ createInvoiceForm }));
 		}
+
+		const record = await locals.pb.collection('company').getOne(locals.user.company);
+		const url = locals.pb.files.getUrl(record, record.logo);
+
+		const InvoiceData = await Promise.all(
+			createInvoiceForm.data.invoice_data.map((i) => {
+				return locals.pb
+					.collection('invoice_data')
+					.create<IInvoiceCreate>(
+						{ quantity: i.quantity, price: i.price, service: i.service },
+						{ requestKey: null, expand: 'service.tax' }
+					);
+			})
+		);
+
+		const Invoice = await locals.pb.collection('invoice').create(
+			{
+				job: createInvoiceForm.data.jobId,
+				invoice_number: createInvoiceForm.data.invoice_number,
+				issue_date: createInvoiceForm.data.issue_date,
+				due_date: createInvoiceForm.data.due_date,
+				invoice_pdf: createInvoiceForm.data.invoice_pdf,
+				invoice_data: InvoiceData.map((i) => i.id)
+			},
+			{ requestKey: null, expand: 'job.address.client' }
+		);
+
+		await locals.pb
+			.collection('job')
+			.update(createInvoiceForm.data.jobId, { invoiced: true }, { requestKey: null });
+
+		const subtotal = InvoiceData.reduce((acc, cur) => {
+			acc = acc.add(Dinero({ amount: cur.price }).multiply(cur.quantity));
+			return acc;
+		}, Dinero({ amount: 0 }));
+
+		const tax = InvoiceData.reduce((acc, cur) => {
+			acc = acc.add(
+				Dinero({ amount: cur.price })
+					.multiply(cur.quantity)
+					.multiply(
+						cur.expand.service.expand.tax.reduce((acc, cur) => (acc = acc + cur.percent), 0) * 0.01
+					)
+			);
+			return acc;
+		}, Dinero({ amount: 0 }));
+
+		const emailResult = await GenerateEmail({
+			invoice_pdf: createInvoiceForm.data.invoice_pdf,
+			company: record.name,
+			company_logo: url,
+			invoice_number: createInvoiceForm.data.invoice_number,
+			client_name: `${Invoice.expand?.job.expand.address.expand.client.first_name} ${Invoice.expand?.job.expand.address.expand.client.last_name}`,
+			client_email: createInvoiceForm.data.client_email,
+			issued: createInvoiceForm.data.issue_date,
+			due: createInvoiceForm.data.due_date,
+			subtotal: subtotal,
+			tax: tax,
+			total: subtotal.add(tax),
+			footer: record.footer
+		});
+		console.log(emailResult);
+
 		return withFiles({ createInvoiceForm });
 	}
 };

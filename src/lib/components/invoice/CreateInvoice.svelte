@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Autocomplete, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { Autocomplete, getToastStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
 	import { superForm } from 'sveltekit-superforms';
 	import type { TJobInvoice } from '../../../routes/(dashboard)/admin/invoice/+page.server';
@@ -10,10 +10,21 @@
 	export let createInvoiceForm: PageData['createInvoiceForm'];
 	let selectedJobData: TJobInvoice | undefined;
 	let offsetJobWidth = 0;
-
+	const toastStore = getToastStore();
 	let previewPDf: Blob;
 
-	const { form, errors, enhance } = superForm(createInvoiceForm, { dataType: 'json' });
+	const { form, errors, enhance } = superForm(createInvoiceForm, {
+		dataType: 'json',
+		onResult: ({ result }) => {
+			if (result.type === 'success') {
+				toastStore.trigger({
+					message: `Invoice NO. ${invoiceData.selectedJobData?.job_number} sent`,
+					background: 'bg-success-500'
+				});
+				selectedJobData = undefined;
+			}
+		}
+	});
 
 	$: invoiceData = {
 		companyInvoiceDetails,

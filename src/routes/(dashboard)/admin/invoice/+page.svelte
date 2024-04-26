@@ -15,13 +15,13 @@
 		<Tab bind:group={tabSet} name="CreateInvoice" value={3}>Create Invoice</Tab>
 
 		<svelte:fragment slot="panel">
-			{#if tabSet === 3}
+			{#if tabSet === 0}
 				<!-- <TaxSettings {data} /> -->
 			{:else if tabSet === 1}
 				<!-- <ServiceSettings {data} /> -->
 			{:else if tabSet === 2}
 				<!-- <ProfileSettings {data} /> -->
-			{:else if tabSet === 0}
+			{:else if tabSet === 3}
 				<CreateInvoice
 					invoiceJobs={data.invoiceJobs}
 					companyInvoiceDetails={data.companyInvoiceDetails}
