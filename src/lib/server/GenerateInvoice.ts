@@ -4,7 +4,6 @@ import blobStream, { type IBlobStream } from 'blob-stream';
 import PdfPrinter from 'pdfmake';
 import dayjs from 'dayjs';
 import Dinero from 'dinero.js';
-import { text } from 'stream/consumers';
 
 interface ITax {
 	type: string;
