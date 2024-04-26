@@ -33,19 +33,13 @@ type TJob = {
 };
 
 export const load = async ({ params, locals }) => {
-	const pb = locals.pb;
-	if (!pb) {
-		// return {};
-		throw redirect(300, '/');
-	}
-
-	const client = await pb
+	const client = await locals.pb
 		.collection('client')
 		.getOne<TClient>(params.slug, { expand: 'address(client)' });
 
 	const jobs = Promise.all(
 		client.expand['address(client)'].map((addr) => {
-			return pb.collection('job').getFullList<TJob>({
+			return locals.pb.collection('job').getFullList<TJob>({
 				filter: `address~"${addr.id}"`,
 				expand: 'address,task,task.service',
 				fields: 'id,job_number,status, expand.address.address,expand.task.expand.service.name',

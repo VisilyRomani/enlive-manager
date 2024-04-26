@@ -2,7 +2,9 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
+
 import type Record from 'pocketbase';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const ClientValidation = z.object({
 	first_name: z.string().min(1, 'First name is required'),
@@ -41,7 +43,7 @@ export interface IClientList extends Record {
 }
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const clientForm = await superValidate(request, ClientValidation);
+	const clientForm = await superValidate(request, zod(ClientValidation));
 	const clientList = (
 		await locals.pb?.collection('client').getFullList<IClientList>({
 			expand: 'address(client)',
@@ -67,7 +69,7 @@ export const actions = {
 			throw redirect(300, '/');
 		}
 
-		const clientForm = await superValidate(request, ClientValidation);
+		const clientForm = await superValidate(request, zod(ClientValidation));
 
 		if (!clientForm.valid) {
 			return fail(400, { clientForm });

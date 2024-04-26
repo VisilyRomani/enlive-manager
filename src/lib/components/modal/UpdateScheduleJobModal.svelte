@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from '../../../routes/(dashboard)/app/daily/[slug]/$types';
 	import { invalidateAll } from '$app/navigation';
 	const data = $page.data as PageData;

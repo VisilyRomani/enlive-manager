@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { FileDropzone, ProgressBar } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { CompanySchema } from '../+page.server';
-	export let data: SuperValidated<CompanySchema>;
+	import { onMount } from 'svelte';
+	export let data: SuperValidated<Infer<CompanySchema>>;
 	const { form, enhance, errors, delayed } = superForm(data, {
 		dataType: 'json',
 		delayMs: 500,
@@ -11,6 +12,27 @@
 	});
 
 	let files: FileList;
+
+	onMount(() => {
+		const autoCompleteInput = document.getElementById('auto-complete-input') as HTMLInputElement;
+		let googlePlaces = new google.maps.places.Autocomplete(autoCompleteInput, {
+			types: ['address'],
+			componentRestrictions: { country: 'ca' },
+			fields: ['geometry', 'formatted_address']
+		});
+		googlePlaces.addListener('place_changed', () => {
+			const place = googlePlaces.getPlace();
+			form.update(
+				($form) => {
+					if (!!place.geometry?.location?.lat() && !!place.geometry?.location?.lng()) {
+						$form.address = place.formatted_address ?? '';
+					}
+					return $form;
+				},
+				{ taint: false }
+			);
+		});
+	});
 </script>
 
 <div class="lg:mx-60 lg:my-4 m-5 flex flex-col gap-4">
@@ -44,7 +66,7 @@
 				/>
 				{#if $errors.phone} <span class="text-xs text-red-500">{$errors.phone}</span>{/if}
 			</div>
-			<div class="lg:col-span-2">
+			<div>
 				<input
 					class="input variant-form-material {$errors.email ? 'input-error' : undefined}"
 					type="email"
@@ -57,22 +79,13 @@
 			<div>
 				<input
 					class="input variant-form-material {$errors.address ? 'input-error' : undefined}"
-					type="text"
-					name="address"
-					placeholder="Address"
+					id="auto-complete-input"
+					type="search"
+					name="addr"
+					placeholder="Addr.."
 					bind:value={$form.address}
 				/>
 				{#if $errors.address} <span class="text-xs text-red-500">{$errors.address}</span>{/if}
-			</div>
-			<div>
-				<input
-					class="input variant-form-material {$errors.city ? 'input-error' : undefined}"
-					type="text"
-					name="city"
-					placeholder="City"
-					bind:value={$form.city}
-				/>
-				{#if $errors.city} <span class="text-xs text-red-500">{$errors.city}</span>{/if}
 			</div>
 		</div>
 		<h3>Logo Upload</h3>

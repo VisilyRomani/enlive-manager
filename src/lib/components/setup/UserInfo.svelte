@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import type { UserSchema } from '../../../routes/(dashboard)/admin/initial-setup/proxy+page.server';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	export let data: SuperValidated<UserSchema>;
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	export let data: SuperValidated<Infer<UserSchema>>;
 
 	const { form, enhance, errors } = superForm(data);
 </script>

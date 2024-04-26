@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import dayjs from 'dayjs';
 	import type { PageData } from '../../../routes/(dashboard)/admin/schedule/[slug]/$types';
 	const data = $page.data as PageData;

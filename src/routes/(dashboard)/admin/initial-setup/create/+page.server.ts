@@ -2,13 +2,13 @@ import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const CompanyValidation = z.object({
 	name: z.string().min(1, { message: 'Please enter company name' }),
 	phone: z.string().min(1, { message: 'Please enter phone number' }),
 	email: z.string().email(),
 	address: z.string().min(1, { message: 'Please enter address' }),
-	city: z.string().min(1, { message: 'Please enter city' }),
 	gst: z.string().optional(),
 	pst: z.string().optional(),
 	url: z.string().url(),
@@ -27,7 +27,7 @@ const CompanyValidation = z.object({
 export type CompanySchema = typeof CompanyValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const companyForm = await superValidate(request, CompanyValidation);
+	const companyForm = await superValidate(request, zod(CompanyValidation));
 	return {
 		companyForm
 	};
@@ -36,14 +36,12 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 export const actions = {
 	createCompany: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const companyForm = await superValidate(formData, CompanyValidation);
+		const companyForm = await superValidate(formData, zod(CompanyValidation));
 		if (!companyForm.valid) {
 			return fail(400, { companyForm });
 		}
 
 		const companyData = new FormData();
-
-		console.log(companyForm.data);
 
 		for (const [key, value] of Object.entries(companyForm.data)) {
 			if (typeof value === 'number') {
@@ -65,7 +63,6 @@ export const actions = {
 			await locals.pb
 				?.collection('users')
 				.update(locals.user?.id, { company: company?.id, permission: 'OWNER' });
-			locals.user = structuredClone(locals.pb?.authStore.model) ?? undefined;
 			return { companyForm };
 		} catch (err) {
 			if (err instanceof Error) {

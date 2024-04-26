@@ -4,8 +4,8 @@
 declare namespace App {
 	type PocketBase = import('pocketbase').default;
 	interface Locals {
-		pb?: PocketBase;
-		user?: Record<string, T>;
+		pb: PocketBase;
+		user: Record<string, T>;
 	}
 	// interface PageData {}
 	// interface Error {}

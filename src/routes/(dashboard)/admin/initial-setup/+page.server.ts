@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const UserValidation = z.object({ first_name: z.string().min(4), last_name: z.string().min(4) });
 const CompanyValidation = z.object({
@@ -9,7 +10,7 @@ const CompanyValidation = z.object({
 	phone: z.string().min(1, { message: 'Please enter phone number' }),
 	email: z.string().email(),
 	address: z.string().min(1, { message: 'Please enter address' }),
-	city: z.string().min(1, { message: 'Please enter city' }),
+	city: z.string().min(1, { message: 'Please  enter city' }),
 	gst: z.string().optional(),
 	pst: z.string().optional(),
 	url: z.string().url(),
@@ -30,9 +31,9 @@ export type UserSchema = typeof UserValidation;
 export type CompanySchema = typeof CompanyValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
-	const userForm = await superValidate(request, UserValidation);
+	const userForm = await superValidate(request, zod(UserValidation));
 	userForm.data = { first_name: locals.user?.first_name, last_name: locals.user?.last_name };
-	const companyForm = await superValidate(request, CompanyValidation);
+	const companyForm = await superValidate(request, zod(CompanyValidation));
 
 	return {
 		userForm,
@@ -42,7 +43,7 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 export const actions = {
 	updateUser: async ({ request, locals }) => {
-		const userForm = await superValidate(request, UserValidation);
+		const userForm = await superValidate(request, zod(UserValidation));
 
 		if (!userForm.valid) {
 			return fail(400, { userForm });
@@ -62,42 +63,5 @@ export const actions = {
 		}
 
 		return { userForm };
-	},
-	createCompany: async ({ request, locals }) => {
-		const formData = await request.formData();
-		const companyForm = await superValidate(formData, CompanyValidation);
-		if (!companyForm.valid) {
-			return fail(400, { companyForm });
-		}
-
-		const companyData = new FormData();
-
-		for (const [key, value] of Object.entries(companyForm.data)) {
-			if (typeof value === 'number') {
-				companyData.append(key, String(value));
-			} else {
-				companyData.append(key, value);
-			}
-		}
-		if (formData.has('logo')) {
-			const logo = formData.get('logo');
-			if (logo instanceof File) {
-				companyData.append('logo', logo);
-			}
-		}
-
-		companyData.append('job_count', String(2000));
-		try {
-			const company = await locals.pb?.collection('company').create(companyData);
-			await locals.pb?.collection('users').update(locals.user?.id, { company: company?.id });
-			locals.user = structuredClone(locals.pb?.authStore.model) ?? undefined;
-			return { companyForm };
-		} catch (err) {
-			if (err instanceof Error) {
-				console.error(err.message);
-				return fail(400, { companyForm, error: err.message });
-			}
-		}
-		return { companyForm };
 	}
 };

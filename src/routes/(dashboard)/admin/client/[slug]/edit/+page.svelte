@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	const toastStore = getToastStore();
