@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import CreateInvoice from '$lib/components/invoice/CreateInvoice.svelte';
+	import ListInvoice from '$lib/components/invoice/ListInvoice.svelte';
 	import type { PageData } from './$types';
 	$: createInvoiceForm = data.createInvoiceForm;
 	export let data: PageData;
@@ -16,7 +17,7 @@
 
 		<svelte:fragment slot="panel">
 			{#if tabSet === 0}
-				<!-- <TaxSettings {data} /> -->
+				<ListInvoice invoicedJobs={data.invoicedJobs} />
 			{:else if tabSet === 1}
 				<!-- <ServiceSettings {data} /> -->
 			{:else if tabSet === 2}
