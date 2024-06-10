@@ -21,7 +21,7 @@
 
 <nav class="list-nav p-4 flex flex-col justify-between gap-5">
 	<ul>
-		<li>
+		<!-- <li>
 			<a
 				href="/admin/dashboard"
 				class="!rounded-md {$page.url.pathname === '/admin/dashboard'
@@ -29,7 +29,7 @@
 					: ''}"
 				on:click={navClose}>Dashboard</a
 			>
-		</li>
+		</li> -->
 		<li>
 			<a
 				class="!rounded-md {$page.url.pathname === '/admin/client'

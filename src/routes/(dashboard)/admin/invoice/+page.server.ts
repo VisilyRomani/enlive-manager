@@ -94,7 +94,7 @@ interface IInvoiceCreate {
 	};
 }
 
-export const load: PageServerLoad = async ({ request, locals, fetch }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const companyInvoiceDetails = await locals.pb
 		.collection('company')
 		.getOne<TCompanyInvoce>(locals.user.company);
@@ -102,6 +102,24 @@ export const load: PageServerLoad = async ({ request, locals, fetch }) => {
 	const invoiceJobs = await locals.pb.collection('job').getFullList<TJobInvoice>({
 		expand: 'address.client, task.service.tax',
 		filter: 'invoiced=false && status="COMPLETED"',
+		fields: `id, 
+            job_number, 
+            expand.address.address, 
+            expand.address.expand.client.first_name, 
+            expand.address.expand.client.last_name, 
+            expand.address.expand.client.email,
+            expand.task.count,
+            expand.task.price,
+            expand.task.expand.service.id,
+			expand.task.expand.service.name,
+            expand.task.expand.service.expand.tax.name,
+            expand.task.expand.service.expand.tax.percent
+            `
+	});
+
+	const invoicedJobs = await locals.pb.collection('job').getFullList<TJobInvoice>({
+		expand: 'address.client, task.service.tax',
+		filter: 'invoiced=true && status="COMPLETED"',
 		fields: `id, 
             job_number, 
             expand.address.address, 
@@ -127,6 +145,7 @@ export const load: PageServerLoad = async ({ request, locals, fetch }) => {
 	);
 
 	return {
+		invoicedJobs,
 		invoiceJobs,
 		companyInvoiceDetails,
 		createInvoiceForm

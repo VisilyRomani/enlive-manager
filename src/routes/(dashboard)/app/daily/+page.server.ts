@@ -1,7 +1,9 @@
 import type { PageServerLoad } from './$types';
+import dayjs from 'dayjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const startDate = new Date();
+	const tzOffset = new Date().getTimezoneOffset();
+	const startDate = dayjs().add(tzOffset, 'minute').toDate();
 	startDate.setHours(0, 0, 0, 0);
 
 	const endDate = new Date();
