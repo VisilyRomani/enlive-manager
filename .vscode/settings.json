@@ -114,5 +114,5 @@
 		"width",
 		"zIndex"
 	],
-	"editor.formatOnSave": true
+	"editor.formatOnSave": false
 }

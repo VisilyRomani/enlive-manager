@@ -12,6 +12,7 @@ const ClientValidation = z.object({
 	email: z.string().email().optional(),
 	phone: z.string().optional(),
 	addr: z.string().min(1, 'Address is required'),
+	client_company_name: z.string(),
 	lat: z
 		.number({
 			errorMap: () => ({
@@ -85,7 +86,8 @@ export const actions = {
 				email: clientForm.data.email,
 				phone: clientForm.data.phone,
 				notes: clientForm.data.notes,
-				company: locals.user?.company
+				company: locals.user?.company,
+				client_company_name: clientForm.data.client_company_name
 			});
 
 			await pb.collection('address').create({

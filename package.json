@@ -59,6 +59,7 @@
 		"pdfmake": "^0.2.10",
 		"pocketbase": "^0.18.3",
 		"resend": "^3.2.0",
-		"svelte-email": "^0.0.4"
+		"svelte-email": "^0.0.4",
+		"xlsx": "^0.18.5"
 	}
 }
