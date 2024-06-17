@@ -29,7 +29,11 @@ const ClientValidation = z.object({
 		.default('' as unknown as number),
 	notes: z.string().optional()
 });
+
+const BulkClientValidation = z.object({ clients: z.array(ClientValidation) });
+
 export type ClientSchema = typeof ClientValidation;
+export type BulkClientSchema = typeof BulkClientValidation;
 
 export interface IClientList extends Record {
 	id: string;
@@ -45,6 +49,8 @@ export interface IClientList extends Record {
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientForm = await superValidate(request, zod(ClientValidation));
+	const bulkClient = await superValidate(request, zod(BulkClientValidation));
+
 	const clientList = (
 		await locals.pb?.collection('client').getFullList<IClientList>({
 			expand: 'address(client)',
@@ -58,11 +64,21 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	}));
 	return {
 		clientForm,
+		bulkClient,
 		clientList: clientList
 	};
 };
 
 export const actions = {
+	BulkImportClient: async ({ locals, request }) => {
+		const bulkClient = await superValidate(request, zod(BulkClientValidation));
+		// console.log(bulkClient.data);
+		// TODO: validate list
+		// geocode address
+		// update database
+		// Show user status
+		return { bulkClient };
+	},
 	CreateClient: async ({ locals, request }) => {
 		const pb = locals.pb;
 
