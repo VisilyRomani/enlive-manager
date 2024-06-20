@@ -7,6 +7,14 @@
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
 
+	const eventSource = new EventSource('?/BulkImportClient');
+
+	eventSource.onmessage = function (event) {
+		//console.log(event);
+		var dataobj = JSON.parse(event.data);
+		console.log(dataobj);
+	};
+
 	const modalStore = getModalStore();
 	const cBase = 'card p-4 w-full shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
@@ -87,7 +95,7 @@
 				bind:files={inputFileList}
 				on:change={handleNewSheet}
 				multiple="false"
-				accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+				accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
 			>
 				<svelte:fragment slot="lead"
 					><div class="flex justify-center w-full">

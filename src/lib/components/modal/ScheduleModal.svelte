@@ -152,6 +152,10 @@
 		...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))
 	] as TJob[];
 
+	$: checkSortDisable =
+		!$form.job.length ||
+		!!($form.job as TJob[]).find((j) => !j.expand.address.lat || !j.expand.address.lng);
+
 	$: googleEmbeddedParams = () => {
 		const JobRef = [...$form.job];
 		const lastJob = JobRef.pop();
@@ -359,7 +363,7 @@
 				<div>
 					<button
 						type="button"
-						disabled={!$form.job.length}
+						disabled={checkSortDisable}
 						class="btn {parent.buttonPositive} "
 						on:click={sortJobForm}>Sort Location</button
 					>
