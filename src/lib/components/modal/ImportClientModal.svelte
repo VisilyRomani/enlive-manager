@@ -7,14 +7,6 @@
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
 
-	const eventSource = new EventSource('?/BulkImportClient');
-
-	eventSource.onmessage = function (event) {
-		//console.log(event);
-		var dataobj = JSON.parse(event.data);
-		console.log(dataobj);
-	};
-
 	const modalStore = getModalStore();
 	const cBase = 'card p-4 w-full shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
@@ -65,7 +57,7 @@
 		});
 		form.update(
 			($form) => {
-				$form.clients = FormattedData.map((f) => ({ ...f, lat: 0, lng: 0 }));
+				$form.clients = FormattedData.map((f) => ({ ...f }));
 				return $form;
 			},
 			{ taint: false }
@@ -77,6 +69,9 @@
 	const { form, enhance } = superForm(bulkClientForm, {
 		dataType: 'json',
 		resetForm: true,
+		onSubmit({ jsonData }) {
+			jsonData({ clients: $form.clients.filter((c) => !!c.first_name && !!c.addr) });
+		},
 		async onResult(event) {
 			if (event.result.type === 'success') {
 				modalStore.close();
@@ -104,7 +99,7 @@
 					</div></svelte:fragment
 				>
 				<svelte:fragment slot="message"><b>Upload a file</b> or drag and drop</svelte:fragment>
-				<svelte:fragment slot="meta">XLSX and CSV allowed</svelte:fragment>
+				<svelte:fragment slot="meta">XLSX, XLS and CSV allowed</svelte:fragment>
 			</FileDropzone>
 		</div>
 
@@ -119,13 +114,12 @@
 							<th class="table-cell-fit">Email</th>
 							<th class="table-cell-fit">Company Name</th>
 							<th class="table-cell-fit">Street Address</th>
-
 							<th class="table-cell-fit">Phone</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each FormattedData ?? [] as client, idx}
-							<tr>
+							<tr class={`${(!client.addr || !client.first_name) && 'bg-red-400'}`}>
 								<td class="table-cell-fit">{idx}</td>
 								<td class="table-cell-fit">
 									{client.first_name}
@@ -140,7 +134,7 @@
 								<td class="table-cell-fit">
 									{client.client_company_name ?? ''}
 								</td>
-								<td class="table-cell-fit">
+								<td class={`table-cell-fit `}>
 									{client.addr ?? ''}
 								</td>
 								<td class="table-cell-fit">
