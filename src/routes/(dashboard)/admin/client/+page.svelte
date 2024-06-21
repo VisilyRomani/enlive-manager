@@ -16,6 +16,9 @@
 			title: 'Import Client'
 		});
 	};
+
+	$: clientList = data.clientList;
+	$: console.log(clientList.filter((c) => c.first_name === '1614 Landa Street'));
 </script>
 
 <div class="mx-1">
@@ -30,13 +33,13 @@
 		<input bind:value={searchValues} placeholder="Search" class="input variant-form-material" />
 	</div>
 
-	{#if !data.clientList}
+	{#if !clientList}
 		<div>
 			<div class="placeholder animate-pulse" />
 		</div>
 	{/if}
 
 	<nav class="mt-1">
-		<Datatable clientList={data.clientList} {searchValues} />
+		<Datatable {clientList} {searchValues} />
 	</nav>
 </div>

@@ -77,12 +77,9 @@ export const actions = {
 	BulkImportClient: async ({ locals, request }) => {
 		const pb = locals.pb;
 		const bulkClient = await superValidate(request, zod(BulkClientValidation));
-		console.log(bulkClient.errors);
 		if (!bulkClient.valid) {
 			return fail(400, { bulkClient });
 		}
-		console.log(bulkClient.data.clients);
-
 		const clientsPromise = bulkClient.data.clients.map(async (client) => {
 			try {
 				const dbClient = await pb

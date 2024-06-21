@@ -6,6 +6,7 @@
 	import type { BulkClientSchema } from '../../../routes/(dashboard)/admin/client/proxy+page.server';
 	import { page } from '$app/stores';
 	import { invalidate } from '$app/navigation';
+	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	const modalStore = getModalStore();
 	const cBase = 'card p-4 w-full shadow-xl space-y-4';
@@ -26,6 +27,8 @@
 		email: string;
 		addr: string;
 	};
+
+	const toastStore = getToastStore();
 
 	let FormattedData: FormattedClient[] = [];
 
@@ -74,7 +77,18 @@
 		},
 		async onResult(event) {
 			if (event.result.type === 'success') {
+				toastStore.trigger({
+					message: `Bulk client upload successful`,
+					background: 'bg-success-500'
+				});
 				modalStore.close();
+				await invalidate('/admin/client');
+			}
+			if (event.result.type === 'failure') {
+				toastStore.trigger({
+					message: `Bulk client upload failed please contact admin`,
+					background: 'bg-error-500'
+				});
 				await invalidate('/admin/client');
 			}
 		}

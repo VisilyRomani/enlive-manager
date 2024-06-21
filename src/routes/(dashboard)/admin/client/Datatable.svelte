@@ -14,7 +14,8 @@
 	export let searchValues;
 	const handler = new DataHandler(clientList);
 	const rows = handler.getRows();
-	$: searchValues && handler.search(searchValues, ['first_name', 'last_name', 'address']);
+	$: clientList, handler.setRows(clientList);
+	$: searchValues, handler.search(searchValues, ['first_name', 'last_name', 'address']);
 </script>
 
 <div class="table-container space-y-4">
