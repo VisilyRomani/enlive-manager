@@ -7,6 +7,7 @@ import AddAddressModal from './components/modal/AddAddressModal.svelte';
 import AddTaskModal from './components/modal/AddTaskModal.svelte';
 import EditScheduleModal from './components/modal/EditScheduleModal.svelte';
 import UpdateScheduleJobModal from './components/modal/UpdateScheduleJobModal.svelte';
+import ImportClientModal from './components/modal/ImportClientModal.svelte';
 
 export const modalRegistry: Record<string, ModalComponent> = {
 	ClientModal: { ref: ClientModal },
@@ -16,5 +17,6 @@ export const modalRegistry: Record<string, ModalComponent> = {
 	AddAddressModal: { ref: AddAddressModal },
 	AddTaskModal: { ref: AddTaskModal },
 	EditScheduleModal: { ref: EditScheduleModal },
-	UpdateScheduleJobModal: { ref: UpdateScheduleJobModal }
+	UpdateScheduleJobModal: { ref: UpdateScheduleJobModal },
+	ImportClientModal: { ref: ImportClientModal }
 };

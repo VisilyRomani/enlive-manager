@@ -1,13 +1,24 @@
 <script lang="ts">
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import Datatable from './Datatable.svelte';
 	export let data;
 
 	const modalStore = getModalStore();
-	let clientFilter = '';
+	$: searchValues = '';
 
 	const newClientModal = () => {
 		modalStore.trigger({ type: 'component', component: 'ClientModal', title: 'Create Client' });
 	};
+	const importClientModal = () => {
+		modalStore.trigger({
+			type: 'component',
+			component: 'ImportClientModal',
+			title: 'Import Client'
+		});
+	};
+
+	$: clientList = data.clientList;
+	$: console.log(clientList.filter((c) => c.first_name === '1614 Landa Street'));
 </script>
 
 <div class="mx-1">
@@ -15,34 +26,20 @@
 		<button class="btn variant-outline-secondary variant-form-material" on:click={newClientModal}
 			>New Client</button
 		>
-		<input bind:value={clientFilter} placeholder="Search" class="input variant-form-material" />
+		<button
+			class="btn variant-outline-secondary variant-form-material hidden lg:block"
+			on:click={importClientModal}>Import</button
+		>
+		<input bind:value={searchValues} placeholder="Search" class="input variant-form-material" />
 	</div>
 
-	{#if !data.clientList}
+	{#if !clientList}
 		<div>
 			<div class="placeholder animate-pulse" />
 		</div>
 	{/if}
 
 	<nav class="mt-1">
-		<ul class="space-y-1">
-			{#each data.clientList ?? [] as client}
-				<li
-					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
-				>
-					<a href="/admin/client/{client.id}">
-						<h3 class="h3">
-							{client.first_name}
-							{client.last_name}
-						</h3>
-						{#each client.address ?? [] as addr}
-							<p class="text-secondary-400 break-all flex flex-col">
-								{addr.address.split(',').slice(0, 2)}
-							</p>
-						{/each}
-					</a>
-				</li>
-			{/each}
-		</ul>
+		<Datatable {clientList} {searchValues} />
 	</nav>
 </div>

@@ -94,6 +94,14 @@
 			</div>
 			<div>
 				<input
+					class="input variant-form-material"
+					bind:value={$form.client_company_name}
+					name="client_company_name"
+					placeholder="Company Name"
+				/>
+			</div>
+			<div>
+				<input
 					class="input variant-form-material {$errors.email ? 'input-error' : undefined}"
 					bind:value={$form.email}
 					type="email"
@@ -103,45 +111,40 @@
 				{#if $errors.email}
 					<span class="text-xs text-red-500">{$errors.email}</span>{/if}
 			</div>
+			<div class="w-full">
+				<input
+					class="input variant-form-material {$errors.addr ? 'input-error' : undefined}"
+					id="auto-complete-input"
+					type="search"
+					name="addr"
+					placeholder="Addr.."
+					bind:value={$form.addr}
+				/>
+				{#if $errors.addr}
+					<span class="text-xs text-red-500">{$errors.addr}</span>{/if}
+			</div>
 
-			<div class="lg:col-span-2 gap-3 flex flex-wrap">
-				<div class="w-full">
-					<input
-						class="input variant-form-material {$errors.addr ? 'input-error' : undefined}"
-						id="auto-complete-input"
-						type="search"
-						name="addr"
-						placeholder="Addr.."
-						bind:value={$form.addr}
-					/>
-					{#if $errors.addr}
-						<span class="text-xs text-red-500">{$errors.addr}</span>{/if}
-				</div>
-
-				<div class="grid gap-3 lg:grid-cols-2 w-full">
-					<div>
-						<input
-							class="input variant-form-material {$errors.lat ? 'input-error' : undefined}"
-							type="text"
-							placeholder="Latitude"
-							name="lat"
-							bind:value={$form.lat}
-						/>
-						{#if $errors.lat}
-							<span class="text-xs text-red-500">{$errors.lat}</span>{/if}
-					</div>
-					<div>
-						<input
-							class="input variant-form-material {$errors.lng ? 'input-error' : undefined}"
-							type="text"
-							name="lng"
-							placeholder="Longitude"
-							bind:value={$form.lng}
-						/>
-						{#if $errors.lng}
-							<span class="text-xs text-red-500">{$errors.lng}</span>{/if}
-					</div>
-				</div>
+			<div>
+				<input
+					class="input variant-form-material {$errors.lat ? 'input-error' : undefined}"
+					type="text"
+					placeholder="Latitude"
+					name="lat"
+					bind:value={$form.lat}
+				/>
+				{#if $errors.lat}
+					<span class="text-xs text-red-500">{$errors.lat}</span>{/if}
+			</div>
+			<div>
+				<input
+					class="input variant-form-material {$errors.lng ? 'input-error' : undefined}"
+					type="text"
+					name="lng"
+					placeholder="Longitude"
+					bind:value={$form.lng}
+				/>
+				{#if $errors.lng}
+					<span class="text-xs text-red-500">{$errors.lng}</span>{/if}
 			</div>
 			<div class="lg:col-span-2">
 				<textarea
