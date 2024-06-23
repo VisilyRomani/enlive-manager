@@ -1,28 +1,17 @@
 <script lang="ts">
 	import { DataHandler } from '@vincjo/datatables';
-	interface IClient {
-		id: string;
-		first_name: string;
-		last_name: string;
-		address: {
-			address: string;
-			id: string;
-		}[];
-	}
+	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
+
 	let lastElement: HTMLTableRowElement;
-	export let clientList: IClient[];
 
 	export let searchValues;
-	let counter = 50;
-	const handler = new DataHandler(clientList);
-	const rows = handler.getRows();
-	// Jank fix for search causes initial lag when searching need to fix in future
-	$: clientList,
-		searchValues.length >= 2
-			? handler.setRows(clientList)
-			: handler.setRows(clientList.slice(0, counter));
+	export let invoicedJobs: PageData['invoicedJobs'] = [];
 
-	$: searchValues, handler.search(searchValues, ['first_name', 'last_name', 'address']);
+	let counter = 50;
+	const handler = new DataHandler(invoicedJobs.slice(0, counter));
+	const rows = handler.getRows();
+	$: invoicedJobs, handler.setRows(invoicedJobs.slice(0, counter));
+	$: searchValues, handler.search(searchValues);
 	$: lastElement, lazyLoad(lastElement);
 
 	const lazyLoad = (target: Element | undefined) => {
@@ -33,7 +22,7 @@
 				if (!lastItem?.isIntersecting) return;
 				counter += 50;
 				io.unobserve(lastItem.target);
-				handler.setRows(clientList.slice(0, counter));
+				handler.setRows(invoicedJobs.slice(0, counter));
 			},
 			{ rootMargin: '100px' }
 		);
@@ -47,16 +36,13 @@
 			{#each $rows as row}
 				<tr bind:this={lastElement}>
 					<td>
-						<a href="/admin/client/{row.id}">
-							<h3 class="h3">
-								{row.first_name}
-								{row.last_name}
-							</h3>
-							{#each row.address ?? [] as addr}
+						<a href="/admin/inovice/{row.id}">
+							<!-- <h3 class="h3" /> -->
+							<!-- {#each row.address ?? [] as addr}
 								<p class="text-secondary-400 break-all flex flex-col">
 									{addr.address.split(',').slice(0, 2)}
 								</p>
-							{/each}
+							{/each} -->
 						</a>
 					</td>
 				</tr>

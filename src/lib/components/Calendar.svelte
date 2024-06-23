@@ -13,7 +13,9 @@
 			.map((a, idx) => {
 				const date = selectedDate
 					.set('date', idx + 1)
-					.add(new Date().getTimezoneOffset(), 'minute');
+					.set('hour', 12)
+					.set('m', 0)
+					.set('s', 0);
 				if (idx === 0 && date.day() !== 0) {
 					const values: Dayjs[] = [];
 					for (let i = 0; i < date.day(); i++) {
@@ -81,7 +83,6 @@
 			<button
 				type="button"
 				on:click={() => {
-					date = cell;
 					if (multiSelect) {
 						hasDate(cell) ? removeDate(cell) : addDate(cell);
 					} else {
