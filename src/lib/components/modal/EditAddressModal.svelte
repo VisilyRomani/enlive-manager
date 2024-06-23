@@ -13,6 +13,8 @@
 			if (result.type === 'success') {
 				modalStore.close();
 				toastStore.trigger({ message: 'Updated Address!', background: 'bg-success-500' });
+			} else {
+				toastStore.trigger({ message: JSON.stringify($errors), background: 'bg-error-500' });
 			}
 		}
 	});

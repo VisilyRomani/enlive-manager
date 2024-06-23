@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { DataHandler } from '@vincjo/datatables';
+	import { onMount } from 'svelte';
 	interface IClient {
 		id: string;
 		first_name: string;
@@ -9,20 +10,38 @@
 			id: string;
 		}[];
 	}
-
+	let lastElement: HTMLTableRowElement;
 	export let clientList: IClient[];
+
 	export let searchValues;
-	const handler = new DataHandler(clientList);
+	let counter = 50;
+	const handler = new DataHandler(clientList.slice(0, counter));
 	const rows = handler.getRows();
-	$: clientList, handler.setRows(clientList);
+	$: clientList, handler.setRows(clientList.slice(0, counter));
 	$: searchValues, handler.search(searchValues, ['first_name', 'last_name', 'address']);
+	$: lastElement, lazyLoad(lastElement);
+
+	const lazyLoad = (target: Element | undefined) => {
+		if (!target) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				const lastItem = entries.at(-1);
+				if (!lastItem?.isIntersecting) return;
+				counter += 50;
+				io.unobserve(lastItem.target);
+				handler.setRows(clientList.slice(0, counter));
+			},
+			{ rootMargin: '100px' }
+		);
+		io.observe(target);
+	};
 </script>
 
 <div class="table-container space-y-4">
 	<table class="table table-hover table-compact table-auto w-full">
 		<tbody>
 			{#each $rows as row}
-				<tr>
+				<tr bind:this={lastElement}>
 					<td>
 						<a href="/admin/client/{row.id}">
 							<h3 class="h3">

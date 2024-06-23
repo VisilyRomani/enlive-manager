@@ -31,8 +31,8 @@ const ClientValidation = z.object({
 const EditAddressValidation = z.object({
 	id: z.string().min(1, 'id is requred'),
 	address: z.string().min(1, 'Address is requred'),
-	lat: z.number().min(-90).max(90),
-	lng: z.number().min(-180).max(180),
+	lat: z.number().min(-90).max(90).optional(),
+	lng: z.number().min(-180).max(180).optional(),
 	active: z.boolean()
 });
 
@@ -80,6 +80,8 @@ export const actions = {
 	editAddress: async ({ locals, request }) => {
 		const editAddress = await superValidate(request, zod(EditAddressValidation));
 		const pb = locals.pb;
+
+		console.log(editAddress.valid);
 		if (!editAddress.valid || !pb) {
 			return fail(400, { editAddress });
 		}
@@ -87,6 +89,7 @@ export const actions = {
 		try {
 			await pb.collection('address').update(editAddress.data.id, editAddress.data);
 		} catch (e) {
+			console.log(e);
 			return fail(400, { editAddress });
 		}
 		return { editAddress };
