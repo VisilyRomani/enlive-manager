@@ -14,7 +14,7 @@
 	export let invoiceJobs: PageData['invoiceJobs'];
 	export let companyInvoiceDetails: PageData['companyInvoiceDetails'];
 	export let createInvoiceForm: PageData['createInvoiceForm'];
-	let selectedJobData: TJobInvoice | undefined;
+	let selectedJobData: TJobInvoice & { client_name: string };
 	let offsetJobWidth = 0;
 	const toastStore = getToastStore();
 	let previewPDf: Blob;
@@ -27,17 +27,15 @@
 					message: `Invoice NO. ${invoiceData.selectedJobData?.job_number} sent`,
 					background: 'bg-success-500'
 				});
-				selectedJobData = undefined;
 			}
 		}
 	});
-
 	$: invoiceData = {
 		companyInvoiceDetails,
 		selectedJobData
 	};
-	$: invoiceData && updateFormJob();
-	$: invoiceData && generatePdfPreview();
+
+	$: invoiceData, updateFormJob(), generatePdfPreview();
 
 	const generatePdfPreview = async () => {
 		if (selectedJobData) {
@@ -64,7 +62,7 @@
 		form.update(
 			($form) => {
 				$form.invoice_data =
-					invoiceData.selectedJobData?.expand.task.map((t) => ({
+					invoiceData.selectedJobData?.expand?.task.map((t) => ({
 						service: t.expand.service.id,
 						price: t.price,
 						quantity: t.count
@@ -127,7 +125,13 @@
 							<Autocomplete
 								options={invoiceJobs.map((i) => ({ label: String(i.job_number), value: i.id }))}
 								on:selection={(e) => {
-									selectedJobData = invoiceJobs.find((j) => j.id === e.detail.value);
+									const job = invoiceJobs.find((j) => j.id === e.detail.value);
+									if (!!job) {
+										selectedJobData = {
+											...job,
+											client_name: `${job?.expand.address.expand.client.first_name} ${job?.expand.address.expand.client.last_name}`
+										};
+									}
 									form.update(
 										($form) => {
 											$form.jobId = e.detail.value;
@@ -157,7 +161,7 @@
 								type="text"
 								placeholder="Client"
 								class="input variant-form-material"
-								value={`${invoiceData.selectedJobData?.expand.address.expand.client?.first_name} ${selectedJobData.expand.address.expand.client?.last_name}`}
+								bind:value={selectedJobData.client_name}
 							/>
 						</label>
 						<label class="label">
@@ -166,7 +170,7 @@
 								type="text"
 								placeholder="Address"
 								class="input variant-form-material"
-								value={invoiceData.selectedJobData?.expand.address.address}
+								bind:value={selectedJobData.expand.address.address}
 							/>
 						</label>
 						<label class="label">
@@ -175,7 +179,7 @@
 								type="text"
 								placeholder="Email"
 								class="input variant-form-material"
-								bind:value={$form.client_email}
+								bind:value={invoiceData.selectedJobData.expand.address.expand.client.email}
 							/>
 						</label>
 
@@ -199,6 +203,7 @@
 										},
 										{ taint: false }
 									);
+									generatePdfPreview();
 								}}
 							/>
 						</label>
@@ -210,6 +215,7 @@
 								class="input variant-form-material"
 								name="due_date"
 								bind:value={$form.due_date}
+								on:change={generatePdfPreview}
 							/>
 						</label>
 					</div>

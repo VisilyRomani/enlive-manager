@@ -163,7 +163,7 @@ export const generateInvoicePdf = async (
 								style: { bold: true, fontSize: 10, alignment: 'left' }
 							},
 							{
-								text: `${invoice_data.selectedJobData.expand.address.expand.client.first_name} ${invoice_data.selectedJobData.expand.address.expand.client.last_name}`,
+								text: `${invoice_data.selectedJobData.client_name}`,
 								style: { bold: false, fontSize: 10, alignment: 'left' }
 							},
 							{

@@ -9,7 +9,7 @@ import Dinero from 'dinero.js';
 
 export interface TInvoiceData {
 	companyInvoiceDetails: TCompanyInvoce;
-	selectedJobData: TJobInvoice;
+	selectedJobData: TJobInvoice & { client_name: string };
 	due_date: string;
 	issue_date: string;
 }
@@ -117,21 +117,11 @@ export const load: PageServerLoad = async ({ locals }) => {
             `
 	});
 
-	const invoicedJobs = await locals.pb.collection('job').getFullList<TJobInvoice>({
+	const invoicedJobs = await locals.pb.collection('invoice').getFullList({
 		expand: 'address.client, task.service.tax',
-		filter: 'invoiced=true && status="COMPLETED"',
 		fields: `id, 
-            job_number, 
-            expand.address.address, 
-            expand.address.expand.client.first_name, 
-            expand.address.expand.client.last_name, 
-            expand.address.expand.client.email,
-            expand.task.count,
-            expand.task.price,
-            expand.task.expand.service.id,
-			expand.task.expand.service.name,
-            expand.task.expand.service.expand.tax.name,
-            expand.task.expand.service.expand.tax.percent
+            invoice_number,
+            expand.job.expand.address.expand.client.first_name, 
             `
 	});
 	const createInvoiceForm = await superValidate(

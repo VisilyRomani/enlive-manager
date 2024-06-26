@@ -32,19 +32,27 @@
 
 <div class="table-container space-y-4">
 	<table class="table table-hover table-compact table-auto w-full">
+		<thead>
+			<tr>
+				<td>Id</td>
+				<td>Name</td>
+				<td>Address</td>
+				<td>Total</td>
+				<td>Collected</td>
+				<td>Outstanding</td>
+			</tr>
+		</thead>
 		<tbody>
 			{#each $rows as row}
-				<tr bind:this={lastElement}>
-					<td>
-						<a href="/admin/inovice/{row.id}">
-							<!-- <h3 class="h3" /> -->
-							<!-- {#each row.address ?? [] as addr}
-								<p class="text-secondary-400 break-all flex flex-col">
-									{addr.address.split(',').slice(0, 2)}
-								</p>
-							{/each} -->
-						</a>
-					</td>
+				<tr>
+					<a href="/admin/inovice/{row.id}">
+						<td>{row.job_number}</td>
+						<!-- <td
+							>{row.expand}
+							{row.expand.address.expand.client.last_name}
+						</td>
+						<td>{row.expand.address.address}</td> -->
+					</a>
 				</tr>
 			{/each}
 		</tbody>
