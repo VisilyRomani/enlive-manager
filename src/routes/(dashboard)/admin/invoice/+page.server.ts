@@ -94,6 +94,46 @@ interface IInvoiceCreate {
 	};
 }
 
+interface IInvoicedData {
+	cancelled: boolean;
+	invoice_number: number;
+	expand: {
+		invoice_data: {
+			price: number;
+			quantity: number;
+			expand: {
+				service: {
+					name: string;
+					expand: {
+						tax: {
+							name: string;
+							percent: number;
+						}[];
+					};
+				};
+			};
+		}[];
+		'payments(invoice)': {
+			method: string;
+			paid: number;
+			code: string;
+		};
+		job: {
+			id: string;
+			expand: {
+				address: {
+					address: string;
+					expand: {
+						client: {
+							first_name: string;
+							last_name: string;
+						};
+					};
+				};
+			};
+		};
+	};
+}
 export const load: PageServerLoad = async ({ locals }) => {
 	const companyInvoiceDetails = await locals.pb
 		.collection('company')
@@ -117,12 +157,24 @@ export const load: PageServerLoad = async ({ locals }) => {
             `
 	});
 
-	const invoicedJobs = await locals.pb.collection('invoice').getFullList({
-		expand: 'address.client, task.service.tax',
-		fields: `id, 
-            invoice_number,
-            expand.job.expand.address.expand.client.first_name, 
-            `
+	const invoicedJobs = await locals.pb.collection('invoice').getFullList<IInvoicedData>({
+		expand:
+			'invoice_data, invoice_data.service, invoice_data.service.tax, job, job.address.client, job.address, payments(invoice)',
+		fields: `cancelled, 
+		invoice_number,
+		expand.job.id,
+		expand.job.expand.address.expand.client.first_name,
+		expand.job.expand.address.expand.client.last_name,
+		expand.job.expand.address.address,
+		expand.payments(invoice).method,
+		expand.payments(invoice).paid,
+		expand.payments(invoice).code,
+		expand.invoice_data.price,
+		expand.invoice_data.quantity,
+		expand.invoice_data.expand.service.expand.tax.percent,
+		expand.invoice_data.expand.service.expand.tax.name,
+		expand.invoice_data.expand.service.name,
+		`
 	});
 	const createInvoiceForm = await superValidate(
 		{

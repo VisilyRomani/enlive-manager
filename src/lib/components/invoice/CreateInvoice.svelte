@@ -14,7 +14,7 @@
 	export let invoiceJobs: PageData['invoiceJobs'];
 	export let companyInvoiceDetails: PageData['companyInvoiceDetails'];
 	export let createInvoiceForm: PageData['createInvoiceForm'];
-	let selectedJobData: TJobInvoice & { client_name: string };
+	let selectedJobData: (TJobInvoice & { client_name: string }) | undefined;
 	let offsetJobWidth = 0;
 	const toastStore = getToastStore();
 	let previewPDf: Blob;
@@ -28,6 +28,7 @@
 					background: 'bg-success-500'
 				});
 			}
+			selectedJobData = undefined;
 		}
 	});
 	$: invoiceData = {
@@ -179,7 +180,17 @@
 								type="text"
 								placeholder="Email"
 								class="input variant-form-material"
-								bind:value={invoiceData.selectedJobData.expand.address.expand.client.email}
+								bind:value={selectedJobData.expand.address.expand.client.email}
+								on:change={() => {
+									form.update(
+										($form) => {
+											$form.client_email =
+												selectedJobData?.expand.address.expand.client.email ?? '';
+											return $form;
+										},
+										{ taint: false }
+									);
+								}}
 							/>
 						</label>
 

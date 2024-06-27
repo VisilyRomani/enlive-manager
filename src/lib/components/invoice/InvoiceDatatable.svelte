@@ -45,14 +45,18 @@
 		<tbody>
 			{#each $rows as row}
 				<tr>
-					<a href="/admin/inovice/{row.id}">
-						<td>{row.job_number}</td>
-						<!-- <td
+					<td>{row.invoice_number}</td>
+					<td
+						>{row.expand?.job.expand.address.expand.client.first_name}
+						{row.expand?.job.expand.address.expand.client.last_name}</td
+					>
+					<td>{row.expand?.job.expand.address.address}</td>
+
+					<!-- <td
 							>{row.expand}
 							{row.expand.address.expand.client.last_name}
 						</td>
 						<td>{row.expand.address.address}</td> -->
-					</a>
 				</tr>
 			{/each}
 		</tbody>
