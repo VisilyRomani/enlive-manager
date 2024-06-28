@@ -23,9 +23,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		fields: 'job, expand.job.status, id, title'
 	});
 
-	console.log(new Date());
-	console.log(startDate);
-
 	schedules = schedules?.map((s) => {
 		const completed =
 			s.expand?.job.filter((j) => j.status === 'COMPLETED' || j.status === 'CANCELED').length /

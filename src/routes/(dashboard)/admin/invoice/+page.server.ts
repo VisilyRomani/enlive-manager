@@ -214,7 +214,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		},
 		zod(InvoiceValidation)
 	);
-	console.log(invoicedJobs);
 	return {
 		invoicedJobs,
 		invoiceJobs,
