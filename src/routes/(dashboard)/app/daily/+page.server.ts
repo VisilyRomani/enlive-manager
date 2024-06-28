@@ -3,10 +3,10 @@ import dayjs from 'dayjs';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const tzOffset = new Date().getTimezoneOffset();
-	const startDate = dayjs().add(tzOffset, 'minute').toDate();
+	const startDate = dayjs().subtract(tzOffset, 'minute').toDate();
 	startDate.setHours(0, 0, 0, 0);
 
-	const endDate = new Date();
+	const endDate = dayjs().subtract(tzOffset, 'minute').toDate();
 	endDate.setHours(23, 59, 59, 999);
 
 	let schedules = await locals.pb?.collection('schedule').getFullList<{
@@ -22,6 +22,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		expand: 'job',
 		fields: 'job, expand.job.status, id, title'
 	});
+
+	console.log(new Date());
+	console.log(startDate);
 
 	schedules = schedules?.map((s) => {
 		const completed =

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { DataHandler } from '@vincjo/datatables';
 	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
+	import Dinero from 'dinero.js';
 
 	let lastElement: HTMLTableRowElement;
 
@@ -31,15 +32,20 @@
 </script>
 
 <div class="table-container space-y-4">
-	<table class="table table-hover table-compact table-auto w-full">
-		<thead>
+	<table class="table table-hover table-auto w-full">
+		<thead class="font-bold">
 			<tr>
-				<td>Id</td>
-				<td>Name</td>
-				<td>Address</td>
-				<td>Total</td>
-				<td>Collected</td>
-				<td>Outstanding</td>
+				<td class="p-3">Id</td>
+				<td class="p-3">Name</td>
+				<td class="p-3">Address</td>
+				<td class="p-3">Total</td>
+				<td class="p-3">Collected</td>
+				<td
+					on:click={() => {
+						handler.sort('outstanding', 'outstanding');
+					}}
+					class="p-3">Outstanding</td
+				>
 			</tr>
 		</thead>
 		<tbody>
@@ -51,12 +57,14 @@
 						{row.expand?.job.expand.address.expand.client.last_name}</td
 					>
 					<td>{row.expand?.job.expand.address.address}</td>
+					<td>{Dinero(row.total).toFormat('$0.00')}</td>
 
-					<!-- <td
-							>{row.expand}
-							{row.expand.address.expand.client.last_name}
-						</td>
-						<td>{row.expand.address.address}</td> -->
+					<td>
+						{Dinero(row.collected).toFormat('$0.00')}
+					</td>
+					<td class={`${row.total.amount > row.collected.amount && 'text-red-500'}`}>
+						{Dinero(row.outstanding).toFormat('$0.00')}
+					</td>
 				</tr>
 			{/each}
 		</tbody>

@@ -95,7 +95,7 @@
 		<div class="space-y-3">
 			<div class="flex justify-between">
 				<h2 class="h2 m-3">Create Invoice</h2>
-				<div class="">
+				<div>
 					<button
 						class="btn variant-ghost-primary"
 						type="button"

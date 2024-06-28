@@ -96,6 +96,9 @@ interface IInvoiceCreate {
 
 interface IInvoicedData {
 	cancelled: boolean;
+	total: Dinero.DineroObject;
+	collected: Dinero.DineroObject;
+	outstanding: Dinero.DineroObject;
 	invoice_number: number;
 	expand: {
 		invoice_data: {
@@ -117,7 +120,7 @@ interface IInvoicedData {
 			method: string;
 			paid: number;
 			code: string;
-		};
+		}[];
 		job: {
 			id: string;
 			expand: {
@@ -157,10 +160,11 @@ export const load: PageServerLoad = async ({ locals }) => {
             `
 	});
 
-	const invoicedJobs = await locals.pb.collection('invoice').getFullList<IInvoicedData>({
-		expand:
-			'invoice_data, invoice_data.service, invoice_data.service.tax, job, job.address.client, job.address, payments(invoice)',
-		fields: `cancelled, 
+	const invoicedJobs = (
+		await locals.pb.collection('invoice').getFullList<IInvoicedData>({
+			expand:
+				'invoice_data, invoice_data.service, invoice_data.service.tax, job, job.address.client, job.address, payments(invoice)',
+			fields: `cancelled, 
 		invoice_number,
 		expand.job.id,
 		expand.job.expand.address.expand.client.first_name,
@@ -175,7 +179,32 @@ export const load: PageServerLoad = async ({ locals }) => {
 		expand.invoice_data.expand.service.expand.tax.name,
 		expand.invoice_data.expand.service.name,
 		`
+		})
+	).map((job) => {
+		job.collected = (job.expand['payments(invoice)'] ?? [])
+			.reduce((acc, cur) => {
+				return acc.add(Dinero({ amount: cur.paid }));
+			}, Dinero({ amount: 0 }))
+			.toObject();
+		job.total = job.expand.invoice_data
+			.reduce((acc, cur) => {
+				const preTax = cur.price * cur.quantity;
+				const tax_percent =
+					cur.expand.service.expand.tax.reduce((acc, cur) => {
+						acc += cur.percent;
+						return acc;
+					}, 0) / 100;
+
+				acc = acc.add(
+					Dinero({ amount: preTax }).add(Dinero({ amount: preTax }).multiply(tax_percent))
+				);
+				return acc;
+			}, Dinero({ amount: 0 }))
+			.toObject();
+		job.outstanding = Dinero({ amount: job.total.amount - job.collected.amount }).toObject();
+		return job;
 	});
+
 	const createInvoiceForm = await superValidate(
 		{
 			issue_date: dayjs(new Date()).format('YYYY-MM-DD'),
@@ -185,7 +214,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		},
 		zod(InvoiceValidation)
 	);
-
+	console.log(invoicedJobs);
 	return {
 		invoicedJobs,
 		invoiceJobs,
