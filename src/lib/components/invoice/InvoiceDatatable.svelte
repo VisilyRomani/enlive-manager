@@ -2,6 +2,8 @@
 	import { DataHandler } from '@vincjo/datatables';
 	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
 	import Dinero from 'dinero.js';
+	import Info from '$lib/photos/info.svelte';
+	import Payment from '$lib/photos/payment.svelte';
 
 	let lastElement: HTMLTableRowElement;
 
@@ -35,35 +37,40 @@
 	<table class="table table-hover table-auto w-full">
 		<thead class="font-bold">
 			<tr>
-				<td class="p-3">Id</td>
+				<td class="p-3 table-cell-fit">Id</td>
 				<td class="p-3">Name</td>
 				<td class="p-3">Address</td>
-				<td class="p-3">Total</td>
-				<td class="p-3">Collected</td>
+				<td class="p-3 table-cell-fit">Total</td>
+				<td class="p-3 table-cell-fit">Collected</td>
 				<td
 					on:click={() => {
 						handler.sort('outstanding', 'outstanding');
 					}}
-					class="p-3">Outstanding</td
+					class="p-3 table-cell-fit">Outstanding</td
 				>
+				<td class="table-cell-fit" />
 			</tr>
 		</thead>
 		<tbody>
 			{#each $rows as row}
 				<tr>
-					<td>{row.invoice_number}</td>
+					<td class="table-cell-fit">{row.invoice_number}</td>
 					<td
 						>{row.expand?.job.expand.address.expand.client.first_name}
 						{row.expand?.job.expand.address.expand.client.last_name}</td
 					>
 					<td>{row.expand?.job.expand.address.address}</td>
-					<td>{Dinero(row.total).toFormat('$0.00')}</td>
+					<td class="table-cell-fit">{Dinero(row.total).toFormat('$0.00')}</td>
 
-					<td>
+					<td class="table-cell-fit">
 						{Dinero(row.collected).toFormat('$0.00')}
 					</td>
-					<td class={`${row.total.amount > row.collected.amount && 'text-red-500'}`}>
+					<td class={`${row.total.amount > row.collected.amount && 'text-red-500'} table-cell-fit`}>
 						{Dinero(row.outstanding).toFormat('$0.00')}
+					</td>
+					<td class="space-x-5 flex">
+						<button><Info fill="#ffffff" /></button>
+						<button><Payment fill="#ffffff" /></button>
 					</td>
 				</tr>
 			{/each}

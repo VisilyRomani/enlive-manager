@@ -87,6 +87,7 @@
 						hasDate(cell) ? removeDate(cell) : addDate(cell);
 					} else {
 						selectedDates = [cell.toDate()];
+						date = cell;
 					}
 				}}
 				class="hover:bg-secondary-300 rounded-md text-md font-semibold
