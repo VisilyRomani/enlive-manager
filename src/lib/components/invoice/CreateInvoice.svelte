@@ -105,7 +105,9 @@
 							window.open(pdfURl, 'invoice_pdf', 'resizable');
 						}}>Preview</button
 					>
-					<button class="btn variant-ghost-success" type="submit">Send</button>
+					<button class="btn variant-ghost-success" type="submit" disabled={!previewPDf}
+						>Send</button
+					>
 				</div>
 			</div>
 

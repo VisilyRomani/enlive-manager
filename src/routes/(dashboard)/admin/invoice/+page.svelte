@@ -5,6 +5,13 @@
 	import type { PageData } from './$types';
 	$: createInvoiceForm = data.createInvoiceForm;
 	export let data: PageData;
+
+	$: invoicedJobs =
+		tabSet === 1
+			? data.invoicedJobs.filter((d) => d.outstanding.amount <= 0)
+			: tabSet === 2
+			? data.invoicedJobs.filter((d) => d.outstanding.amount > 0)
+			: data.invoicedJobs;
 	let tabSet = 0;
 </script>
 
@@ -16,12 +23,8 @@
 		<Tab bind:group={tabSet} name="CreateInvoice" value={3}>Create Invoice</Tab>
 
 		<svelte:fragment slot="panel">
-			{#if tabSet === 0}
-				<ListInvoice invoicedJobs={data.invoicedJobs} />
-			{:else if tabSet === 1}
-				<!-- <ServiceSettings {data} /> -->
-			{:else if tabSet === 2}
-				<!-- <ProfileSettings {data} /> -->
+			{#if tabSet !== 3}
+				<ListInvoice {invoicedJobs} ListType="tabset" />
 			{:else if tabSet === 3}
 				<CreateInvoice
 					invoiceJobs={data.invoiceJobs}

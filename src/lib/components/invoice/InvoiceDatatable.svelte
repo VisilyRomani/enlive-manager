@@ -4,11 +4,13 @@
 	import Dinero from 'dinero.js';
 	import Info from '$lib/photos/info.svelte';
 	import Payment from '$lib/photos/payment.svelte';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	let lastElement: HTMLTableRowElement;
 
 	export let searchValues;
 	export let invoicedJobs: PageData['invoicedJobs'] = [];
+	const modalStore = getModalStore();
 
 	let counter = 50;
 	const handler = new DataHandler(invoicedJobs.slice(0, counter));
@@ -31,10 +33,19 @@
 		);
 		io.observe(target);
 	};
+
+	const openPaymentModal = (invoice_id: string, invoice_number: number, amount: number) => {
+		modalStore.trigger({
+			type: 'component',
+			component: 'PaymentModal',
+			title: 'Create Payment',
+			meta: { invoice_id, invoice_number, amount }
+		});
+	};
 </script>
 
 <div class="table-container space-y-4">
-	<table class="table table-hover table-auto w-full">
+	<table class="table table-compact table-hover table-auto w-full">
 		<thead class="font-bold">
 			<tr>
 				<td class="p-3 table-cell-fit">Id</td>
@@ -65,12 +76,28 @@
 					<td class="table-cell-fit">
 						{Dinero(row.collected).toFormat('$0.00')}
 					</td>
-					<td class={`${row.total.amount > row.collected.amount && 'text-red-500'} table-cell-fit`}>
+					<td
+						class={`${
+							row.total.amount > row.collected.amount
+								? 'text-red-500'
+								: row.total.amount === row.collected.amount
+								? 'text-green-500'
+								: 'text-warning-500'
+						} table-cell-fit`}
+					>
 						{Dinero(row.outstanding).toFormat('$0.00')}
 					</td>
 					<td class="space-x-5 flex">
-						<button><Info fill="#ffffff" /></button>
-						<button><Payment fill="#ffffff" /></button>
+						<button
+							class="hover:fill-secondary-500 fill-white"
+							on:click={() => {
+								openPaymentModal(row.id, row.invoice_number, row.outstanding.amount);
+							}}
+							type="button"><Payment /></button
+						>
+						<a href="/admin/invoice/{row.id}" class="hover:fill-secondary-500 fill-white"
+							><Info /></a
+						>
 					</td>
 				</tr>
 			{/each}

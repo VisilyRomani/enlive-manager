@@ -26,7 +26,7 @@ const CompanyValidation = z.object({
 
 export type CompanySchema = typeof CompanyValidation;
 
-export const load: PageServerLoad = async ({ request, locals }) => {
+export const load: PageServerLoad = async ({ request }) => {
 	const companyForm = await superValidate(request, zod(CompanyValidation));
 	return {
 		companyForm
@@ -44,12 +44,17 @@ export const actions = {
 		const companyData = new FormData();
 
 		for (const [key, value] of Object.entries(companyForm.data)) {
+			if (value === undefined) {
+				return;
+			}
+
 			if (typeof value === 'number') {
 				companyData.append(key, String(value));
 			} else {
 				companyData.append(key, value);
 			}
 		}
+
 		if (formData.has('logo')) {
 			const logo = formData.get('logo');
 			if (logo instanceof File) {
