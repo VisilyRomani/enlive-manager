@@ -15,9 +15,9 @@
 		onSubmit: ({ formData }) => {
 			const date = formData.get('scheduled_date');
 			const selectedDate = dayjs(String(date))
-				.set('hour', new Date().getHours())
-				.set('minute', new Date().getMinutes())
-				.set('second', new Date().getSeconds())
+				.set('hour', 12)
+				.set('minute', 0)
+				.set('second', 0)
 				.toDate();
 			formData.set('scheduled_date', selectedDate.toUTCString());
 		},

@@ -2,6 +2,7 @@
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	export let data: PageData;
+	$: console.log(data.schedules);
 </script>
 
 <nav class="mt-1">

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { DataHandler } from '@vincjo/datatables';
-	import { onMount } from 'svelte';
 	interface IClient {
 		id: string;
 		first_name: string;
@@ -15,9 +14,14 @@
 
 	export let searchValues;
 	let counter = 50;
-	const handler = new DataHandler(clientList.slice(0, counter));
+	const handler = new DataHandler(clientList);
 	const rows = handler.getRows();
-	$: clientList, handler.setRows(clientList.slice(0, counter));
+	// Jank fix for search causes initial lag when searching need to fix in future
+	$: clientList,
+		searchValues.length >= 2
+			? handler.setRows(clientList)
+			: handler.setRows(clientList.slice(0, counter));
+
 	$: searchValues, handler.search(searchValues, ['first_name', 'last_name', 'address']);
 	$: lastElement, lazyLoad(lastElement);
 

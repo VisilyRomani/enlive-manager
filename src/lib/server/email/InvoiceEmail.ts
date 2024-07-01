@@ -32,7 +32,6 @@ export const GenerateEmail = async (InvoiceData: IInvoiceTemplate) => {
 			plainText: true
 		}
 	});
-	console.log(InvoiceData.company_logo);
 
 	return resend.emails.send({
 		from: `${InvoiceData.company} <invoice@enlivemanager.com>`,

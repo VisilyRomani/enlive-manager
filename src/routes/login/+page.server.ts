@@ -56,7 +56,7 @@ export const actions = {
 
 			return fail(401, { loginForm });
 		}
-		cookies.set('cookie', locals.pb?.authStore.exportToCookie() ?? '');
+		cookies.set('cookie', locals.pb?.authStore.exportToCookie() ?? '', { path: '/' });
 		throw redirect(303, '/admin/initial-setup');
 	}
 };

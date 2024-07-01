@@ -12,7 +12,7 @@ interface ITax {
 	net: Dinero.Dinero;
 }
 
-var fonts = {
+const fonts = {
 	Courier: {
 		normal: 'Courier',
 		bold: 'Courier-Bold',
@@ -44,13 +44,13 @@ export const generateInvoicePdf = async (
 	invoice_data: TInvoiceData,
 	logo: string | undefined
 ): Promise<Blob> => {
-	let subtotal = invoice_data.selectedJobData.expand.task.reduce((acc, cur) => {
+	const subtotal = invoice_data.selectedJobData.expand.task.reduce((acc, cur) => {
 		return acc.add(Dinero({ amount: cur.price }).multiply(cur.count));
 	}, Dinero({ amount: 0 }));
 
-	let taxInfo = invoice_data.selectedJobData.expand.task.reduce((acc, cur) => {
+	const taxInfo = invoice_data.selectedJobData.expand.task.reduce((acc, cur) => {
 		cur.expand.service.expand.tax.map((tax) => {
-			let idx = acc.findIndex((t) => t.type === tax.name);
+			const idx = acc.findIndex((t) => t.type === tax.name);
 			if (idx !== -1) {
 				acc[idx].calculatedAmount = acc[idx].calculatedAmount.add(
 					Dinero({ amount: cur.price })
@@ -163,7 +163,7 @@ export const generateInvoicePdf = async (
 								style: { bold: true, fontSize: 10, alignment: 'left' }
 							},
 							{
-								text: `${invoice_data.selectedJobData.expand.address.expand.client.first_name} ${invoice_data.selectedJobData.expand.address.expand.client.last_name}`,
+								text: `${invoice_data.selectedJobData.client_name}`,
 								style: { bold: false, fontSize: 10, alignment: 'left' }
 							},
 							{
@@ -221,29 +221,29 @@ export const generateInvoicePdf = async (
 					]
 				},
 				layout: {
-					paddingLeft: function (i, node) {
+					paddingLeft: function () {
 						return 5;
 					},
-					paddingRight: function (i, node) {
+					paddingRight: function () {
 						return 5;
 					},
-					paddingTop: function (i, node) {
+					paddingTop: function () {
 						return 5;
 					},
-					paddingBottom: function (i, node) {
+					paddingBottom: function () {
 						return 5;
 					},
 
-					vLineWidth: function (i) {
+					vLineWidth: function () {
 						return 0;
 					},
-					hLineWidth: function (i, node) {
+					hLineWidth: function (i) {
 						return i > 1 ? 0.5 : 0;
 					},
-					hLineColor: function (i) {
+					hLineColor: function () {
 						return 'lightgray';
 					},
-					fillColor: function (row, col, node) {
+					fillColor: function (row) {
 						return row === 0 ? '#bae6fd' : null;
 					}
 				},
@@ -355,29 +355,29 @@ export const generateInvoicePdf = async (
 							]
 						},
 						layout: {
-							paddingLeft: function (i, node) {
+							paddingLeft: function () {
 								return 5;
 							},
-							paddingRight: function (i, node) {
+							paddingRight: function () {
 								return 5;
 							},
-							paddingTop: function (i, node) {
+							paddingTop: function () {
 								return 5;
 							},
-							paddingBottom: function (i, node) {
+							paddingBottom: function () {
 								return 5;
 							},
 
-							vLineWidth: function (i) {
+							vLineWidth: function () {
 								return 0;
 							},
-							hLineWidth: function (i, node) {
+							hLineWidth: function (i) {
 								return i > 1 ? 0.5 : 0;
 							},
-							hLineColor: function (i) {
+							hLineColor: function () {
 								return 'lightgray';
 							},
-							fillColor: function (row, col, node) {
+							fillColor: function (row) {
 								return row === 0 ? '#bae6fd' : null;
 							}
 						},

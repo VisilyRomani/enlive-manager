@@ -11,7 +11,6 @@
 	};
 
 	$: itemsOnDay = data.scheduleList.map((s) => dayjs(s.scheduled_date));
-	$: console.log(data.scheduleList);
 	let date = dayjs();
 </script>
 

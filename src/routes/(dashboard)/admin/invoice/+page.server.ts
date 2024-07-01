@@ -3,13 +3,13 @@ import type { PageServerLoad } from './$types';
 import z from 'zod';
 import dayjs from 'dayjs';
 import { zod } from 'sveltekit-superforms/adapters';
-import { fail } from 'sveltekit-superforms';
 import { GenerateEmail } from '$lib/server/email/InvoiceEmail';
 import Dinero from 'dinero.js';
+import { fail } from '@sveltejs/kit';
 
 export interface TInvoiceData {
 	companyInvoiceDetails: TCompanyInvoce;
-	selectedJobData: TJobInvoice;
+	selectedJobData: TJobInvoice & { client_name: string };
 	due_date: string;
 	issue_date: string;
 }
@@ -61,6 +61,66 @@ export interface TJobInvoice {
 		}[];
 	};
 }
+interface IInvoiceCreate {
+	id: string;
+	quantity: number;
+	price: number;
+	expand: {
+		service: {
+			expand: {
+				tax: {
+					percent: number;
+				}[];
+			};
+		};
+	};
+}
+
+interface IInvoicedData {
+	id: string;
+	cancelled: boolean;
+	total: Dinero.DineroObject;
+	collected: Dinero.DineroObject;
+	outstanding: Dinero.DineroObject;
+	invoice_number: number;
+	expand: {
+		invoice_data: {
+			price: number;
+			quantity: number;
+			expand: {
+				service: {
+					name: string;
+					expand: {
+						tax: {
+							name: string;
+							percent: number;
+						}[];
+					};
+				};
+			};
+		}[];
+		'payments(invoice)': {
+			method: string;
+			paid: number;
+			code: string;
+		}[];
+		job: {
+			id: string;
+			expand: {
+				address: {
+					address: string;
+					expand: {
+						client: {
+							first_name: string;
+							last_name: string;
+							name: string;
+						};
+					};
+				};
+			};
+		};
+	};
+}
 
 const InvoiceValidation = z.object({
 	jobId: z.string().min(1),
@@ -79,20 +139,22 @@ const InvoiceValidation = z.object({
 	invoice_pdf: z.instanceof(File)
 });
 
-interface IInvoiceCreate {
-	id: string;
-	quantity: number;
-	price: number;
-	expand: {
-		service: {
-			expand: {
-				tax: {
-					percent: number;
-				}[];
-			};
-		};
-	};
-}
+const PaymentValidation = z
+	.object({
+		invoice: z.string().min(1),
+		paid: z.number().min(0),
+		method: z.enum(['CASH', 'E-TRANSFER', 'CREDIT', 'DEBIT', 'CHEQUE']),
+		reference_code: z.string().optional()
+	})
+	.refine(
+		(val) => {
+			if (val.method !== 'CASH') {
+				return val.reference_code !== undefined;
+			}
+			return true;
+		},
+		{ message: 'Reference code is required', path: ['reference_code'] }
+	);
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const companyInvoiceDetails = await locals.pb
@@ -117,23 +179,54 @@ export const load: PageServerLoad = async ({ locals }) => {
             `
 	});
 
-	const invoicedJobs = await locals.pb.collection('job').getFullList<TJobInvoice>({
-		expand: 'address.client, task.service.tax',
-		filter: 'invoiced=true && status="COMPLETED"',
-		fields: `id, 
-            job_number, 
-            expand.address.address, 
-            expand.address.expand.client.first_name, 
-            expand.address.expand.client.last_name, 
-            expand.address.expand.client.email,
-            expand.task.count,
-            expand.task.price,
-            expand.task.expand.service.id,
-			expand.task.expand.service.name,
-            expand.task.expand.service.expand.tax.name,
-            expand.task.expand.service.expand.tax.percent
-            `
+	const invoicedJobs = (
+		await locals.pb.collection('invoice').getFullList<IInvoicedData>({
+			expand:
+				'invoice_data, invoice_data.service, invoice_data.service.tax, job, job.address.client, job.address, payments(invoice)',
+			fields: `cancelled, 
+			id,
+		invoice_number,
+		expand.job.id,
+		expand.job.expand.address.expand.client.first_name,
+		expand.job.expand.address.expand.client.last_name,
+		expand.job.expand.address.address,
+		expand.payments(invoice).method,
+		expand.payments(invoice).paid,
+		expand.payments(invoice).code,
+		expand.invoice_data.price,
+		expand.invoice_data.quantity,
+		expand.invoice_data.expand.service.expand.tax.percent,
+		expand.invoice_data.expand.service.expand.tax.name,
+		expand.invoice_data.expand.service.name,
+		`
+		})
+	).map((job) => {
+		job.collected = (job.expand['payments(invoice)'] ?? [])
+			.reduce((acc, cur) => {
+				return acc.add(Dinero({ amount: cur.paid }));
+			}, Dinero({ amount: 0 }))
+			.toObject();
+		job.total = job.expand.invoice_data
+			.reduce((acc, cur) => {
+				const preTax = cur.price * cur.quantity;
+				const tax_percent =
+					cur.expand.service.expand.tax.reduce((acc, cur) => {
+						acc += cur.percent;
+						return acc;
+					}, 0) / 100;
+
+				acc = acc.add(
+					Dinero({ amount: preTax }).add(Dinero({ amount: preTax }).multiply(tax_percent))
+				);
+				return acc;
+			}, Dinero({ amount: 0 }))
+			.toObject();
+		job.outstanding = Dinero({ amount: job.total.amount - job.collected.amount }).toObject();
+		job.expand.job.expand.address.expand.client.name = `${job.expand.job.expand.address.expand.client.first_name} ${job.expand.job.expand.address.expand.client.last_name}`;
+
+		return job;
 	});
+
 	const createInvoiceForm = await superValidate(
 		{
 			issue_date: dayjs(new Date()).format('YYYY-MM-DD'),
@@ -143,11 +236,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		},
 		zod(InvoiceValidation)
 	);
-
+	const createPaymentForm = await superValidate(zod(PaymentValidation));
 	return {
 		invoicedJobs,
 		invoiceJobs,
 		companyInvoiceDetails,
+		createPaymentForm,
 		createInvoiceForm
 	};
 };
@@ -223,5 +317,22 @@ export const actions = {
 		console.log(emailResult);
 
 		return withFiles({ createInvoiceForm });
+	},
+	CreatePayment: async ({ request, locals }) => {
+		const pb = locals.pb;
+		const createPaymentForm = await superValidate(request, zod(PaymentValidation));
+		if (!createPaymentForm.valid) {
+			return fail(400, { createPaymentForm });
+		}
+
+		try {
+			pb.collection('payments').create({
+				...createPaymentForm.data,
+				paid: Math.trunc(+createPaymentForm.data.paid * 100)
+			});
+		} catch (e) {
+			return fail(400, { createPaymentForm, error: e });
+		}
+		return { createPaymentForm };
 	}
 };

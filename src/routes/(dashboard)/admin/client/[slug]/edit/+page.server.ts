@@ -81,7 +81,6 @@ export const actions = {
 		const editAddress = await superValidate(request, zod(EditAddressValidation));
 		const pb = locals.pb;
 
-		console.log(editAddress.valid);
 		if (!editAddress.valid || !pb) {
 			return fail(400, { editAddress });
 		}

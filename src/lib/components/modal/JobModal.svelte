@@ -115,11 +115,11 @@
 					<div data-popup="client-popup" class="w-full z-50">
 						<div class="card max-h-60 overflow-auto w-[${offsetClientWidth + 'px'}]">
 							<Autocomplete
+								limit={50}
 								bind:input={selectedSearch.label}
 								options={clientOptions}
 								on:selection={(e) => {
-									selectedSearch.label = e.detail.label;
-									selectedSearch.value = e.detail.value;
+									selectedSearch = e.detail;
 									selectedSearchAddress = { label: '', value: '' };
 								}}
 							/>

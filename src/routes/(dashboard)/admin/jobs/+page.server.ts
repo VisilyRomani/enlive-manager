@@ -2,7 +2,7 @@ import { superValidate } from 'sveltekit-superforms/client';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import type { IClientList } from '../client/proxy+page.server';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 
 const JobValidation = z.object({

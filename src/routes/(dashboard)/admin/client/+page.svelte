@@ -18,7 +18,6 @@
 	};
 
 	$: clientList = data.clientList;
-	$: console.log(clientList.filter((c) => c.first_name === '1614 Landa Street'));
 </script>
 
 <div class="mx-1">
