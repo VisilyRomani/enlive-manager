@@ -24,7 +24,7 @@
 
 		<svelte:fragment slot="panel">
 			{#if tabSet !== 3}
-				<ListInvoice {invoicedJobs} ListType="tabset" />
+				<ListInvoice {invoicedJobs} />
 			{:else if tabSet === 3}
 				<CreateInvoice
 					invoiceJobs={data.invoiceJobs}
