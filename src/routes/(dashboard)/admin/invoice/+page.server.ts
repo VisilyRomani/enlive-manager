@@ -113,6 +113,7 @@ interface IInvoicedData {
 						client: {
 							first_name: string;
 							last_name: string;
+							name: string;
 						};
 					};
 				};
@@ -221,6 +222,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 			}, Dinero({ amount: 0 }))
 			.toObject();
 		job.outstanding = Dinero({ amount: job.total.amount - job.collected.amount }).toObject();
+		job.expand.job.expand.address.expand.client.name = `${job.expand.job.expand.address.expand.client.first_name} ${job.expand.job.expand.address.expand.client.last_name}`;
+
 		return job;
 	});
 

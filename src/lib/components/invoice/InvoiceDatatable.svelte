@@ -66,10 +66,7 @@
 			{#each $rows as row}
 				<tr>
 					<td class="table-cell-fit">{row.invoice_number}</td>
-					<td
-						>{row.expand?.job.expand.address.expand.client.first_name}
-						{row.expand?.job.expand.address.expand.client.last_name}</td
-					>
+					<td>{row.expand?.job.expand.address.expand.client.name}</td>
 					<td>{row.expand?.job.expand.address.address}</td>
 					<td class="table-cell-fit">{Dinero(row.total).toFormat('$0.00')}</td>
 
