@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import z from 'zod';
@@ -8,7 +8,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 type TSchedule = {
 	id: string;
 	title: string;
-	scheduled_date: Date;
+	schedule_date: string;
 	expand: {
 		employee: {
 			first_name: string;
@@ -48,7 +48,7 @@ type TSchedule = {
 const DetailValidation = z.object({
 	id: z.string().min(1),
 	title: z.string().min(1),
-	scheduled_date: z.date()
+	schedule_date: z.string().min(1) // validate proper string format in future
 });
 const EmployeeValidation = z.object({
 	schedule_id: z.string().min(1),
@@ -69,7 +69,7 @@ const ChangeOrderValidation = z.object({
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const schedule = await locals.pb.collection('schedule').getOne<TSchedule>(params.slug, {
 		expand: 'job, employee, job.task, job.task.service, job.address, job.address.client',
-		fields: ' id, title, scheduled_date, expand'
+		fields: ' id, title, schedule_date, expand'
 	});
 
 	const userList = await locals.pb
@@ -87,7 +87,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	);
 
 	const EditScheduleDetails = await superValidate(
-		{ title: schedule.title, scheduled_date: new Date(schedule.scheduled_date), id: schedule.id },
+		{ title: schedule.title, schedule_date: schedule.schedule_date, id: schedule.id },
 		zod(DetailValidation)
 	);
 	const EditScheduleEmployee = await superValidate(

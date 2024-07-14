@@ -1,13 +1,24 @@
 <script lang="ts">
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
-	export let data: PageData;
-	$: console.log(data.schedules);
+	import { onMount } from 'svelte';
+	import type { IDailySchedule } from '../../admin/api/schedule/+server';
+	let schedules: IDailySchedule[];
+
+	let isMounted = false;
+	onMount(() => {
+		isMounted = true;
+	});
+
+	const getScheduleData = async () => {
+		const result = await fetch(`/admin/api/schedule?date=${new Date().toLocaleDateString()}`);
+		schedules = await result.json();
+	};
+	$: isMounted === true && getScheduleData();
 </script>
 
 <nav class="mt-1">
 	<ul class="space-y-1">
-		{#each data.schedules ?? [] as schedule}
+		{#each schedules ?? [] as schedule}
 			<li
 				class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 {schedule.completed ===
 					100 && 'border-success-500'} rounded-md p-3"

@@ -83,8 +83,8 @@
 			{data.schedule.title}
 		</p>
 		<p>
-			<span class="text-gray-400"> Scheduled Date: </span>
-			{dayjs(data.schedule.scheduled_date).format('DD-MM-YYYY')}
+			<span class="text-gray-400"> Schedule Date: </span>
+			{data.schedule.schedule_date}
 		</p>
 	</div>
 	<div class="card m-3 p-3">

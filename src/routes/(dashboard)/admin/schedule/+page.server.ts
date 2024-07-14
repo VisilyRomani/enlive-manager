@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export type TUser = {
@@ -44,10 +44,10 @@ export type TJob = {
 	};
 };
 
-type TSchedule = {
+export type TSchedule = {
 	title: string;
 	id: string;
-	scheduled_date: Date;
+	schedule_date: string;
 	expand: {
 		job: {
 			job_number: number;
@@ -96,8 +96,8 @@ export const load: PageServerLoad = async ({ locals, request }) => {
 		.getFullList<TUser>({ fields: 'id,first_name,last_name' });
 
 	const scheduleList = await locals.pb.collection('schedule').getFullList<TSchedule>({
-		expand: 'job, ',
-		fields: 'id, expand,expand.job,title,scheduled_date'
+		expand: 'job',
+		fields: 'id, expand,expand.job,title,schedule_date'
 	});
 
 	const scheduleForm = await superValidate(request, zod(ScheduleValidate));
@@ -124,7 +124,7 @@ export const actions = {
 
 		if (scheduleForm.data.dates.length === 1) {
 			pb.collection('schedule').create({
-				scheduled_date: scheduleForm.data.dates[0],
+				schedule_date: scheduleForm.data.dates[0].toLocaleDateString(),
 				job: scheduleForm.data.job.map((j) => j.id),
 				title: scheduleForm.data.title,
 				employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
@@ -152,7 +152,7 @@ export const actions = {
 						);
 						return pb.collection('schedule').create(
 							{
-								scheduled_date: date,
+								schedule_date: date.toLocaleDateString(),
 								job: scheduleForm.data.job.map((j) => j.id),
 								title: `📋 | ${scheduleForm.data.title}`,
 								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
@@ -200,7 +200,7 @@ export const actions = {
 
 						return pb.collection('schedule').create(
 							{
-								scheduled_date: date,
+								schedule_date: date.toLocaleDateString(),
 								job: jobDuplicates.map((j) => j.id),
 								title: `📋 | ${scheduleForm.data.title}`,
 								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),

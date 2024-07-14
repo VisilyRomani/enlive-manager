@@ -10,7 +10,7 @@
 		modalStore.trigger({ type: 'component', component: 'ScheduleModal', title: 'Scheduler' });
 	};
 
-	$: itemsOnDay = data.scheduleList.map((s) => dayjs(s.scheduled_date));
+	$: itemsOnDay = data.scheduleList.map((s) => s.schedule_date);
 	let date = dayjs();
 </script>
 
@@ -36,7 +36,7 @@
 	</div>
 	<nav class="w-full mt-1">
 		<ul class="space-y-1">
-			{#each data.scheduleList.filter( (s) => dayjs(s.scheduled_date).isSame(date, 'day') ) as schedule}
+			{#each data.scheduleList.filter((s) => s.schedule_date === date.format('D/M/YYYY')) as schedule}
 				<li
 					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
 				>
