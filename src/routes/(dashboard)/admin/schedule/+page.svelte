@@ -36,7 +36,7 @@
 	</div>
 	<nav class="w-full mt-1">
 		<ul class="space-y-1">
-			{#each data.scheduleList.filter((s) => s.schedule_date === date.format('D/M/YYYY')) as schedule}
+			{#each data.scheduleList.filter((s) => s.schedule_date === date.format('M/D/YYYY')) as schedule}
 				<li
 					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 rounded-md p-3"
 				>

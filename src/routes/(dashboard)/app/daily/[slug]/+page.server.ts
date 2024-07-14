@@ -86,6 +86,19 @@ export const actions = {
 					.collection('schedule')
 					.update(nextJobForm.data.schedule_id, { 'job-': [nextJobForm.data.job_id] });
 			}
+
+			const schedule = await locals.pb
+				.collection('schedule')
+				.getOne<{ expand: { job: { status: string }[] } }>(nextJobForm.data.schedule_id, {
+					expand: 'job'
+				});
+
+			if (
+				schedule.expand.job.filter((j) => !(j.status === 'COMPLETED' || j.status === 'CANCELED'))
+					.length === 0
+			) {
+				redirect(301, '/app/daily');
+			}
 		} catch (e) {
 			return fail(400, { nextJobForm });
 		}

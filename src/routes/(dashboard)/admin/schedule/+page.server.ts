@@ -3,6 +3,7 @@ import z from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import { fail } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
+import dayjs from 'dayjs';
 
 export type TUser = {
 	id: string;
@@ -124,7 +125,7 @@ export const actions = {
 
 		if (scheduleForm.data.dates.length === 1) {
 			pb.collection('schedule').create({
-				schedule_date: scheduleForm.data.dates[0].toLocaleDateString(),
+				schedule_date: dayjs(scheduleForm.data.dates[0]).format('M/D/YYYY'),
 				job: scheduleForm.data.job.map((j) => j.id),
 				title: scheduleForm.data.title,
 				employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
@@ -152,7 +153,7 @@ export const actions = {
 						);
 						return pb.collection('schedule').create(
 							{
-								schedule_date: date.toLocaleDateString(),
+								schedule_date: dayjs(date).format('M/D/YYYY'),
 								job: scheduleForm.data.job.map((j) => j.id),
 								title: `📋 | ${scheduleForm.data.title}`,
 								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
@@ -200,7 +201,7 @@ export const actions = {
 
 						return pb.collection('schedule').create(
 							{
-								schedule_date: date.toLocaleDateString(),
+								schedule_date: dayjs(date).format('M/D/YYYY'),
 								job: jobDuplicates.map((j) => j.id),
 								title: `📋 | ${scheduleForm.data.title}`,
 								employee: Array.from(scheduleForm.data.employee).map((e) => e[0]),
