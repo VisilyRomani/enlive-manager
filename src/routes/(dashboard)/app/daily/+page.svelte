@@ -2,6 +2,7 @@
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import type { IDailySchedule } from '../../admin/api/schedule/+server';
+	import dayjs from 'dayjs';
 	let schedules: IDailySchedule[];
 
 	let isMounted = false;
@@ -10,7 +11,7 @@
 	});
 
 	const getScheduleData = async () => {
-		const result = await fetch(`/admin/api/schedule?date=${new Date().toLocaleDateString()}`);
+		const result = await fetch(`/admin/api/schedule?date=${dayjs().format('M/D/YYYY')}`);
 		schedules = await result.json();
 	};
 	$: isMounted === true && getScheduleData();
