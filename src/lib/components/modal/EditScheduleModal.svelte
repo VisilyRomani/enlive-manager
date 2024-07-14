@@ -13,13 +13,8 @@
 		errors: detailsErrors
 	} = superForm(data.EditScheduleDetails, {
 		onSubmit: ({ formData }) => {
-			const date = formData.get('scheduled_date');
-			const selectedDate = dayjs(String(date))
-				.set('hour', 12)
-				.set('minute', 0)
-				.set('second', 0)
-				.toDate();
-			formData.set('scheduled_date', selectedDate.toUTCString());
+			const date = formData.get('schedule_date');
+			formData.set('schedule_date', dayjs(String(date)).format('M/D/YYYY'));
 		},
 		onResult({ result }) {
 			if (result.type === 'success') {
@@ -68,6 +63,7 @@
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
+	$: console.log();
 </script>
 
 {#if $modalStore[0]}
@@ -90,12 +86,12 @@
 					<input
 						type="date"
 						class="input variant-outline-primary"
-						name="scheduled_date"
+						name="schedule_date"
 						placeholder="Schedule date"
-						value={dayjs($detailsForm.scheduled_date).format('YYYY-MM-DD')}
+						value={dayjs($detailsForm.schedule_date).format('YYYY-MM-DD')}
 					/>
-					{#if $detailsErrors.scheduled_date}
-						<span class="text-xs text-red-500">{$detailsErrors.scheduled_date}</span>{/if}
+					{#if $detailsErrors.schedule_date}
+						<span class="text-xs text-red-500">{$detailsErrors.schedule_date}</span>{/if}
 				</div>
 
 				<div class="flex justify-between">
