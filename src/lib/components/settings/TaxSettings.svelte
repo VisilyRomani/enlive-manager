@@ -7,6 +7,24 @@
 	const { form, enhance, errors } = superForm(data.taxForm, {
 		resetForm: true
 	});
+	const {
+		form: formActive,
+		enhance: taxEnhance,
+		submit
+	} = superForm(data.taxActive, { dataType: 'json' });
+
+	const submitForm = (id: string, active: boolean) => {
+		formActive.update(
+			($formActive) => {
+				$formActive.id = id;
+				$formActive.active = active;
+				return $formActive;
+			},
+			{ taint: false }
+		);
+
+		submit();
+	};
 </script>
 
 <h2 class="h2">Tax Settings</h2>
@@ -37,31 +55,33 @@
 </form>
 
 <div class="table-container">
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Percent</th>
-				<th>Active</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.taxes ?? [] as row, i}
+	<form use:taxEnhance action="?/toggleTax" method="post">
+		<table class="table">
+			<thead>
 				<tr>
-					<td class="font-bold">{row.name}</td>
-					<td class="font-bold">{row.percent}%</td>
-					<td
-						><SlideToggle
-							name="slide"
-							bind:checked={row.active}
-							on:change={(e) => {
-								// TODO: update active status
-								// console.log(row.id);
-							}}
-						/>
-					</td>
+					<th>Name</th>
+					<th>Percent</th>
+					<th>Active</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{#each data.taxes ?? [] as row, i}
+					<tr>
+						<td class="font-bold">{row.name}</td>
+						<td class="font-bold">{row.percent}%</td>
+						<td>
+							<input hidden name="id" value={row.id} />
+							<SlideToggle
+								name="active"
+								checked={row.active}
+								on:change={() => {
+									submitForm(row.id, !row.active);
+								}}
+							/>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</form>
 </div>

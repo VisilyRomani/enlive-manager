@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Avatar, SlideToggle } from '@skeletonlabs/skeleton';
+	import { Avatar } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import Dot from '$lib/photos/dot.svelte';
 	export let data: PageData;
@@ -85,7 +85,7 @@
 	</div>
 	<hr class="hr" />
 	<ol class="list">
-		{#each data.client?.expand?.['address(client)'] as addr}
+		{#each data.client?.expand?.['address(client)'] ?? [] as addr}
 			<li class="w-full">
 				<a
 					class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"

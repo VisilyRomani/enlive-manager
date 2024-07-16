@@ -5,7 +5,8 @@
 	const toastStore = getToastStore();
 	export let data: PageData;
 	const { form, errors, enhance } = superForm(data.editClient, {
-		onResult: ({ result }) => {
+		invalidateAll: 'force',
+		onResult: async ({ result }) => {
 			if (result.type === 'success') {
 				toastStore.trigger({ message: 'Client Updated', background: 'bg-success-500' });
 			}

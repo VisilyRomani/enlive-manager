@@ -14,6 +14,26 @@
 		dataType: 'json',
 		resetForm: true
 	});
+
+	const {
+		form: formActive,
+		enhance: serviceEnhance,
+		submit
+	} = superForm(data.taxActive, { dataType: 'json' });
+
+	const submitForm = (id: string, active: boolean) => {
+		formActive.update(
+			($formActive) => {
+				$formActive.id = id;
+				$formActive.active = active;
+				return $formActive;
+			},
+			{ taint: false }
+		);
+		console.log($formActive);
+		submit();
+	};
+
 	const popupClient: PopupSettings = {
 		event: 'focus-blur',
 		target: 'tax-popup',
@@ -22,7 +42,9 @@
 	let selectSearch = { label: '', value: '' };
 	let offsetWidth = 0;
 	$: search = `card max-h-60 overflow-auto w-[${offsetWidth + 'px'}] `;
-	$: taxOptions = data.taxes.map((t) => ({ label: `${t.name} - ${t.percent}%`, value: t.id }));
+	$: taxOptions = data.taxes
+		.filter((t) => t.active)
+		.map((t) => ({ label: `${t.name} - ${t.percent}%`, value: t.id }));
 	$: tax = $form.tax.flatMap((t) => {
 		return t.label;
 	});
@@ -114,16 +136,18 @@
 							{/each}
 						</div>
 					</td>
-					<td
-						><SlideToggle
-							class="static z-0"
-							name="slide"
-							bind:checked={row.active}
-							on:change={(e) => {
-								// TODO: add update for active
-								// console.error(row.id);
-							}}
-						/>
+					<td>
+						<form method="post" action="?/toggleService" use:serviceEnhance>
+							<input name="id" hidden />
+							<SlideToggle
+								class="static z-0"
+								name="active"
+								checked={row.active}
+								on:change={() => {
+									submitForm(row.id, !row.active);
+								}}
+							/>
+						</form>
 					</td>
 				</tr>
 			{/each}

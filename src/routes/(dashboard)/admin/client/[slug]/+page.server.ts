@@ -38,7 +38,7 @@ export const load = async ({ params, locals }) => {
 		.getOne<TClient>(params.slug, { expand: 'address(client)' });
 
 	const jobs = Promise.all(
-		client.expand['address(client)'].map((addr) => {
+		client?.expand['address(client)'].map((addr) => {
 			return locals.pb.collection('job').getFullList<TJob>({
 				filter: `address~"${addr.id}"`,
 				expand: 'address,task,task.service',

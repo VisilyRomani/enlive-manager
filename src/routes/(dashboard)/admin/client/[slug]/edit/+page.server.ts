@@ -47,6 +47,7 @@ export const load = async ({ params, locals }) => {
 	const client = await locals.pb
 		.collection('client')
 		.getOne<TClient>(params.slug, { expand: 'address(client)' });
+	console.log(client);
 
 	const editClient = await superValidate(client, zod(ClientValidation));
 	const editAddress = await superValidate(zod(EditAddressValidation));

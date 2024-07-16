@@ -99,154 +99,158 @@
 {#if $modalStore[0]}
 	<div class="card p-4 w-modal max-w-4xl shadow-xl space-y-4">
 		<h2 class="h2">{$modalStore[0].title}</h2>
-		<form class="grid lg:grid-cols-2 gap-4" action="?/CreateJob" method="post" use:enhance>
-			<div class="flex flex-col gap-3">
-				<input type="text" style="display:none" />
-				<div bind:offsetWidth={offsetClientWidth}>
-					<input
-						class="input variant-form-material"
-						type="search"
-						id="client-popup"
-						autocomplete="off"
-						bind:value={selectedSearch.label}
-						use:popup={popupClient}
-						placeholder="Select Client"
-					/>
-					<div data-popup="client-popup" class="w-full z-50">
-						<div class="card max-h-60 overflow-auto w-[${offsetClientWidth + 'px'}]">
-							<Autocomplete
-								limit={50}
-								bind:input={selectedSearch.label}
-								options={clientOptions}
-								on:selection={(e) => {
-									selectedSearch = e.detail;
-									selectedSearchAddress = { label: '', value: '' };
-								}}
-							/>
-						</div>
-					</div>
-				</div>
-				<div>
-					<div bind:offsetWidth={offsetAddressWidth}>
+		<form class="space-y-4" action="?/CreateJob" method="post" use:enhance>
+			<div class="grid lg:grid-cols-2 gap-4">
+				<div class="flex flex-col gap-3">
+					<input type="text" style="display:none" />
+					<div bind:offsetWidth={offsetClientWidth}>
 						<input
-							class="input variant-form-material h-full {$errors.address
-								? 'input-error'
-								: undefined}"
+							class="input variant-form-material"
 							type="search"
+							id="client-popup"
 							autocomplete="off"
-							id="address-popup"
-							name="address"
-							bind:value={selectedSearchAddress.label}
-							use:popup={popupAddress}
-							placeholder="Select Address"
+							bind:value={selectedSearch.label}
+							use:popup={popupClient}
+							placeholder="Select Client"
 						/>
-						<div data-popup="address-popup" class="w-full z-50">
-							<div class="card max-h-60 overflow-auto w-[${offsetAddressWidth + 'px'}]">
+						<div data-popup="client-popup" class="w-full z-50">
+							<div class="card max-h-60 overflow-auto w-[${offsetClientWidth + 'px'}]">
 								<Autocomplete
-									bind:input={selectedSearchAddress.label}
-									options={addressOptions}
+									limit={50}
+									bind:input={selectedSearch.label}
+									options={clientOptions}
 									on:selection={(e) => {
-										form.update(($form) => {
-											$form.address = e.detail.value;
-											return $form;
-										});
-										selectedSearchAddress.value = e.detail.value;
-										selectedSearchAddress.label = e.detail.label;
+										selectedSearch = e.detail;
+										selectedSearchAddress = { label: '', value: '' };
 									}}
 								/>
 							</div>
 						</div>
 					</div>
-					{#if $errors.address}
-						<span class="text-xs text-red-500">{$errors.address}</span>
-					{/if}
-				</div>
-				<textarea
-					class="input variant-form-material"
-					name="notes"
-					placeholder="Notes"
-					bind:value={$form.notes}
-				/>
-			</div>
-			<div class="h-72 flex justify-between flex-col gap-2">
-				<div class="table-container">
-					<table class="table">
-						<thead>
-							<tr>
-								<th>Service</th>
-								<th>Count</th>
-								<th>Price</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each $form.task || [] as task}
-								<tr>
-									<td>
-										{task[1].service_name}
-									</td>
-									<td>
-										{task[1].count}
-									</td>
-
-									<td>
-										{Dinero({ amount: task[1].price }).toFormat('$0.00')}
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-
-				<div class="flex flex-col">
-					{#if $errors.task?.length}
-						{#each $errors.task as error}
-							<span class="text-xs text-red-500">{error}</span>
-						{/each}
-					{/if}
-					<div class="grid grid-cols-3 gap-2">
-						<div class="w-full col-span-3" bind:offsetWidth={offsetTaskWidth}>
+					<div>
+						<div bind:offsetWidth={offsetAddressWidth}>
 							<input
-								class="input variant-form-material h-full {$errors.task
+								class="input variant-form-material h-full {$errors.address
 									? 'input-error'
 									: undefined}"
 								type="search"
-								name="task"
 								autocomplete="off"
-								id="task-popup"
-								bind:value={selectTask.service_name}
-								use:popup={popupTask}
-								placeholder="Select Service"
+								id="address-popup"
+								name="address"
+								bind:value={selectedSearchAddress.label}
+								use:popup={popupAddress}
+								placeholder="Select Address"
 							/>
-							<div data-popup="task-popup" class="w-full z-50">
-								<div class="card max-h-60 overflow-auto w-[${offsetTaskWidth + 'px'}]">
+							<div data-popup="address-popup" class="w-full z-50">
+								<div class="card max-h-60 overflow-auto w-[${offsetAddressWidth + 'px'}]">
 									<Autocomplete
-										bind:input={selectTask.service_name}
-										options={taskOptions}
+										bind:input={selectedSearchAddress.label}
+										options={addressOptions}
 										on:selection={(e) => {
-											selectTask.service_name = e.detail.label;
-											selectTask.service_id = e.detail.value;
+											form.update(($form) => {
+												$form.address = e.detail.value;
+												return $form;
+											});
+											selectedSearchAddress.value = e.detail.value;
+											selectedSearchAddress.label = e.detail.label;
 										}}
 									/>
 								</div>
 							</div>
 						</div>
-						<input
-							class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
-							placeholder="Count"
-							type="number"
-							bind:value={selectTask.count}
-						/>
+						{#if $errors.address}
+							<span class="text-xs text-red-500">{$errors.address}</span>
+						{/if}
+					</div>
+					<textarea
+						class="input variant-form-material"
+						name="notes"
+						placeholder="Notes"
+						bind:value={$form.notes}
+					/>
+				</div>
+				<div class="h-72 flex justify-between flex-col gap-2">
+					<div class="table-container">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Service</th>
+									<th>Count</th>
+									<th>Price</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each $form.task || [] as task}
+									<tr>
+										<td>
+											{task[1].service_name}
+										</td>
+										<td>
+											{task[1].count}
+										</td>
 
-						<input
-							class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
-							placeholder="Price"
-							type="number"
-							bind:value={selectTask.price}
-						/>
-						<button type="button" class="btn variant-form-material" on:click={addTask}>Add</button>
+										<td>
+											{Dinero({ amount: task[1].price }).toFormat('$0.00')}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+
+					<div class="flex flex-col">
+						{#if $errors.task?.length}
+							{#each $errors.task as error}
+								<span class="text-xs text-red-500">{error}</span>
+							{/each}
+						{/if}
+						<div class="grid grid-cols-3 gap-2">
+							<div class="w-full col-span-3" bind:offsetWidth={offsetTaskWidth}>
+								<input
+									class="input variant-form-material h-full {$errors.task
+										? 'input-error'
+										: undefined}"
+									type="search"
+									name="task"
+									autocomplete="off"
+									id="task-popup"
+									bind:value={selectTask.service_name}
+									use:popup={popupTask}
+									placeholder="Select Service"
+								/>
+								<div data-popup="task-popup" class="w-full z-50">
+									<div class="card max-h-60 overflow-auto w-[${offsetTaskWidth + 'px'}]">
+										<Autocomplete
+											bind:input={selectTask.service_name}
+											options={taskOptions}
+											on:selection={(e) => {
+												selectTask.service_name = e.detail.label;
+												selectTask.service_id = e.detail.value;
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+							<input
+								class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
+								placeholder="Count"
+								type="number"
+								bind:value={selectTask.count}
+							/>
+
+							<input
+								class="input variant-form-material {$errors.task ? 'input-error' : undefined}"
+								placeholder="Price"
+								type="number"
+								bind:value={selectTask.price}
+							/>
+							<button type="button" class="btn variant-form-material" on:click={addTask}>Add</button
+							>
+						</div>
 					</div>
 				</div>
 			</div>
+
 			<footer class="flex justify-between col-span-2">
 				<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{parent.buttonTextCancel}</button

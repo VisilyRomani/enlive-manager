@@ -9,8 +9,8 @@ const CompanyValidation = z.object({
 	phone: z.string().min(1, { message: 'Please enter phone number' }),
 	email: z.string().email(),
 	address: z.string().min(1, { message: 'Please enter address' }),
-	gst: z.string().optional(),
-	pst: z.string().optional(),
+	gst: z.string(),
+	pst: z.string(),
 	url: z.string().url(),
 	terms: z.string().min(1, { message: 'Please enter invoice terms' }),
 	days_until_due: z
