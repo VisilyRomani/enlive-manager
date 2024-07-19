@@ -2,6 +2,7 @@
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import Dot from '$lib/photos/dot.svelte';
+	import Dinero from 'dinero.js';
 	export let data: PageData;
 </script>
 
@@ -124,37 +125,71 @@
 	</ol>
 </div>
 
-<div class="card m-3 p-3">
-	<h4 class="h4 self-center">Jobs</h4>
-	<hr class="hr" />
-	{#await data.streamed.jobs}
-		<p>loading</p>
-	{:then jobs}
-		<ul class="overflow-auto max-h-96">
-			{#each jobs.flat().sort((a, b) => (a.job_number > b.job_number ? -1 : 0)) as job}
-				<li
-					class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"
-				>
-					<a href="/admin/jobs/{job.id}" class="flex items-center gap-3 w-full p-1 rounded-md">
-						<p>
-							{job.job_number}
-						</p>
-						<div class="flex flex-col">
-							<div class="flex flex-row flex-wrap gap-3">
-								{#each job.expand.task as task}
-									<p class="chip variant-outline-tertiary">
-										{task.expand.service.name}
-									</p>
-								{/each}
-							</div>
+<div class="grid lg:grid-cols-2 grid-cols-1">
+	<div class="card m-3 p-3 max-h-80 overflow-auto">
+		<h4 class="h4 self-center">Jobs</h4>
+		<hr class="hr" />
+		{#await data.streamed.jobs}
+			<p>loading</p>
+		{:then jobs}
+			<ul class="overflow-auto max-h-96">
+				{#each jobs.flat().sort((a, b) => (a.job_number > b.job_number ? -1 : 0)) as job}
+					<li
+						class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"
+					>
+						<a href="/admin/jobs/{job.id}" class="flex items-center gap-3 w-full p-1 rounded-md">
 							<p>
-								{job.expand.address.address.split(',').slice(0, 2)}
+								{job.job_number}
 							</p>
-						</div>
-					</a>
-				</li>
-				<hr class="hr" />
-			{/each}
-		</ul>
-	{/await}
+							<div class="flex flex-col">
+								<div class="flex flex-row flex-wrap gap-3">
+									{#each job.expand.task as task}
+										<p class="chip variant-outline-tertiary">
+											{task.expand.service.name}
+										</p>
+									{/each}
+								</div>
+								<p>
+									{job.expand.address.address.split(',').slice(0, 2)}
+								</p>
+							</div>
+						</a>
+					</li>
+					<hr class="hr" />
+				{/each}
+			</ul>
+		{/await}
+	</div>
+	<div class="card m-3 p-3 max-h-80 overflow-auto">
+		<h4 class="h4 self-center">Invoices</h4>
+		<hr class="hr" />
+		{#await data.streamed.invoices}
+			<p>loading</p>
+		{:then invoices}
+			<ul class="overflow-auto max-h-96">
+				{#each invoices
+					.flat()
+					.sort((a, b) => (a.invoice_number > b.invoice_number ? -1 : 0)) as invoice}
+					<li
+						class="hover:bg-primary-900 flex items-center flex-row px-3 p-1 bg-surface-700 rounded-lg my-1 w-full"
+					>
+						<a
+							href="/admin/invoice/{invoice.id}"
+							class="flex items-center gap-3 w-full p-1 rounded-md"
+						>
+							<p>
+								{invoice.invoice_number}
+							</p>
+							<div class="flex flex-col">
+								<p>Total: {Dinero(invoice.total).toFormat('$0.00')}</p>
+								<p>Collected: {Dinero(invoice.collected).toFormat('$0.00')}</p>
+								<p>Outstanding: {Dinero(invoice.outstanding).toFormat('$0.00')}</p>
+							</div>
+						</a>
+					</li>
+					<hr class="hr" />
+				{/each}
+			</ul>
+		{/await}
+	</div>
 </div>

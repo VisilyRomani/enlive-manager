@@ -43,7 +43,7 @@
 	onMount(() => {
 		const script = document.createElement('script');
 		script.src =
-			'https://maps.googleapis.com/maps/api/js?key=AIzaSyB7EdZYIgR4SxMikrHBWC3YxTWFft1oLz0&libraries=places';
+			'https://maps.googleapis.com/maps/api/js?key=AIzaSyB7EdZYIgR4SxMikrHBWC3YxTWFft1oLz0&loading=async&libraries=places';
 		script.async = true;
 		script.defer = true;
 		mapsScript = script;

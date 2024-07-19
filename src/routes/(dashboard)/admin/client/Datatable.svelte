@@ -4,6 +4,7 @@
 		id: string;
 		first_name: string;
 		last_name: string;
+		client_company_name: string;
 		address: {
 			address: string;
 			id: string;
@@ -22,7 +23,8 @@
 			? handler.setRows(clientList)
 			: handler.setRows(clientList.slice(0, counter));
 
-	$: searchValues, handler.search(searchValues, ['first_name', 'last_name', 'address']);
+	$: searchValues,
+		handler.search(searchValues, ['first_name', 'last_name', 'address', 'client_company_name']);
 	$: lastElement, lazyLoad(lastElement);
 
 	const lazyLoad = (target: Element | undefined) => {
@@ -51,6 +53,9 @@
 							<h3 class="h3">
 								{row.first_name}
 								{row.last_name}
+								{#if row.client_company_name}
+									- {row.client_company_name}
+								{/if}
 							</h3>
 							{#each row.address ?? [] as addr}
 								<p class="text-secondary-400 break-all flex flex-col">

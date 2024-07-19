@@ -13,9 +13,7 @@ const TaxValidation = z.object({
 		.default('' as unknown as number)
 });
 
-const TaxActiveValidation = z.object({ id: z.string().min(1), active: z.boolean() });
-
-const ServiceActiveValidation = z.object({ id: z.string().min(1), active: z.boolean() });
+const ToggleActiveValidation = z.object({ id: z.string().min(1), active: z.boolean() });
 
 const ServiceValidation = z.object({
 	name: z.string().min(1),
@@ -45,6 +43,7 @@ interface TEmployeeList extends Record {
 	first_name: string;
 	last_name: string;
 	permission: string;
+	active: boolean;
 }
 
 interface TCodeList extends Record {
@@ -55,10 +54,12 @@ interface TCodeList extends Record {
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const taxForm = await superValidate(request, zod(TaxValidation));
-	const taxActive = await superValidate(request, zod(TaxActiveValidation));
+	const taxActive = await superValidate(request, zod(ToggleActiveValidation));
 
 	const serviceForm = await superValidate(request, zod(ServiceValidation));
-	const serviceActive = await superValidate(request, zod(ServiceActiveValidation));
+	const serviceActive = await superValidate(request, zod(ToggleActiveValidation));
+
+	const workerActive = await superValidate(request, zod(ToggleActiveValidation));
 
 	const codeForm = await superValidate(request, zod(CodeValidation));
 
@@ -82,11 +83,21 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 			codes,
 			codeForm,
 			taxActive,
+			workerActive,
 			serviceActive
 		};
 	}
 
-	return { taxForm, taxes, serviceForm, services, codeForm, taxActive, serviceActive };
+	return {
+		taxForm,
+		taxes,
+		serviceForm,
+		services,
+		codeForm,
+		taxActive,
+		serviceActive,
+		workerActive
+	};
 };
 
 export const actions = {
@@ -119,12 +130,20 @@ export const actions = {
 		return { taxForm };
 	},
 	toggleTax: async ({ locals, request }) => {
-		const taxActive = await superValidate(request, zod(TaxActiveValidation));
+		const taxActive = await superValidate(request, zod(ToggleActiveValidation));
 		if (taxActive.valid) {
 			locals.pb.collection('tax').update(taxActive.data.id, { active: taxActive.data.active });
 		}
 
 		return { taxActive };
+	},
+	toggleWorker: async ({ locals, request }) => {
+		const workerActive = await superValidate(request, zod(ToggleActiveValidation));
+		if (workerActive.valid) {
+			locals.pb
+				.collection('users')
+				.update(workerActive.data.id, { active: workerActive.data.active });
+		}
 	},
 	createService: async ({ locals, request }) => {
 		const serviceForm = await superValidate(request, zod(ServiceValidation));
@@ -156,7 +175,7 @@ export const actions = {
 		return { serviceForm };
 	},
 	toggleService: async ({ locals, request }) => {
-		const serviceActive = await superValidate(request, zod(ServiceActiveValidation));
+		const serviceActive = await superValidate(request, zod(ToggleActiveValidation));
 		if (serviceActive.valid) {
 			locals.pb
 				.collection('service')

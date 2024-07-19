@@ -30,7 +30,6 @@
 			},
 			{ taint: false }
 		);
-		console.log($formActive);
 		submit();
 	};
 

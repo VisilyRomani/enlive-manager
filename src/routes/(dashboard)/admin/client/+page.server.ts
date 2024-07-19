@@ -41,6 +41,7 @@ export interface IClientList extends Record {
 	id: string;
 	first_name: string;
 	last_name: string;
+	client_company_name: string;
 	expand: {
 		'address(client)': {
 			address: string;
@@ -56,14 +57,15 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 	const clientList = (
 		await locals.pb?.collection('client').getFullList<IClientList>({
 			expand: 'address(client)',
-			fields: 'first_name, last_name, id, expand'
+			fields: 'first_name, last_name, id, expand, client_company_name'
 		})
 	)
 		?.map((c) => ({
 			id: c.id,
 			first_name: c.first_name,
 			last_name: c.last_name,
-			address: c.expand?.['address(client)']
+			address: c.expand?.['address(client)'],
+			client_company_name: c.client_company_name
 		}))
 		.sort((a, b) => a.first_name.localeCompare(b.first_name));
 	return {

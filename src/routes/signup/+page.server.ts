@@ -54,6 +54,7 @@ export const actions = {
 		signup.append('email', form.data.email);
 		signup.append('password', form.data.password);
 		signup.append('passwordConfirm', form.data.passwordConfirm);
+		signup.append('active', 'true');
 
 		try {
 			await locals.pb?.collection('users').create(signup);
