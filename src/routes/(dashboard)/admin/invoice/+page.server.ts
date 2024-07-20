@@ -79,6 +79,7 @@ interface IInvoiceCreate {
 interface IInvoicedData {
 	id: string;
 	cancelled: boolean;
+	issue_date: Date;
 	total: Dinero.DineroObject;
 	collected: Dinero.DineroObject;
 	outstanding: Dinero.DineroObject;
@@ -186,6 +187,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			fields: `cancelled, 
 			id,
 		invoice_number,
+		issue_date,
 		expand.job.id,
 		expand.job.expand.address.expand.client.first_name,
 		expand.job.expand.address.expand.client.last_name,

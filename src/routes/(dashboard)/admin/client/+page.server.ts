@@ -90,8 +90,8 @@ export const actions = {
 				pb.collection('address').create(
 					{
 						address: client.addr,
-						lat: undefined,
-						lng: undefined,
+						lat: client.lat,
+						lng: client.lng,
 						active: true,
 						client: dbClient.id
 					},

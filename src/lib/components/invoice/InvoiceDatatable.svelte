@@ -5,6 +5,7 @@
 	import Info from '$lib/photos/info.svelte';
 	import Payment from '$lib/photos/payment.svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import dayjs from 'dayjs';
 
 	let lastElement: HTMLTableRowElement;
 
@@ -51,6 +52,7 @@
 				<td class="p-3 table-cell-fit">Id</td>
 				<td class="p-3">Name</td>
 				<td class="p-3">Address</td>
+				<td class="p-3">Issue Date</td>
 				<td class="p-3 table-cell-fit">Total</td>
 				<td class="p-3 table-cell-fit">Collected</td>
 				<td
@@ -68,6 +70,8 @@
 					<td class="table-cell-fit">{row.invoice_number}</td>
 					<td>{row.expand?.job.expand.address.expand.client.name}</td>
 					<td>{row.expand?.job.expand.address.address}</td>
+					<td>{dayjs(row.issue_date).format('D/M/YYYY')}</td>
+
 					<td class="table-cell-fit">{Dinero(row.total).toFormat('$0.00')}</td>
 
 					<td class="table-cell-fit">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FileDropzone, getModalStore } from '@skeletonlabs/skeleton';
+	import { FileDropzone, getModalStore, ProgressRadial } from '@skeletonlabs/skeleton';
 	import FileIcon from '$lib/photos/file.svelte';
 	import * as XLSX from 'xlsx';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms/client';
@@ -18,6 +18,8 @@
 		Phone: string;
 		Email: string;
 		'Street Address': string;
+		Latitude: number;
+		Longitude: number;
 	};
 	type FormattedClient = {
 		first_name: string;
@@ -26,6 +28,8 @@
 		phone: string;
 		email: string;
 		addr: string;
+		lat: number;
+		lng: number;
 	};
 
 	const toastStore = getToastStore();
@@ -45,7 +49,9 @@
 					client_company_name: c['Company name'],
 					phone: c.Phone,
 					email: c.Email,
-					addr: c['Street Address']
+					addr: c['Street Address'],
+					lat: c.Latitude,
+					lng: c.Longitude
 				};
 			} else {
 				return {
@@ -54,7 +60,9 @@
 					client_company_name: c['Company name'],
 					phone: c.Phone,
 					email: c.Email,
-					addr: c['Street Address']
+					addr: c['Street Address'],
+					lat: c.Latitude,
+					lng: c.Longitude
 				};
 			}
 		});
@@ -69,7 +77,7 @@
 
 	const bulkClientForm: SuperValidated<Infer<BulkClientSchema>> = $page.data.bulkClient;
 
-	const { form, enhance } = superForm(bulkClientForm, {
+	const { form, enhance, delayed } = superForm(bulkClientForm, {
 		dataType: 'json',
 		resetForm: true,
 		onSubmit({ jsonData }) {
@@ -128,6 +136,8 @@
 							<th class="table-cell-fit">Email</th>
 							<th class="table-cell-fit">Company Name</th>
 							<th class="table-cell-fit">Street Address</th>
+							<th class="table-cell-fit">Latitude</th>
+							<th class="table-cell-fit">Longitude </th>
 							<th class="table-cell-fit">Phone</th>
 						</tr>
 					</thead>
@@ -151,6 +161,11 @@
 								<td class={`table-cell-fit `}>
 									{client.addr ?? ''}
 								</td>
+								<td class={`table-cell-fit `}>
+									{client.lat ?? ''}
+								</td><td class={`table-cell-fit `}>
+									{client.lng ?? ''}
+								</td>
 								<td class="table-cell-fit">
 									{client.phone ?? ''}
 								</td>
@@ -170,7 +185,13 @@
 					}}
 					class="btn variant-ghost-primary">Close</button
 				>
-				<button class="btn variant-ghost-success">Submit</button>
+				<button disabled={$delayed} class="btn variant-ghost-success">
+					{#if $delayed}
+						<ProgressRadial stroke={40} width="w-5" />
+					{:else}
+						Submit
+					{/if}
+				</button>
 			</div>
 		</form>
 	</div>
