@@ -40,7 +40,12 @@
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title} - {$modalStore[0].meta.invoice_number}</header>
-		<form class="flex gap-3 flex-col" use:enhance method="post" action="?/CreatePayment">
+		<form
+			class="flex gap-3 flex-col"
+			use:enhance
+			method="post"
+			action="/admin/invoice?/CreatePayment"
+		>
 			<input type="text" name="invoice" hidden bind:value={$modalStore[0].meta.invoice_id} />
 			<select
 				bind:value={$paymentForm.method}

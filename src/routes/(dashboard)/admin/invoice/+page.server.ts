@@ -139,7 +139,7 @@ const InvoiceValidation = z.object({
 	invoice_pdf: z.instanceof(File)
 });
 
-const PaymentValidation = z
+export const _PaymentValidation = z
 	.object({
 		invoice: z.string().min(1),
 		paid: z.number().min(0),
@@ -236,7 +236,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		},
 		zod(InvoiceValidation)
 	);
-	const createPaymentForm = await superValidate(zod(PaymentValidation));
+	const createPaymentForm = await superValidate(zod(_PaymentValidation));
 	return {
 		invoicedJobs,
 		invoiceJobs,
@@ -320,7 +320,7 @@ export const actions = {
 	},
 	CreatePayment: async ({ request, locals }) => {
 		const pb = locals.pb;
-		const createPaymentForm = await superValidate(request, zod(PaymentValidation));
+		const createPaymentForm = await superValidate(request, zod(_PaymentValidation));
 		if (!createPaymentForm.valid) {
 			return fail(400, { createPaymentForm });
 		}
