@@ -5,6 +5,8 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import dayjs from 'dayjs';
 
+	// change client name and created by to be single string so they can be searchable
+
 	let lastElement: HTMLTableRowElement;
 
 	export let searchValues;

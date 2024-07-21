@@ -19,5 +19,5 @@
 			<input bind:value={searchValues} class="input variant-outline-primary" placeholder="Search" />
 		</div>
 	</div>
-	<PaymentsDatatable {payments} />
+	<PaymentsDatatable {payments} {searchValues} />
 </div>
