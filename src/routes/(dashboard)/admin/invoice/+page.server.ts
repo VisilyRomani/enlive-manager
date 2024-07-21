@@ -76,6 +76,39 @@ interface IInvoiceCreate {
 	};
 }
 
+interface IPaymentData {
+	id: string;
+	created: Date;
+	expand: {
+		created_by: {
+			first_name: string;
+			last_name: string;
+		};
+		invoice: {
+			id: string;
+			invoice_number: number;
+			expand: {
+				job: {
+					expand: {
+						address: {
+							expand: {
+								client: {
+									first_name: string;
+									last_name: string;
+									id: string;
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+	method: string;
+	paid: number;
+	reference_code: string;
+}
+
 interface IInvoicedData {
 	id: string;
 	cancelled: boolean;
@@ -238,13 +271,34 @@ export const load: PageServerLoad = async ({ locals }) => {
 		},
 		zod(InvoiceValidation)
 	);
+
+	const payments = await locals.pb.collection('payments').getFullList<IPaymentData>({
+		sort: '-created',
+		expand: 'invoice.job.address.client, created_by',
+		fields: `
+			id,
+			paid, 
+			method, 
+			reference_code,
+			created,
+			expand.created_by.first_name,
+			expand.created_by.last_name,
+			expand.invoice.expand.job.expand.address.expand.client.first_name,
+			expand.invoice.expand.job.expand.address.expand.client.id,
+			expand.invoice.expand.job.expand.address.expand.client.last_name,
+			expand.invoice.id,
+			expand.invoice.invoice_number
+			`
+	});
+
 	const createPaymentForm = await superValidate(zod(_PaymentValidation));
 	return {
 		invoicedJobs,
 		invoiceJobs,
 		companyInvoiceDetails,
 		createPaymentForm,
-		createInvoiceForm
+		createInvoiceForm,
+		payments
 	};
 };
 
@@ -330,6 +384,7 @@ export const actions = {
 		try {
 			pb.collection('payments').create({
 				...createPaymentForm.data,
+				created_by: locals.user.id,
 				paid: Math.trunc(+createPaymentForm.data.paid * 100)
 			});
 		} catch (e) {
