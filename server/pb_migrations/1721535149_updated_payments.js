@@ -7,7 +7,6 @@ migrate((db) => {
   collection.schema.addField(new SchemaField({
     "system": false,
     "id": "hjdn5fjw",
-    "name": "created_by",
     "type": "relation",
     "required": true,
     "presentable": false,

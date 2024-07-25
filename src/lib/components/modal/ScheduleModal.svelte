@@ -346,7 +346,7 @@
 							style="border:0"
 							referrerpolicy="no-referrer-when-downgrade"
 							allowfullscreen
-							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}&loading=async
+							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
 							&mode=driving
 							{currentLocation
 								? `&origin=${currentLocation.lat},${currentLocation.lng}`
