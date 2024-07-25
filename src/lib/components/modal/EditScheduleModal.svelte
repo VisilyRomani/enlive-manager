@@ -63,7 +63,6 @@
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
-	$: console.log();
 </script>
 
 {#if $modalStore[0]}

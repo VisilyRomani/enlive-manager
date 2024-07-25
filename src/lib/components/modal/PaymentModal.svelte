@@ -13,11 +13,9 @@
 		enhance
 	} = superForm(data.createPaymentForm, {
 		onError: (e) => {
-			console.log(e);
 			toastStore.trigger({ message: 'Failed to Create Payment!', background: 'bg-error-500' });
 		},
 		onResult: async ({ result }) => {
-			console.log(result.type);
 			if (result.type === 'success') {
 				modalStore.close();
 				invalidateAll();

@@ -6,7 +6,6 @@
 	let searchValues = '';
 
 	export let payments: PageData['payments'];
-	$: console.log(payments);
 </script>
 
 <div class="space-y-3">

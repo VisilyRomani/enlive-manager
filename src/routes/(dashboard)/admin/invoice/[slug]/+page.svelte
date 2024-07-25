@@ -14,8 +14,6 @@
 			meta: { invoice_id, invoice_number, amount }
 		});
 	};
-
-	$: console.log(data.invoice);
 </script>
 
 <div class="flex justify-between">

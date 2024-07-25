@@ -13,7 +13,6 @@
 			? invoicedJobs.filter((d) => d.outstanding.amount > 0)
 			: [];
 	let InvoiceFilter = 0;
-	$: console.log(InvoiceFilter);
 </script>
 
 <div class="space-y-3">
