@@ -4,13 +4,16 @@
 	import type { PageData } from '../../../routes/(dashboard)/admin/invoice/$types';
 	let searchValues = '';
 	export let invoicedJobs: PageData['invoicedJobs'];
-	$: invoicedJobs =
-		InvoiceFilter === 1
+	$: invoice =
+		InvoiceFilter === 0
+			? invoicedJobs
+			: InvoiceFilter === 1
 			? invoicedJobs.filter((d) => d.outstanding.amount <= 0)
 			: InvoiceFilter === 2
 			? invoicedJobs.filter((d) => d.outstanding.amount > 0)
-			: invoicedJobs;
+			: [];
 	let InvoiceFilter = 0;
+	$: console.log(InvoiceFilter);
 </script>
 
 <div class="space-y-3">
@@ -31,5 +34,5 @@
 			<input bind:value={searchValues} class="input variant-outline-primary" placeholder="Search" />
 		</div>
 	</div>
-	<InvoiceDatatable {invoicedJobs} {searchValues} />
+	<InvoiceDatatable invoicedJobs={invoice} {searchValues} />
 </div>
