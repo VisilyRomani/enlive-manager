@@ -26,5 +26,5 @@
 </svelte:head>
 
 <p>
-	{JSON.stringify(4, null, TempData)}
+	{JSON.stringify(TempData, 4, null)}
 </p>
