@@ -24,3 +24,7 @@
 	<meta name="robots" content="noindex nofollow" />
 	<title>Enlive Manager</title>
 </svelte:head>
+
+<p>
+	{JSON.stringify(4, null, TempData)}
+</p>
