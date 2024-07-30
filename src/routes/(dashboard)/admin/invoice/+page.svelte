@@ -10,6 +10,10 @@
 	let tabSet = 0;
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex nofollow" />
+	<title>Enlive Manager</title>
+</svelte:head>
 <div class="p-4 flex flex-col gap-4">
 	<TabGroup>
 		<Tab bind:group={tabSet} name="InvoiceList" value={0}>Invoice List</Tab>

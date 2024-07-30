@@ -11,6 +11,10 @@
 	};
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex nofollow" />
+	<title>Enlive Manager</title>
+</svelte:head>
 <div class="flex sticky top-0 flex-row card w-full rounded-sm items-center p-4 gap-4 z-10">
 	<button class="btn variant-outline-secondary variant-form-material" on:click={newJobModal}
 		>New Job</button

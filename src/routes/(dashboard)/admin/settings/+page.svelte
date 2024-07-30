@@ -11,7 +11,7 @@
 
 <svelte:head>
 	<meta name="robots" content="noindex nofollow" />
-	<title>Settings</title>
+	<title>Enlive Manager</title>
 </svelte:head>
 
 <div class="p-4 flex flex-col gap-4">

@@ -4,6 +4,10 @@
 	export let data;
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex nofollow" />
+	<title>Enlive Manager</title>
+</svelte:head>
 {#if !$page.data.user.first_name}
 	<UserInfo data={data.userForm} />
 {:else if !$page.data.user.company}

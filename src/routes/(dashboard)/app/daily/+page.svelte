@@ -17,6 +17,10 @@
 	$: isMounted === true && getScheduleData();
 </script>
 
+<svelte:head>
+	<meta name="robots" content="noindex nofollow" />
+	<title>Enlive Manager</title>
+</svelte:head>
 <nav class="mt-1">
 	<ul class="space-y-1">
 		{#if schedules?.length}
