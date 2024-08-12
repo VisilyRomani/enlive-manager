@@ -40,7 +40,7 @@
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
-				currentLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+				currentLocation = { lat: 52.1662674, lng: -106.6459408 };
 			},
 			(err) => {
 				console.error(err.message);
