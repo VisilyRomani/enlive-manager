@@ -11,7 +11,7 @@
 	const modalStore = getModalStore();
 
 	const { form, errors, enhance, delayed } = superForm(data.nextJobForm, {
-		warnings: { duplicateId: false },
+		invalidateAll: 'force',
 		onResult: async ({ result }) => {
 			console.log(result);
 			await invalidateAll();
@@ -88,7 +88,7 @@
 			}}
 		>
 			{#if $delayed}
-				<ProgressRadial />
+				<ProgressRadial width={'w-7'} />
 			{:else}
 				Next
 			{/if}

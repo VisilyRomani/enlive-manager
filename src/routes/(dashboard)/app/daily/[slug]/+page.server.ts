@@ -74,23 +74,32 @@ export const actions = {
 		const nextJobForm = await superValidate(request, zod(ScheduleJobValidation));
 
 		try {
-			await locals.pb.collection('job').update(nextJobForm.data.job_id, {
-				status: nextJobForm.data.status,
-				...(nextJobForm.data.status !== 'COMPLETED' && {
-					update_description: nextJobForm.data.update_description
-				})
-			});
+			await locals.pb.collection('job').update(
+				nextJobForm.data.job_id,
+				{
+					status: nextJobForm.data.status,
+					...(nextJobForm.data.status !== 'COMPLETED' && {
+						update_description: nextJobForm.data.update_description
+					})
+				},
+				{ requestKey: null }
+			);
 
 			if (nextJobForm.data.status === 'RESCHEDULE') {
 				await locals.pb
 					.collection('schedule')
-					.update(nextJobForm.data.schedule_id, { 'job-': [nextJobForm.data.job_id] });
+					.update(
+						nextJobForm.data.schedule_id,
+						{ 'job-': [nextJobForm.data.job_id] },
+						{ requestKey: null }
+					);
 			}
 
 			const schedule = await locals.pb
 				.collection('schedule')
 				.getOne<{ expand: { job: { status: string }[] } }>(nextJobForm.data.schedule_id, {
-					expand: 'job'
+					expand: 'job',
+					requestKey: null
 				});
 
 			if (
