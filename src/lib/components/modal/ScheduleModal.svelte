@@ -40,7 +40,8 @@
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
-				currentLocation = { lat: 52.1662674, lng: -106.6459408 };
+				// hard code start address
+				currentLocation = { lat: 52.1662641, lng: -106.6433659 };
 			},
 			(err) => {
 				console.error(err.message);
@@ -98,7 +99,7 @@
 
 				const firstJob = nearestJob(
 					$form.job as TJob[],
-					{ expand: { address: { lat: currentLocation.lat, lng: currentLocation.lng } } } as TJob
+					{ expand: { address: { lat: 52.1662641, lng: -106.6433659 } } } as TJob
 				);
 
 				if (firstJob) {
