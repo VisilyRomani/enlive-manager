@@ -7,6 +7,10 @@
 	import { invalidate } from '$app/navigation';
 	export let parent: any;
 
+	interface IOptionType {
+		label: string;
+		value: string;
+	}
 	const modalStore = getModalStore();
 
 	const data = $page.data as PageData;
@@ -53,11 +57,19 @@
 			meta: c.expand?.['address(client)'].map((a) => ({ label: a.address, value: a.id }))
 		})) ?? [];
 
-	$: addressOptions =
-		(clientOptions?.find((c) => c.value === selectedSearch.value)?.meta as {
-			label: string;
-			value: string;
-		}[]) ?? [];
+	// $: addressOptions =
+	// 	(clientOptions?.find((c) => c.value === selectedSearch.value)?.meta as {
+	// 		label: string;
+	// 		value: string;
+	// 	}[]) ?? [];
+
+	$: addressOptions = data.clientList.reduce((acc, cur) => {
+		let test = cur.expand?.['address(client)'].flatMap((a) => {
+			return { label: a.address, value: a.id };
+		});
+		acc = [...acc, ...test];
+		return acc;
+	}, [] as IOptionType[]);
 	$: taskOptions = data.serviceList?.map((s) => ({ value: s.id, label: s.name })) ?? [];
 
 	const addTask = () => {
@@ -103,7 +115,7 @@
 			<div class="grid lg:grid-cols-2 gap-4">
 				<div class="flex flex-col gap-3">
 					<input type="text" style="display:none" />
-					<div bind:offsetWidth={offsetClientWidth}>
+					<!-- <div bind:offsetWidth={offsetClientWidth}>
 						<input
 							class="input variant-form-material"
 							type="search"
@@ -126,7 +138,7 @@
 								/>
 							</div>
 						</div>
-					</div>
+					</div> -->
 					<div>
 						<div bind:offsetWidth={offsetAddressWidth}>
 							<input
