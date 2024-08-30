@@ -66,6 +66,11 @@ const ChangeOrderValidation = z.object({
 	order: z.number(),
 	type: z.enum(['INCREASE', 'DECREASE'])
 });
+
+const DuplicateScheduleValidation = z.object({
+	schedule_id: z.string(),
+	duplicated_dates: z.string().array()
+})
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const schedule = await locals.pb.collection('schedule').getOne<TSchedule>(params.slug, {
 		expand: 'job, employee, job.task, job.task.service, job.address, job.address.client',
@@ -94,6 +99,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		{ schedule_id: schedule.id, employees: schedule.expand.employee.map((e) => e.id) },
 		zod(EmployeeValidation)
 	);
+	const DuplicateSchedule = await superValidate({ schedule_id: schedule.id }, zod(DuplicateScheduleValidation))
 	const AddScheduleJobs = await superValidate({ schedule_id: schedule.id }, zod(JobValiation));
 	const DeleteScheduleJobs = await superValidate({ schedule_id: schedule.id }, zod(JobValiation));
 	return {
@@ -102,6 +108,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		OrderScheduleJob,
 		AddScheduleJobs,
 		DeleteScheduleJobs,
+		DuplicateSchedule,
 		schedule,
 		userList,
 		jobList
@@ -274,5 +281,8 @@ export const actions = {
 		}
 
 		return { DeleteScheduleJobs };
+	},
+	duplicateSchedule: async ({ request, locals }) => {
+
 	}
 };

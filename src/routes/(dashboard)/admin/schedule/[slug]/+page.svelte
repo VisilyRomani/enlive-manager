@@ -41,19 +41,22 @@
 	});
 </script>
 
-<ol class="breadcrumb mx-3 px-3">
-	<li class="crumb">
-		<a class="anchor" href="/admin/schedule">
-			<h3 class="h3">Schedule</h3>
-		</a>
-	</li>
-	<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
-	<li>
-		<h3 class="h3">
-			{data.schedule.title}
-		</h3>
-	</li>
-</ol>
+<div class="flex flex-row">
+	<ol class="breadcrumb mx-3 px-3">
+		<li class="crumb">
+			<a class="anchor" href="/admin/schedule">
+				<h3 class="h3">Schedule</h3>
+			</a>
+		</li>
+		<li class="crumb-separator text-4xl" aria-hidden>&rsaquo;</li>
+		<li>
+			<h3 class="h3">
+				{data.schedule.title}
+			</h3>
+		</li>
+	</ol>
+	<button type="button" class="btn variant-ghost-primary m-3">Duplicate</button>
+</div>
 <div class="grid lg:grid-cols-2">
 	<div class="card m-3 p-3">
 		<div class="grid grid-cols-2 gap-1">
@@ -148,6 +151,7 @@
 					<th class="table-cell-fit">Order</th>
 					<th class="table-cell-fit">Job No.</th>
 					<th>Client</th>
+					<th>Address</th>
 					<th>Status</th>
 					<th class="table-cell-fit">More</th>
 				</tr>
@@ -215,6 +219,11 @@
 							<p class="whitespace-normal">
 								{job.expand.address.expand.client.first_name}
 								{job.expand.address.expand.client.last_name}
+							</p>
+						</td>
+						<td class="!align-middle">
+							<p class="whitespace-normal">
+								{job.expand.address.address}
 							</p>
 						</td>
 						<td class="!align-middle">

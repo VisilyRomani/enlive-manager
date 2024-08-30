@@ -9,6 +9,7 @@ import EditScheduleModal from './components/modal/EditScheduleModal.svelte';
 import UpdateScheduleJobModal from './components/modal/UpdateScheduleJobModal.svelte';
 import ImportClientModal from './components/modal/ImportClientModal.svelte';
 import PaymentModal from './components/modal/PaymentModal.svelte';
+import DuplicateScheduleModal from './components/modal/DuplicateScheduleModal.svelte';
 
 export const modalRegistry: Record<string, ModalComponent> = {
 	ClientModal: { ref: ClientModal },
@@ -20,5 +21,6 @@ export const modalRegistry: Record<string, ModalComponent> = {
 	EditScheduleModal: { ref: EditScheduleModal },
 	UpdateScheduleJobModal: { ref: UpdateScheduleJobModal },
 	ImportClientModal: { ref: ImportClientModal },
-	PaymentModal: { ref: PaymentModal }
+	PaymentModal: { ref: PaymentModal },
+	DuplicateScheduleModal: { ref: DuplicateScheduleModal }
 };
