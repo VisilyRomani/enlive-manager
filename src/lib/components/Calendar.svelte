@@ -7,6 +7,8 @@
 	export let multiSelect: boolean = false;
 	export let itemsOnDay: string[] = [];
 	export let selectedDates: Date[] = [];
+	export let disabledDates: Date[] = [];
+
 	const getCells = (selectedDate: Dayjs) => {
 		return new Array(selectedDate.daysInMonth())
 			.fill('')
@@ -53,6 +55,7 @@
 			selectedDates = [];
 		})();
 
+	const weekDate = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 	$: cells = getCells(date);
 </script>
 
@@ -79,9 +82,13 @@
 		</div>
 	</div>
 	<div class="grid grid-cols-7 rounded-lg h-full gap-1">
+		{#each weekDate as date}
+			<p class="flex justify-center items-center m-2">{date}</p>
+		{/each}
 		{#each cells as cell, idx (idx)}
 			<button
 				type="button"
+				disabled={!!disabledDates.find((d) => dayjs(d).isSame(cell, 'day'))}
 				on:click={() => {
 					if (multiSelect) {
 						hasDate(cell) ? removeDate(cell) : addDate(cell);
@@ -90,7 +97,10 @@
 						date = cell;
 					}
 				}}
-				class="hover:bg-secondary-300 rounded-md text-md font-semibold
+				class="
+				{!!disabledDates.find((d) => dayjs(d).isSame(cell, 'day')) &&
+					'bg-gray-600 hover:bg-gray-600 hover:text-white text-white'}
+				hover:bg-secondary-300 hover:text-black rounded-md text-md font-semibold
 				{cell.isSame(dayjs(), 'day') && 'bg-secondary-200 text-black'}
 				{!!itemsOnDay.find((i) => {
 					return i === cell.toDate().toLocaleDateString();

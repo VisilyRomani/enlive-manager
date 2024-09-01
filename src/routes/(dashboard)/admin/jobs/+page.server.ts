@@ -15,13 +15,13 @@ const JobValidation = z.object({
 				service_name: z.string(),
 				service_id: z.string(),
 				price: z
-					.number()
-					.min(0, 'Price must be at/greater than zero')
-					.default('' as unknown as number),
+					.number(),
+				// .min(0, 'Price must be at/greater than zero')
+				// .default('' as unknown as number),
 				count: z
 					.number()
 					.min(1, 'Count must be greater than one')
-					.default('' as unknown as number)
+					.default(1)
 			})
 		)
 		.refine((t) => t.size > 0, { message: 'Must have at least one Task' })

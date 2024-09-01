@@ -19,7 +19,7 @@
 	<title>Enlive Manager</title>
 </svelte:head>
 <div class="flex flex-col lg:flex-row h-full">
-	<div class="card p-4 h-full w-64 flex-col gap-2 hidden lg:flex">
+	<div class="card p-4 h-full w-fit flex-col gap-2 hidden lg:flex">
 		<button class="btn variant-form-material w-full btn-sm" on:click={newScheduleModal}>
 			Create Schedule
 		</button>
