@@ -9,6 +9,7 @@ type TSchedule = {
 	id: string;
 	title: string;
 	schedule_date: string;
+	employee: string[];
 	expand: {
 		employee: {
 			first_name: string;
@@ -20,6 +21,7 @@ type TSchedule = {
 			job_number: number;
 			notes: string;
 			order: number;
+			address: string;
 			status: string;
 			expand: {
 				address: {
@@ -34,6 +36,7 @@ type TSchedule = {
 				task: {
 					count: number;
 					price: number;
+					service: string;
 					expand: {
 						service: {
 							name: string;
@@ -69,7 +72,7 @@ const ChangeOrderValidation = z.object({
 
 const DuplicateScheduleValidation = z.object({
 	schedule_id: z.string(),
-	duplicated_dates: z.string().array()
+	duplicated_dates: z.array(z.string())
 })
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const schedule = await locals.pb.collection('schedule').getOne<TSchedule>(params.slug, {
@@ -283,6 +286,80 @@ export const actions = {
 		return { DeleteScheduleJobs };
 	},
 	duplicateSchedule: async ({ request, locals }) => {
+		const DuplicateSchedule = await superValidate(request, zod(DuplicateScheduleValidation))
+		if (!DuplicateSchedule.valid) {
+			return fail(400, { DuplicateSchedule });
+		}
 
+		const company = await locals.pb
+			.collection('company')
+			.getOne<{ job_count: number }>(locals.user?.company, { fields: 'job_count', requestKey: null });
+		const schedule = await locals.pb.collection('schedule').getOne<TSchedule>(DuplicateSchedule.data.schedule_id, { expand: 'job.task.service' })
+
+		let scheduleData = await Promise.all(DuplicateSchedule.data.duplicated_dates.map(async (date) => {
+
+			const duplicated_jobs = await Promise.all(schedule.expand.job.map(async (job) => {
+				// Duplicating task
+				const duplicated_tasks = await Promise.all(job.expand.task.map(task => {
+					return locals.pb.collection('task').create({
+						service: task.service,
+						price: task.price,
+						count: task.count,
+						company: locals.user?.company
+					},
+						{ requestKey: null })
+				}));
+				return {
+					status: 'SCHEDULED',
+					company: locals.user.company,
+					notes: job.notes,
+					address: job.address,
+					task: duplicated_tasks.map(t => t.id),
+					job_number: company.job_count,
+					order: job.order
+				}
+			}));
+
+			return {
+				job: duplicated_jobs,
+				employee: schedule.employee,
+				title: `📋 |${schedule.title}`,
+				company: locals.user.company,
+				schedule_date: date
+			}
+		}));
+		scheduleData = scheduleData.map((sd, sd_idx) => {
+
+			return {
+				...sd,
+				job: sd.job.map((j, idx) => {
+					return { ...j, job_number: j.job_number + (sd_idx == 0 ? 0 : scheduleData[sd_idx - 1]?.job.length) + idx + 1 }
+				})
+			}
+		})
+		Promise.all(scheduleData.map(async sd => {
+			const CreatedJobs = await Promise.all(sd.job.map((j) => {
+				return locals.pb.collection('job').create({
+					...j
+				}, { requestKey: null })
+			}));
+			await locals.pb.collection('schedule').create({
+				...sd,
+				job: CreatedJobs.map(j => j.id)
+			}, { requestKey: null })
+
+		}))
+
+		await locals.pb.collection('company').update(
+			locals.user?.company,
+			{
+				job_count: company.job_count + scheduleData.reduce((acc, cur) => {
+					return acc += cur.job.length
+				}, 0)
+			},
+			{ requestKey: null }
+		);
+
+		return { DuplicateSchedule }
 	}
 };

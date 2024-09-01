@@ -7,12 +7,12 @@
 	import { statusColor } from '$lib/helper/StyleHelper';
 	import { getToastStore, getModalStore } from '@skeletonlabs/skeleton';
 	export let data: PageData;
-	const modalStore = getModalStore();
 	import Trash from '$lib/photos/trash.svelte';
 	import Info from '$lib/photos/info.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	const toastStore = getToastStore();
 
+	const modalStore = getModalStore();
 	const { form, enhance, errors } = superForm(data.OrderScheduleJob, {
 		dataType: 'json',
 		onResult: ({ result }) => {
@@ -39,6 +39,15 @@
 			}
 		}
 	});
+
+	const DuplicateSchedule = () => {
+		modalStore.trigger({
+			type: 'component',
+			component: 'DuplicateScheduleModal',
+			title: 'Duplicate Schedule',
+			meta: data.schedule.schedule_date
+		});
+	};
 </script>
 
 <div class="flex flex-row">
@@ -55,7 +64,9 @@
 			</h3>
 		</li>
 	</ol>
-	<button type="button" class="btn variant-ghost-primary m-3">Duplicate</button>
+	<button type="button" class="btn variant-ghost-primary m-3" on:click={DuplicateSchedule}
+		>Duplicate</button
+	>
 </div>
 <div class="grid lg:grid-cols-2">
 	<div class="card m-3 p-3">

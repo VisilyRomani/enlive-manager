@@ -3,11 +3,24 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from '../../../routes/(dashboard)/admin/schedule/[slug]/$types';
+	import Calendar from '../Calendar.svelte';
+	import dayjs from 'dayjs';
 	const data = $page.data as PageData;
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
 
+	let selectedDates: Date[] = [];
+
+	$: selectedDates,
+		form.update(
+			($form) => {
+				$form.duplicated_dates = selectedDates.map((d) => dayjs(d).format('M/D/YYYY'));
+				return $form;
+			},
+			{ taint: false }
+		);
 	const { form, errors, enhance } = superForm(data.DuplicateSchedule, {
+		dataType: 'json',
 		onResult: ({ result }) => {
 			if (result.type === 'success') {
 				modalStore.close();
@@ -25,8 +38,25 @@
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title}</header>
 		<form class="flex gap-3 flex-col" use:enhance method="post" action="?/duplicateSchedule">
-			<input hidden name="schedule_id" />
-			<div />
+			<input hidden name="schedule_id" bind:value={$form.schedule_id} />
+			<input hidden name="duplicated_dates" />
+
+			<Calendar
+				multiSelect
+				bind:selectedDates
+				disabledDates={[dayjs($modalStore[0].meta).toDate()]}
+			/>
+
+			<div class="flex justify-between">
+				<button
+					type="button"
+					on:click={() => {
+						modalStore.close();
+					}}
+					class="btn variant-ghost-primary">Close</button
+				>
+				<button class="btn variant-ghost-success">Submit</button>
+			</div>
 		</form>
 	</div>
 {/if}

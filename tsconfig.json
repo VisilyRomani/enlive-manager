@@ -10,9 +10,13 @@
 		"sourceMap": true,
 		"strict": true,
 		"target": "es2019",
-		"lib": ["es2020"],
+		"lib": [
+			"es2020"
+		],
 		"module": "es2020",
-		"types": ["google.maps"]
+		"types": [
+			"google.maps"
+		]
 	},
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
