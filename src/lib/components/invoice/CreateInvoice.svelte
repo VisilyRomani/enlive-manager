@@ -27,15 +27,14 @@
 					message: `Invoice NO. ${invoiceData.selectedJobData?.job_number} sent`,
 					background: 'bg-success-500'
 				});
+				selectedJobData = undefined;
 			}
-			selectedJobData = undefined;
 		}
 	});
 	$: invoiceData = {
 		companyInvoiceDetails,
 		selectedJobData
 	};
-
 	$: invoiceData, updateFormJob(), generatePdfPreview();
 
 	const generatePdfPreview = async () => {
@@ -62,6 +61,7 @@
 	const updateFormJob = () => {
 		form.update(
 			($form) => {
+				$errors = { _errors: undefined };
 				$form.invoice_data =
 					invoiceData.selectedJobData?.expand?.task.map((t) => ({
 						service: t.expand.service.id,
@@ -176,25 +176,29 @@
 								bind:value={selectedJobData.expand.address.address}
 							/>
 						</label>
-						<label class="label">
-							<span>Email</span>
-							<input
-								type="text"
-								placeholder="Email"
-								class="input variant-form-material"
-								bind:value={selectedJobData.expand.address.expand.client.email}
-								on:change={() => {
-									form.update(
-										($form) => {
-											$form.client_email =
-												selectedJobData?.expand.address.expand.client.email ?? '';
-											return $form;
-										},
-										{ taint: false }
-									);
-								}}
-							/>
-						</label>
+						<div>
+							<label class="label">
+								<span>Email</span>
+								<input
+									type="text"
+									placeholder="Email"
+									class={`input variant-form-material ${$errors.client_email ? 'input-error' : ''}`}
+									bind:value={selectedJobData.expand.address.expand.client.email}
+									on:change={() => {
+										form.update(
+											($form) => {
+												$form.client_email =
+													selectedJobData?.expand.address.expand.client.email ?? '';
+												return $form;
+											},
+											{ taint: false }
+										);
+									}}
+								/>
+							</label>
+							{#if $errors.client_email}
+								<span class="text-xs text-red-500">{$errors.client_email[0]}</span>{/if}
+						</div>
 
 						<label class="label">
 							<span>Issue Date</span>

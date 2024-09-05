@@ -163,7 +163,9 @@ const InvoiceValidation = z.object({
 	invoice_number: z.number().nonnegative(),
 	issue_date: z.string(),
 	due_date: z.string(),
-	client_email: z.string().email(),
+	client_email: z.string()
+		.min(1, { message: "This field has to be filled." })
+		.email(),
 	invoice_data: z
 		.object({
 			service: z.string().min(1),
