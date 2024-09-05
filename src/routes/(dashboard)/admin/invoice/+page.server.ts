@@ -109,10 +109,11 @@ interface IPaymentData {
 	reference_code: string;
 }
 
-interface IInvoicedData {
+export interface IInvoicedData {
 	id: string;
 	cancelled: boolean;
 	issue_date: Date;
+	due_date: Date;
 	total: Dinero.DineroObject;
 	collected: Dinero.DineroObject;
 	outstanding: Dinero.DineroObject;
@@ -137,6 +138,7 @@ interface IInvoicedData {
 			method: string;
 			paid: number;
 			code: string;
+			created: Date;
 		}[];
 		job: {
 			id: string;
