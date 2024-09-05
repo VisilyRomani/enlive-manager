@@ -24,7 +24,7 @@
 	let userSearch = '';
 	let offsetWidth = 0;
 	let showFirst = true;
-
+	let address = '';
 	const data = $page.data as PageData;
 	const { form, enhance, errors } = superForm(data.scheduleForm, {
 		dataType: 'json',
@@ -35,18 +35,32 @@
 	});
 
 	export let parent: any;
-	let currentLocation: { lat: number; lng: number };
+	let startLocation: { lat: number; lng: number };
 
 	onMount(() => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
-				// hard code start address
-				currentLocation = { lat: 52.1662641, lng: -106.6433659 };
+				startLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
 			},
 			(err) => {
 				console.error(err.message);
 			}
 		);
+
+		const autoCompleteInput = document.getElementById('auto-complete-input') as HTMLInputElement;
+		let googlePlaces = new google.maps.places.Autocomplete(autoCompleteInput, {
+			types: ['address'],
+			componentRestrictions: { country: 'ca' },
+			fields: ['geometry', 'formatted_address']
+		});
+		googlePlaces.addListener('place_changed', () => {
+			const place = googlePlaces.getPlace();
+			if (place.geometry?.location?.lat() && place.geometry?.location?.lng())
+				startLocation = {
+					lat: place.geometry?.location?.lat(),
+					lng: place.geometry?.location?.lng()
+				};
+		});
 	});
 
 	const popupSettings: PopupSettings = {
@@ -99,7 +113,7 @@
 
 				const firstJob = nearestJob(
 					$form.job as TJob[],
-					{ expand: { address: { lat: 52.1662641, lng: -106.6433659 } } } as TJob
+					{ expand: { address: { lat: startLocation.lat, lng: startLocation.lng } } } as TJob
 				);
 
 				if (firstJob) {
@@ -183,6 +197,15 @@
 		action="?/createSchedule"
 	>
 		<h2 class="h2">{$modalStore[0].title}</h2>
+		<input
+			id="auto-complete-input"
+			type="search"
+			hidden={showFirst}
+			name="addr"
+			class="input"
+			placeholder="Starting Address"
+			bind:value={address}
+		/>
 		{#if showFirst}
 			<div class="ml-auto mr-0">
 				<SlideToggle size="sm" name="toggle" bind:checked={multiSelect}
@@ -349,9 +372,7 @@
 							allowfullscreen
 							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
 							&mode=driving
-							{currentLocation
-								? `&origin=${currentLocation.lat},${currentLocation.lng}`
-								: '&origin=Current%20Location'}
+							{startLocation ? `&origin=${startLocation.lat},${startLocation.lng}` : '&origin=Current%20Location'}
 							{googleEmbeddedParams()}"
 						/>
 					</div>
