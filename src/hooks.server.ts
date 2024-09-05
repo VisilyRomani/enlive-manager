@@ -49,7 +49,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				'/admin/initial-setup/connect'
 			].includes(event.url.pathname)
 		) {
-			throw redirect(303, '/admin/client');
+			throw redirect(303, '/admin/dashboard');
 		}
 	}
 
