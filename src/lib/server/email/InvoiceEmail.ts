@@ -35,7 +35,7 @@ export const GenerateEmail = async (InvoiceData: IInvoiceTemplate) => {
 
 	return resend.emails.send({
 		from: `${InvoiceData.company} <invoice@enlivemanager.com>`,
-		to: ['visilyromanicm@gmail.com'],
+		to: InvoiceData.client_email,
 		subject: `Invoice #${InvoiceData.invoice_number} from ${InvoiceData.company}`,
 		attachments: [
 			{

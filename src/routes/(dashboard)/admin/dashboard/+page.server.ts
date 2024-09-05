@@ -42,17 +42,12 @@ export const load: PageServerLoad = async ({ request, locals }) => {
         // sum all payments within last 30 days
         acc = { ...acc, paid_month: acc.paid_month.add(Dinero({ amount: paid_amount.month_payments })) }
 
-
-        console.log(dayjs(cur.due_date).isBefore(dayjs()))
-        console.log(invoice_total.subtract(Dinero({ amount: paid_amount.all_payments })).toFormat('0.00'))
-
         // overdue invoices
         if (dayjs(cur.due_date).isBefore(dayjs())) {
             acc = { ...acc, unpaid_overdue: invoice_total.subtract(Dinero({ amount: paid_amount.all_payments })) }
         } else {
             acc = { ...acc, unpaid_not_due_yet: invoice_total.subtract(Dinero({ amount: paid_amount.all_payments })) }
         }
-
 
         // sort for gross
         if (dayjs(cur.issue_date).isAfter(one_month_date)) {
@@ -88,10 +83,6 @@ export const load: PageServerLoad = async ({ request, locals }) => {
         unpaid_not_due_yet: gross_data_dinero.unpaid_not_due_yet.toObject(),
         paid_month: gross_data_dinero.paid_month.toObject()
     }
-
-
-
-
 
     return { company_finance, month_job_count: job_count.length }
 }

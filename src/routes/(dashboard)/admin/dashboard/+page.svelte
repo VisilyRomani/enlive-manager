@@ -2,14 +2,9 @@
 	import { ProgressBar } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import Dinero from 'dinero.js';
-	/** Dashboard Statistics - 
- * Completed Jobs revenue - 1 month - 3 months - yearly - 
-* Invoices - overdue - not due yet - last 365 days -
-amount of Jobs Created - last 30 - scheduled - completed */
+
 	export let data: PageData;
 	let selected_month = 12;
-
-	$: console.log(data);
 </script>
 
 <svelte:head>
