@@ -24,8 +24,8 @@
 		<svelte:fragment slot="lead">(icon)</svelte:fragment>
 		<span class="text-xs">Forecast</span>
 	</TabAnchor>
-	<TabAnchor href="/admin/dashboard" selected={$page.url.pathname === '/admin/dashboard'}>
+	<TabAnchor href="/admin/settings" selected={$page.url.pathname === '/admin/settings'}>
 		<svelte:fragment slot="lead">(icon)</svelte:fragment>
-		<span class="text-xs">Dashboard</span>
+		<span class="text-xs">Profile</span>
 	</TabAnchor>
 </TabGroup>

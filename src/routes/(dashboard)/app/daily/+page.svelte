@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import type { IDailySchedule } from '../../admin/api/schedule/+server';
 	import dayjs from 'dayjs';
-	let schedules: IDailySchedule[];
+	let schedules: IDailySchedule[] = [];
 
 	let isMounted = false;
 	onMount(() => {
@@ -12,7 +12,8 @@
 
 	const getScheduleData = async () => {
 		const result = await fetch(`/admin/api/schedule?date=${dayjs().format('M/D/YYYY')}`);
-		schedules = await result.json();
+		console.log(await result.json());
+		// schedules = await result.json();
 	};
 	$: isMounted === true && getScheduleData();
 </script>

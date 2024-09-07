@@ -21,51 +21,53 @@
 
 <nav class="list-nav p-4 flex flex-col justify-between gap-5">
 	<ul>
-		<li>
-			<a
-				href="/admin/dashboard"
-				class="!rounded-md {$page.url.pathname === '/admin/dashboard'
-					? '!bg-primary-900 text-cyan-50'
-					: ''}"
-				on:click={navClose}>Dashboard</a
-			>
-		</li>
-		<li>
-			<a
-				class="!rounded-md {$page.url.pathname === '/admin/client'
-					? '!bg-primary-900 text-cyan-50'
-					: ''}"
-				href="/admin/client"
-				on:click={navClose}>Client</a
-			>
-		</li>
-		<li>
-			<a
-				class="!rounded-md {$page.url.pathname === '/admin/jobs'
-					? '!bg-primary-900 text-cyan-50'
-					: ''}"
-				href="/admin/jobs"
-				on:click={navClose}>Jobs</a
-			>
-		</li>
-		<li>
-			<a
-				class="!rounded-md {$page.url.pathname === '/admin/schedule'
-					? '!bg-primary-900 text-cyan-50'
-					: ''}"
-				href="/admin/schedule"
-				on:click={navClose}>Schedule</a
-			>
-		</li>
-		<li>
-			<a
-				class="!rounded-md {$page.url.pathname === '/admin/invoice'
-					? '!bg-primary-900 text-cyan-50'
-					: ''}"
-				href="/admin/invoice"
-				on:click={navClose}>Invoice</a
-			>
-		</li>
+		{#if $page.data.user.permission !== 'WORKER'}
+			<li>
+				<a
+					href="/admin/dashboard"
+					class="!rounded-md {$page.url.pathname === '/admin/dashboard'
+						? '!bg-primary-900 text-cyan-50'
+						: ''}"
+					on:click={navClose}>Dashboard</a
+				>
+			</li>
+			<li>
+				<a
+					class="!rounded-md {$page.url.pathname === '/admin/client'
+						? '!bg-primary-900 text-cyan-50'
+						: ''}"
+					href="/admin/client"
+					on:click={navClose}>Client</a
+				>
+			</li>
+			<li>
+				<a
+					class="!rounded-md {$page.url.pathname === '/admin/jobs'
+						? '!bg-primary-900 text-cyan-50'
+						: ''}"
+					href="/admin/jobs"
+					on:click={navClose}>Jobs</a
+				>
+			</li>
+			<li>
+				<a
+					class="!rounded-md {$page.url.pathname === '/admin/schedule'
+						? '!bg-primary-900 text-cyan-50'
+						: ''}"
+					href="/admin/schedule"
+					on:click={navClose}>Schedule</a
+				>
+			</li>
+			<li>
+				<a
+					class="!rounded-md {$page.url.pathname === '/admin/invoice'
+						? '!bg-primary-900 text-cyan-50'
+						: ''}"
+					href="/admin/invoice"
+					on:click={navClose}>Invoice</a
+				>
+			</li>
+		{/if}
 		<li>
 			<a
 				class="!rounded-md {$page.url.pathname === '/app/daily'

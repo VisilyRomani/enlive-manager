@@ -40,6 +40,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 			throw redirect(303, '/admin/initial-setup');
 		}
 
+		if (event.locals.user.permission === 'WORKER' && ![
+			'/app/daily',
+			'/app/forecast',
+			'/admin/settings'
+		].includes(event.url.pathname)) {
+			throw redirect(303, '/app/daily');
+
+		}
+
 		if (
 			event.locals.user.first_name &&
 			event.locals.user.company &&

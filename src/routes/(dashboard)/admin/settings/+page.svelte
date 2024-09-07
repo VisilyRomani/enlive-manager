@@ -7,7 +7,7 @@
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	export let data;
 
-	let tabSet = 0;
+	let tabSet = data.user?.permission === 'WORKER' ? 2 : 0;
 </script>
 
 <svelte:head>
@@ -17,11 +17,14 @@
 
 <div class="p-4 flex flex-col gap-4">
 	<TabGroup>
-		<Tab bind:group={tabSet} name="Tax" value={0}>Tax</Tab>
-		<Tab bind:group={tabSet} name="Services" value={1}>Services</Tab>
+		{#if data.user?.permission === 'OWNER' || data.user?.permission === 'MANAGER'}
+			<Tab bind:group={tabSet} name="Tax" value={0}>Tax</Tab>
+			<Tab bind:group={tabSet} name="Services" value={1}>Services</Tab>
+			<Tab bind:group={tabSet} name="Employee" value={3}>Employee</Tab>
+		{/if}
+
 		<Tab bind:group={tabSet} name="User" value={2}>Profile</Tab>
 		{#if data.user?.permission === 'OWNER'}
-			<Tab bind:group={tabSet} name="Employee" value={3}>Employee</Tab>
 			<Tab bind:group={tabSet} name="Employee" value={4}>Company</Tab>
 		{/if}
 		<svelte:fragment slot="panel">

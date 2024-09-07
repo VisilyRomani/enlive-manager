@@ -63,11 +63,10 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 	const codeForm = await superValidate(request, zod(CodeValidation));
 
-	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
-	const services =
-		(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
-
-	if (locals.user?.permission == 'OWNER') {
+	if (locals.user?.permission !== 'WORKER') {
+		const services =
+			(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
+		const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
 		const employees = (await locals.pb?.collection('users').getFullList<TEmployeeList>()) ?? [];
 		const codes =
 			(await locals.pb
@@ -86,18 +85,11 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 			workerActive,
 			serviceActive
 		};
-	}
+	} else {
+		return {
 
-	return {
-		taxForm,
-		taxes,
-		serviceForm,
-		services,
-		codeForm,
-		taxActive,
-		serviceActive,
-		workerActive
-	};
+		};
+	}
 };
 
 export const actions = {
