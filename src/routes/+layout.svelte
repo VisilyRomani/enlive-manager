@@ -24,7 +24,6 @@
 	import { modalRegistry } from '$lib/ModalRegistry';
 	import { goto } from '$app/navigation';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-	$: console.log($navigating);
 	initializeStores();
 	const drawerStore = getDrawerStore();
 
@@ -102,7 +101,9 @@
 		</div>
 	</svelte:fragment>
 	{#if $navigating}
-		<ProgressRadial />
+		<div class="w-full h-full flex justify-center items-center">
+			<ProgressRadial />
+		</div>
 	{:else}
 		<slot />
 	{/if}

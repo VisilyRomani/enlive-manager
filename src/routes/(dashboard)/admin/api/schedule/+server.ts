@@ -1,4 +1,4 @@
-import { json } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 
 export interface IDailySchedule {
 	id: string;
@@ -9,26 +9,24 @@ export interface IDailySchedule {
 }
 
 export const GET = async ({ url, locals }) => {
-	try {
+	const date = url.searchParams.get('date');
 
-		const date = url.searchParams.get('date');
+	let schedules = await locals.pb?.collection('schedule').getFullList<IDailySchedule>({
+		filter: `schedule_date = "${date}" && employee.id?="${locals.user?.id}"`,
+		expand: 'job',
+		fields: 'job, expand.job.status, id, title'
+	});
 
-		let schedules = await locals.pb?.collection('schedule').getFullList<IDailySchedule>({
-			filter: ` schedule_date = "${date}" && employee.id?="${locals.user?.id}"`,
-			expand: 'job',
-			fields: 'job, expand.job.status, id, title'
-		}) ?? [];
+	schedules = schedules?.map((s) => {
+		const completed =
+			s.expand?.job.filter((j) => j.status === 'COMPLETED' || j.status === 'CANCELED').length /
+			s.expand?.job.length;
+		return {
+			...s,
+			completed: completed * 100
+		};
 
-		schedules = schedules?.map((s) => {
-			const completed =
-				s.expand?.job.filter((j) => j.status === 'COMPLETED' || j.status === 'CANCELED').length /
-				s.expand?.job.length;
-			return {
-				...s,
-				completed: completed * 100
-			};
-		});
+	});
 
-		return json(schedules);
-	} catch (e) { console.log(e) }
+	return json(schedules);
 };

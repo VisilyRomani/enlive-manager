@@ -5,17 +5,12 @@
 	import dayjs from 'dayjs';
 	let schedules: IDailySchedule[] = [];
 
-	let isMounted = false;
-	onMount(() => {
-		isMounted = true;
+	onMount(async () => {
+		const result = await fetch(`/admin/api/schedule?date=${dayjs().format('M/D/YYYY')}`, {
+			method: 'GET'
+		});
+		schedules = await result.json();
 	});
-
-	const getScheduleData = async () => {
-		const result = await fetch(`/admin/api/schedule?date=${dayjs().format('M/D/YYYY')}`);
-		console.log(await result.json());
-		// schedules = await result.json();
-	};
-	$: isMounted === true && getScheduleData();
 </script>
 
 <svelte:head>
@@ -24,8 +19,8 @@
 </svelte:head>
 <nav class="mt-1">
 	<ul class="space-y-1">
-		{#if schedules?.length}
-			{#each schedules ?? [] as schedule}
+		{#if schedules.length}
+			{#each schedules as schedule}
 				<li
 					class="hover:bg-surface-700 bg-surface-800 shadow-md transition-colors border-l-4 {schedule.completed ===
 						100 && 'border-success-500'} rounded-md p-3"

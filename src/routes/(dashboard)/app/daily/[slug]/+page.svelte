@@ -13,7 +13,6 @@
 	const { form, errors, enhance, delayed } = superForm(data.nextJobForm, {
 		invalidateAll: 'force',
 		onResult: async ({ result }) => {
-			console.log(result);
 			await invalidateAll();
 		}
 	});

@@ -15,9 +15,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (event.locals.pb.authStore.isValid) {
 			// Refresh the user's authentication
 			await event.locals.pb.collection('users').authRefresh();
-
-			// Set the user in the locals object
-			event.locals.user = structuredClone(event.locals.pb.authStore.model) || undefined;
+			const user = structuredClone(event.locals.pb.authStore.model)
+			if (user) {
+				// Set the user in the locals object
+				event.locals.user = user;
+			}
 		}
 	} catch (err) {
 		// Clear the authStore if there is an error
@@ -43,6 +45,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (event.locals.user.permission === 'WORKER' && ![
 			'/app/daily',
 			'/app/forecast',
+			'/admin/api/schedule',
 			'/admin/settings'
 		].includes(event.url.pathname)) {
 			throw redirect(303, '/app/daily');
