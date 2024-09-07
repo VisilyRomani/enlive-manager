@@ -8,10 +8,12 @@
 		Drawer,
 		Toast,
 		Modal,
-		Avatar
+		Avatar,
+		ProgressRadial
 	} from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { onMount } from 'svelte';
+	import { navigating } from '$app/stores';
 
 	import ArrowBack from '$lib/photos/aback.svelte';
 
@@ -22,7 +24,7 @@
 	import { modalRegistry } from '$lib/ModalRegistry';
 	import { goto } from '$app/navigation';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-
+	$: console.log($navigating);
 	initializeStores();
 	const drawerStore = getDrawerStore();
 
@@ -99,6 +101,9 @@
 			<Navigation />
 		</div>
 	</svelte:fragment>
-
-	<slot />
+	{#if $navigating}
+		<ProgressRadial />
+	{:else}
+		<slot />
+	{/if}
 </AppShell>
