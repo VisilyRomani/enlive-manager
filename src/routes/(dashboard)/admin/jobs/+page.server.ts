@@ -7,6 +7,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 
 const JobValidation = z.object({
 	address: z.string().min(1, 'Job must have address'),
+	lat: z.number().optional(),
+	lng: z.number().optional(),
+	new_client: z.boolean().default(false),
 	notes: z.string().optional(),
 	task: z
 		.map(
@@ -83,23 +86,11 @@ export const actions = {
 		if (!jobForm.valid) {
 			return fail(400, { jobForm });
 		}
-
-		const jobData = new FormData();
-
-		jobData.append('address', jobForm.data.address);
-		jobData.append('notes', jobForm.data.notes ?? '');
-		jobData.append('status', 'PENDING');
-
-		if (!locals.user?.company) {
-			locals.pb.authStore.clear();
-		}
-		jobData.append('company', locals.user?.company);
-
 		const company = await locals.pb
 			.collection('company')
 			.getOne<{ job_count: number }>(locals.user?.company, { fields: 'job_count' });
 
-		jobData.append('job_number', String(company.job_count + 1));
+
 
 		try {
 			const tasks = Array.from(jobForm.data.task).map((t) => {
@@ -113,23 +104,39 @@ export const actions = {
 					{ requestKey: null }
 				);
 			});
+			const task_ids = (await Promise.all(tasks)).map(t => t.id)
 
-			(await Promise.all(tasks)).forEach((task) => {
-				if (task) {
-					jobData.append('task', task.id);
-				}
-			});
-			const job = await locals.pb.collection('job').create(jobData);
 
+			if (jobForm.data.new_client) {
+				const client = await locals.pb.collection('client').create({ first_name: jobForm.data.address, company: locals.user.company });
+				const address = await locals.pb.collection('address').create({ address: jobForm.data.address, lat: jobForm.data.lat, lng: jobForm.data.lng, client: client.id, active: true })
+				await locals.pb.collection('job').create({
+					...jobForm.data,
+					address: address.id,
+					job_number: String(company.job_count + 1),
+					status: 'PENDING', task: task_ids,
+					company: locals.user?.company
+				});
+			} else {
+				await locals.pb.collection('job').create({
+					...jobForm.data,
+					job_number: String(company.job_count + 1),
+					status: 'PENDING', task: task_ids,
+					company: locals.user?.company
+				});
+			}
 			await locals.pb
 				.collection('company')
 				.update(locals.user?.company, { job_count: company.job_count + 1 });
-			return { result: job, jobForm };
+
 		} catch (e) {
 			if (e instanceof Error) {
 				console.error(e.message);
 				return fail(400, { jobForm });
 			}
 		}
+
+
+		return { jobForm };
 	}
 };

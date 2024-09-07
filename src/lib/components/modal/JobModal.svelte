@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Autocomplete, getModalStore, type PopupSettings, popup } from '@skeletonlabs/skeleton';
+	import {
+		Autocomplete,
+		getModalStore,
+		type PopupSettings,
+		popup,
+		SlideToggle
+	} from '@skeletonlabs/skeleton';
 	import Dinero from 'dinero.js';
 	import type { PageData } from '../../../routes/(dashboard)/admin/jobs/$types';
 	import { superForm } from 'sveltekit-superforms';
 	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
 	export let parent: any;
 
 	interface IOptionType {
@@ -13,14 +20,36 @@
 	}
 	const modalStore = getModalStore();
 
+	onMount(() => {
+		const autoCompleteInput = document.getElementById('auto-complete-input') as HTMLInputElement;
+		let googlePlaces = new google.maps.places.Autocomplete(autoCompleteInput, {
+			types: ['address'],
+			componentRestrictions: { country: 'ca' },
+			fields: ['geometry', 'formatted_address']
+		});
+		googlePlaces.addListener('place_changed', () => {
+			const place = googlePlaces.getPlace();
+
+			if (place.geometry?.location?.lat() && place.geometry?.location?.lng()) {
+				form.update(
+					($form) => {
+						$form.lat = place.geometry?.location?.lat();
+						$form.lng = place.geometry?.location?.lng();
+						$form.address = place?.formatted_address ?? $form.address;
+						return $form;
+					},
+					{ taint: false }
+				);
+			}
+		});
+	});
+
 	const data = $page.data as PageData;
 
-	let offsetClientWidth = 0;
 	let offsetAddressWidth = 0;
 	let offsetTaskWidth = 0;
 
 	let selectTask = { service_name: '', service_id: '', price: '', count: '' };
-	let selectedSearch = { label: '', value: '' };
 	let selectedSearchAddress = { label: '', value: '' };
 
 	const { form, errors, enhance } = superForm(data.jobForm, {
@@ -34,11 +63,6 @@
 		}
 	});
 
-	const popupClient: PopupSettings = {
-		event: 'focus-click',
-		target: 'client-popup',
-		placement: 'bottom'
-	};
 	const popupAddress: PopupSettings = {
 		event: 'focus-click',
 		target: 'address-popup',
@@ -50,19 +74,6 @@
 		placement: 'bottom'
 	};
 
-	$: clientOptions =
-		data.clientList?.map((c) => ({
-			label: `${c.first_name} ${c.last_name}`,
-			value: c.id,
-			meta: c.expand?.['address(client)'].map((a) => ({ label: a.address, value: a.id }))
-		})) ?? [];
-
-	// $: addressOptions =
-	// 	(clientOptions?.find((c) => c.value === selectedSearch.value)?.meta as {
-	// 		label: string;
-	// 		value: string;
-	// 	}[]) ?? [];
-
 	$: addressOptions = data.clientList.reduce((acc, cur) => {
 		let test = cur.expand?.['address(client)'].flatMap((a) => {
 			return { label: a.address, value: a.id };
@@ -71,7 +82,6 @@
 		return acc;
 	}, [] as IOptionType[]);
 	$: taskOptions = data.serviceList?.map((s) => ({ value: s.id, label: s.name })) ?? [];
-
 	const addTask = () => {
 		form.update(
 			($form) => {
@@ -114,37 +124,35 @@
 		<form class="space-y-4" action="?/CreateJob" method="post" use:enhance>
 			<div class="grid lg:grid-cols-2 gap-4">
 				<div class="flex flex-col gap-3">
-					<input type="text" style="display:none" />
-					<!-- <div bind:offsetWidth={offsetClientWidth}>
-						<input
-							class="input variant-form-material"
-							type="search"
-							id="client-popup"
-							autocomplete="off"
-							bind:value={selectedSearch.label}
-							use:popup={popupClient}
-							placeholder="Select Client"
-						/>
-						<div data-popup="client-popup" class="w-full z-50">
-							<div class="card max-h-60 overflow-auto w-[${offsetClientWidth + 'px'}]">
-								<Autocomplete
-									limit={50}
-									bind:input={selectedSearch.label}
-									options={clientOptions}
-									on:selection={(e) => {
-										selectedSearch = e.detail;
-										selectedSearchAddress = { label: '', value: '' };
-									}}
-								/>
-							</div>
-						</div>
-					</div> -->
 					<div>
+						<SlideToggle
+							name="new_client"
+							bind:checked={$form.new_client}
+							on:change={() => {
+								form.update(
+									($form) => {
+										$form.address = '';
+										return $form;
+									},
+									{ taint: false }
+								);
+							}}
+							size="sm">New Client</SlideToggle
+						>
+						<input
+							class={`input variant-form-material  ${!$form.new_client ? 'hidden' : ''}`}
+							placeholder="New Address"
+							name="address"
+							id="auto-complete-input"
+							bind:value={$form.address}
+						/>
+						<input hidden name="lat" bind:value={$form.lat} />
+						<input hidden name="lng" bind:value={$form.lng} />
 						<div bind:offsetWidth={offsetAddressWidth}>
 							<input
-								class="input variant-form-material h-full {$errors.address
-									? 'input-error'
-									: undefined}"
+								class="input variant-form-material
+								{$errors.address ? 'input-error' : undefined}  
+									{$form.new_client ? 'hidden' : ''}"
 								type="search"
 								autocomplete="off"
 								id="address-popup"
@@ -156,6 +164,7 @@
 							<div data-popup="address-popup" class="w-full z-50">
 								<div class="card max-h-60 overflow-auto w-[${offsetAddressWidth + 'px'}]">
 									<Autocomplete
+										class={$form.new_client ? 'hidden' : ''}
 										bind:input={selectedSearchAddress.label}
 										options={addressOptions}
 										on:selection={(e) => {
@@ -169,10 +178,10 @@
 									/>
 								</div>
 							</div>
+							{#if $errors.address}
+								<span class="text-xs text-red-500">{$errors.address}</span>
+							{/if}
 						</div>
-						{#if $errors.address}
-							<span class="text-xs text-red-500">{$errors.address}</span>
-						{/if}
 					</div>
 					<textarea
 						class="input variant-form-material"
