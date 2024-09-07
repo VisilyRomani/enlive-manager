@@ -7,7 +7,8 @@
 		initializeStores,
 		Drawer,
 		Toast,
-		Modal
+		Modal,
+		Avatar
 	} from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { onMount } from 'svelte';
@@ -84,8 +85,10 @@
 							</span>
 						</button>
 					{/if}
-					<strong class="text-xl uppercase">
-						<a href="/"> Enlive Manager </a>
+					<strong class="text-xl uppercase flex flex-row justify-center item-center h-fit gap-3">
+						<Avatar src="/drawing.png" width="w-12" />
+
+						<a href="/" class="mt-auto mb-auto"> Enlive Manager </a>
 					</strong>
 				</div>
 			</svelte:fragment>
