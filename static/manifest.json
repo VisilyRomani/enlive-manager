@@ -1,9 +1,9 @@
 {
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#404762",
+    "background_color": "#404762",
     "icons": [
         {
-            "purpose": "maskable",
+            "purpose": "any",
             "sizes": "512x512",
             "src": "drawing.png",
             "type": "image/png"
