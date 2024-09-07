@@ -23,6 +23,7 @@
     ],
     "orientation": "portrait",
     "display": "standalone",
+    "scope": "/",
     "dir": "left",
     "lang": "en-CA",
     "name": "EnliveManager",
