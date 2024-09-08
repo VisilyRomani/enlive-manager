@@ -42,8 +42,7 @@
 				&hourly=apparent_temperature,precipitation_probability
 				&daily=precipitation_probability_max,apparent_temperature_max,apparent_temperature_min&timezone=auto`;
 				const result = await fetch(apiString, { method: 'GET' });
-				const temp = await result.json();
-				temperature_data = temp;
+				temperature_data = await result.json();
 			},
 
 			(error) => {
