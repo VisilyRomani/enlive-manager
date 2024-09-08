@@ -23,6 +23,7 @@
     ],
     "orientation": "portrait",
     "display_override": [
+        "standalone",
         "fullscreen",
         "minimal-ui"
     ],
