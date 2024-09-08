@@ -2,6 +2,8 @@
 	import { page } from '$app/stores';
 	import { TabAnchor, TabGroup } from '@skeletonlabs/skeleton';
 	import Task from '$lib/photos/task.svelte';
+	import Weather from '$lib/photos/weather.svelte';
+	import People from '$lib/photos/people.svelte';
 </script>
 
 <TabGroup
@@ -21,11 +23,15 @@
 	</TabAnchor>
 
 	<TabAnchor href="/app/forecast" selected={$page.url.pathname === '/app/forecast'}>
-		<svelte:fragment slot="lead">(icon)</svelte:fragment>
+		<div class="flex justify-center">
+			<Weather size={30} fill={$page.url.pathname === '/app/forecast' ? 'black' : 'white'} />
+		</div>
 		<span class="text-xs">Forecast</span>
 	</TabAnchor>
 	<TabAnchor href="/admin/settings" selected={$page.url.pathname === '/admin/settings'}>
-		<svelte:fragment slot="lead">(icon)</svelte:fragment>
+		<div class="flex justify-center">
+			<People size={30} fill={$page.url.pathname === '/admin/settings' ? 'black' : 'white'} />
+		</div>
 		<span class="text-xs">Profile</span>
 	</TabAnchor>
 </TabGroup>
