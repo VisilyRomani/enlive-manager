@@ -21,7 +21,7 @@
 
 <nav class="list-nav p-4 flex flex-col justify-between gap-5">
 	<ul>
-		{#if $page.data.user.permission !== 'WORKER'}
+		{#if $page.data.user?.permission !== 'WORKER'}
 			<li>
 				<a
 					href="/admin/dashboard"
