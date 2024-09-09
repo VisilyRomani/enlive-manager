@@ -1,38 +1,28 @@
-# create-svelte
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+ <h1 align = center>
+  <img src="https://github.com/user-attachments/assets/ba816285-e3ec-4768-8685-9157e37ea394" style="width: 20%"><br>
+  Enlive Manager
+</h1>
 
-## Creating a project
 
-If you're seeing this, you've probably already done this step. Congrats!
+Enlive Manager is a progressive web app created to organize and track client data, jobs and seamlessly create invoices for small buisnesses. It can be used via the hosted service [here](enlivemanager.com).
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+# Self hosting
 
-# create a new project in my-app
-npm create svelte@latest my-app
+1. Make sure you have NodeJs pre installed on your machine
+2. Clone the repo
+3. Host the pocketbase instance inside the server file 
+4. create a .env file with keys to Resend, google maps and Pocketbase
+5. Install dependencies
+```sh
+  npm i 
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+  
+7. run the development pocketbase instance
+```sh
+  npm run server 
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
+8. run the sveltekit server
+```sh
+  npm run dev
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
