@@ -123,7 +123,9 @@
 		</h2>
 		<div class="overflow-auto w-full card rounded-lg">
 			<div class="flex flex-row p-3 gap-3 relative">
-				{#each temperature_data?.hourly.time.slice(0, 25) ?? [] as time, idx}
+				{#each temperature_data?.hourly.time
+					.filter((t) => dayjs(t).isAfter(dayjs()))
+					.slice(0, 25) ?? [] as time, idx}
 					<div class="whitespace-nowrap text-center">
 						<p class="text-sm">
 							{dayjs(time).format('h a')}
