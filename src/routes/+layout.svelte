@@ -23,6 +23,7 @@
 	import { page } from '$app/stores';
 	import { modalRegistry } from '$lib/ModalRegistry';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_GOOGLE_MAPS } from '$env/static/public';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 	initializeStores();
 	const drawerStore = getDrawerStore();
@@ -44,8 +45,7 @@
 
 	onMount(() => {
 		const script = document.createElement('script');
-		script.src =
-			'https://maps.googleapis.com/maps/api/js?key=AIzaSyB7EdZYIgR4SxMikrHBWC3YxTWFft1oLz0&loading=async&libraries=places';
+		script.src = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS}&loading=async&libraries=places`;
 		script.async = true;
 		script.defer = true;
 		mapsScript = script;
