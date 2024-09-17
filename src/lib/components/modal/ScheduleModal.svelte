@@ -17,6 +17,9 @@
 	import { onMount } from 'svelte';
 	import { nearestJob } from '$lib/helper/LocationHelper';
 	import { invalidate } from '$app/navigation';
+	import { dndzone } from 'svelte-dnd-action';
+	import type { DndEventInfo } from 'svelte-dnd-action';
+	import { flip } from 'svelte/animate';
 
 	const modalStore = getModalStore();
 	let date = dayjs();
@@ -113,7 +116,11 @@
 
 				const firstJob = nearestJob(
 					$form.job as TJob[],
-					{ expand: { address: { lat: startLocation.lat, lng: startLocation.lng } } } as TJob
+					{
+						expand: {
+							address: { lat: startLocation.lat, lng: startLocation.lng }
+						}
+					} as TJob
 				);
 
 				if (firstJob) {
@@ -162,10 +169,9 @@
 			return $errors;
 		});
 
-	$: sortedJobs = [
-		...$form.job,
-		...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))
-	] as TJob[];
+	$: jobList = [...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))] as TJob[];
+
+	$: selectedJobs = $form.job as TJob[];
 
 	$: checkSortDisable =
 		!$form.job.length ||
@@ -186,6 +192,19 @@
 		} else {
 			return `&destination=${encodeURIComponent(lastJob?.expand.address.address ?? '')}`;
 		}
+	};
+
+	const handleDndConsider = (e: CustomEvent<{ items: TJob[]; info: DndEventInfo }>) => {
+		form.update(($form) => {
+			$form.job = e.detail.items.map((j, idx) => ({ ...j, order: idx + 1 }));
+			return $form;
+		});
+	};
+	const handleDndFinalize = (e: CustomEvent<{ items: TJob[]; info: DndEventInfo }>) => {
+		form.update(($form) => {
+			$form.job = e.detail.items.map((j, idx) => ({ ...j, order: idx + 1 }));
+			return $form;
+		});
 	};
 </script>
 
@@ -296,13 +315,73 @@
 							'border-2 border-error-500'}"
 					>
 						<input name="job" class="hidden" />
-						{#if sortedJobs.length}
-							{#each sortedJobs ?? [] as job}
+
+						{#if jobList.length}
+							<section
+								class="gap-3 flex flex-col"
+								use:dndzone={{ items: selectedJobs }}
+								on:consider={handleDndConsider}
+								on:finalize={handleDndFinalize}
+							>
+								{#each selectedJobs as job (job.id)}
+									<button
+										animate:flip={{ duration: 300 }}
+										type="button"
+										class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
+							{job.order && 'bg-primary-300'}
+							"
+										on:click={() => jobSelect(job)}
+									>
+										<p class="w-3 text-primary-900 font-bold p-2">
+											{#if job.order}
+												{job.order}
+											{/if}
+										</p>
+										<div class="divider-vertical h-9 mx-2" />
+										<li value={job.id} class="grid grid-cols-2 text-left w-full">
+											<div>
+												<h5
+													class="h4 group-hover:text-primary-900
+									{job.order && 'text-primary-900 '}"
+												>
+													{job.expand.address.expand.client.first_name}
+													{job.expand.address.expand.client.last_name} |
+													<span
+														class="text-secondary-400 group-hover:text-secondary-700
+									{job.order && 'text-secondary-700'}
+									">{job.id.slice(-4)}</span
+													>
+												</h5>
+												<p
+													class="text-gray-400 text-sm group-hover:text-gray-800 {job.order &&
+														'text-gray-700'}"
+												>
+													{job.expand.address.address}
+												</p>
+											</div>
+											<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+												{#each job.expand.task as task}
+													<p
+														class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+															'!bg-primary-500 !text-surface-800'}"
+													>
+														{task.expand.service.name}
+													</p>
+												{/each}
+											</div>
+										</li>
+									</button>
+								{/each}
+							</section>
+							{#if selectedJobs.length}
+								<hr />
+							{/if}
+							{#each jobList as job}
 								<button
 									type="button"
 									class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
-								{job.order && 'bg-primary-300'}
-								"
+			{job.order && 'bg-primary-300'}
+			"
 									on:click={() => jobSelect(job)}
 								>
 									<p class="w-3 text-primary-900 font-bold p-2">
@@ -315,19 +394,19 @@
 										<div>
 											<h5
 												class="h4 group-hover:text-primary-900
-										{job.order && 'text-primary-900 '}"
+					{job.order && 'text-primary-900 '}"
 											>
 												{job.expand.address.expand.client.first_name}
 												{job.expand.address.expand.client.last_name} |
 												<span
 													class="text-secondary-400 group-hover:text-secondary-700
-											{job.order && 'text-secondary-700'}
-											">{job.id.slice(-4)}</span
+					{job.order && 'text-secondary-700'}
+					">{job.id.slice(-4)}</span
 												>
 											</h5>
 											<p
-												class="text-gray-400 text-sm group-hover:text-gray-800
-									{job.order && 'text-gray-700'}"
+												class="text-gray-400 text-sm group-hover:text-gray-800 {job.order &&
+													'text-gray-700'}"
 											>
 												{job.expand.address.address}
 											</p>
@@ -335,16 +414,15 @@
 										<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
 											{#each job.expand.task as task}
 												<p
-													class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800
-											{job.order && '!bg-primary-500 !text-surface-800'}"
+													class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+														'!bg-primary-500 !text-surface-800'}"
 												>
 													{task.expand.service.name}
 												</p>
 											{/each}
 										</div>
 									</li>
-								</button>
-							{/each}
+								</button>{/each}
 						{:else}
 							<div class="flex justify-center items-center flex-col h-full">
 								<p class="text-center text-3xl font-bold">No Jobs Found</p>
@@ -389,7 +467,7 @@
 						class="btn {parent.buttonPositive} "
 						on:click={sortJobForm}>Sort Location</button
 					>
-					<button type="submit" disabled={!sortedJobs.length} class="btn {parent.buttonPositive}"
+					<button type="submit" disabled={!selectedJobs.length} class="btn {parent.buttonPositive}"
 						>Create</button
 					>
 				</div>

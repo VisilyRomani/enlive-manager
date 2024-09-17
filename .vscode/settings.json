@@ -114,5 +114,6 @@
 		"width",
 		"zIndex"
 	],
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"tailwind-fold.unfoldedTextOpacity": 1
 }
