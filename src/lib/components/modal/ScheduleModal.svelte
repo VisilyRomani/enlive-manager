@@ -209,244 +209,250 @@
 </script>
 
 {#if $modalStore[0]}
-	<form
-		class=" w-full lg:w-fit card p-5 flex flex-col gap-3"
-		use:enhance
-		method="post"
-		action="?/createSchedule"
-	>
-		<h2 class="h2">{$modalStore[0].title}</h2>
-		<input
-			id="auto-complete-input"
-			type="search"
-			hidden={showFirst}
-			name="addr"
-			class="input"
-			placeholder="Starting Address"
-			bind:value={address}
-		/>
-		{#if showFirst}
-			<div class="ml-auto mr-0">
-				<SlideToggle size="sm" name="toggle" bind:checked={multiSelect}
-					>Duplicate Schedule
-				</SlideToggle>
-			</div>
-			<div class="grid lg:grid-cols-2 gap-3">
-				<div class="space-y-3">
+	<div class="lg:w-modal-wide min-h-full max-w-[100%] w-full p-[-1rem]">
+		<form
+			class=" w-full h-full card p-5 flex flex-col gap-3"
+			use:enhance
+			method="post"
+			action="?/createSchedule"
+		>
+			<h2 class="h2">{$modalStore[0].title}</h2>
+			<input
+				id="auto-complete-input"
+				type="search"
+				hidden={showFirst}
+				name="addr"
+				class="input"
+				placeholder="Starting Address"
+				bind:value={address}
+			/>
+			{#if showFirst}
+				<div class="ml-auto mr-0">
+					<SlideToggle size="sm" name="toggle" bind:checked={multiSelect}
+						>Duplicate Schedule
+					</SlideToggle>
+				</div>
+				<div class="grid lg:grid-cols-2 gap-3">
+					<div class="space-y-3">
+						<div>
+							<input
+								class="input {$errors.title && 'input-error'}"
+								placeholder="Title"
+								bind:value={$form.title}
+							/>
+							{#if $errors.title}
+								<div class="variant-soft-error">
+									<span class="text-xs text-error-200 font-bold ml-3">{$errors.title}</span>
+								</div>
+							{/if}
+						</div>
+						<div bind:offsetWidth>
+							<input
+								class="input {$errors.employee ? 'input-error' : undefined}"
+								placeholder="Schedule Users"
+								name="employee"
+								bind:value={userSearch}
+								use:popup={popupSettings}
+							/>
+							{#if $errors.employee}
+								<div class="variant-soft-error">
+									<span class="text-xs text-error-200 font-bold ml-3">{$errors.employee}</span>
+								</div>
+							{/if}
+							<div data-popup="userPopup" class=" w-full z-50">
+								<div class="card max-h-60 overflow-auto w-[${offsetWidth + 'px'}]">
+									<Autocomplete
+										options={userOptions}
+										bind:input={userSearch}
+										on:selection={userSelect}
+									/>
+								</div>
+							</div>
+						</div>
+						<div>
+							{#each $form.employee as user}
+								<button
+									type="button"
+									class="chip variant-ghost-primary"
+									on:click={() => {
+										form.update(($form) => {
+											$form.employee.delete(user[0]);
+											return $form;
+										});
+									}}
+								>
+									{user[1]} 🗙
+								</button>
+							{/each}
+						</div>
+					</div>
+					<input name="dates" class="hidden" />
 					<div>
-						<input
-							class="input {$errors.title && 'input-error'}"
-							placeholder="Title"
-							bind:value={$form.title}
-						/>
-						{#if $errors.title}
+						<div class={$errors.dates?._errors && 'border-2 border-error-500'}>
+							<Calendar {multiSelect} bind:date bind:selectedDates={$form.dates} />
+						</div>
+						{#if $errors.dates?._errors}
 							<div class="variant-soft-error">
-								<span class="text-xs text-error-200 font-bold ml-3">{$errors.title}</span>
+								<span class="text-xs text-error-200 font-bold ml-3">{$errors.dates._errors}</span>
 							</div>
 						{/if}
 					</div>
-					<div bind:offsetWidth>
-						<input
-							class="input {$errors.employee ? 'input-error' : undefined}"
-							placeholder="Schedule Users"
-							name="employee"
-							bind:value={userSearch}
-							use:popup={popupSettings}
-						/>
-						{#if $errors.employee}
-							<div class="variant-soft-error">
-								<span class="text-xs text-error-200 font-bold ml-3">{$errors.employee}</span>
-							</div>
-						{/if}
-						<div data-popup="userPopup" class=" w-full z-50">
-							<div class="card max-h-60 overflow-auto w-[${offsetWidth + 'px'}]">
-								<Autocomplete
-									options={userOptions}
-									bind:input={userSearch}
-									on:selection={userSelect}
-								/>
-							</div>
-						</div>
-					</div>
-					<div>
-						{#each $form.employee as user}
-							<button
-								type="button"
-								class="chip variant-ghost-primary"
-								on:click={() => {
-									form.update(($form) => {
-										$form.employee.delete(user[0]);
-										return $form;
-									});
-								}}
-							>
-								{user[1]} 🗙
-							</button>
-						{/each}
-					</div>
 				</div>
-				<input name="dates" class="hidden" />
-				<div>
-					<div class={$errors.dates?._errors && 'border-2 border-error-500'}>
-						<Calendar {multiSelect} bind:date bind:selectedDates={$form.dates} />
-					</div>
-					{#if $errors.dates?._errors}
-						<div class="variant-soft-error">
-							<span class="text-xs text-error-200 font-bold ml-3">{$errors.dates._errors}</span>
-						</div>
-					{/if}
-				</div>
-			</div>
-			<footer class="modal-footer flex justify-between">
-				<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
-					>{parent.buttonTextCancel}</button
-				>
-				<button
-					type="button"
-					on:click={() => (showFirst = !showFirst)}
-					class="btn {parent.buttonPositive}">Next</button
-				>
-			</footer>
-		{:else}
-			<div class="grid {$form.job.length && 'lg:grid-cols-2'} gap-3">
-				<div>
-					<ul
-						class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
-							'border-2 border-error-500'}"
+				<footer class="modal-footer flex justify-between">
+					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
+						>{parent.buttonTextCancel}</button
 					>
-						<input name="job" class="hidden" />
+					<button
+						type="button"
+						on:click={() => (showFirst = !showFirst)}
+						class="btn {parent.buttonPositive}">Next</button
+					>
+				</footer>
+			{:else}
+				<div class="grid {$form.job.length && 'lg:grid-cols-2'} gap-3">
+					<div>
+						<ul
+							class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
+								'border-2 border-error-500'}"
+						>
+							<input name="job" class="hidden" />
 
-						{#if jobList.length || selectedJobs.length}
-							<section
-								class="gap-3 flex flex-col"
-								use:dndzone={{ items: selectedJobs }}
-								on:consider={handleDndConsider}
-								on:finalize={handleDndFinalize}
-							>
-								{#each selectedJobs as job (job.id)}
+							{#if jobList.length || selectedJobs.length}
+								<section
+									class="gap-3 flex flex-col"
+									use:dndzone={{ items: selectedJobs }}
+									on:consider={handleDndConsider}
+									on:finalize={handleDndFinalize}
+								>
+									{#each selectedJobs as job (job.id)}
+										<button
+											animate:flip={{ duration: 300 }}
+											type="button"
+											class="flex flex-row items-center w-full group rounded-md bg-primary-300"
+											on:click={() => jobSelect(job)}
+										>
+											<p class="w-3 text-primary-900 font-bold p-2">
+												{#if job.order}
+													{job.order}
+												{/if}
+											</p>
+											<div class="divider-vertical h-9 mx-2" />
+											<li value={job.id} class="grid grid-cols-2 text-left w-full">
+												<div>
+													<h5 class="h4 text-primary-900">
+														{job.expand.address.expand.client.first_name}
+														{job.expand.address.expand.client.last_name} |
+														<span class="text-secondary-700">
+															{job.id.slice(-4)}
+														</span>
+													</h5>
+													<p class="text-sm text-gray-700">
+														{job.expand.address.address}
+													</p>
+												</div>
+												<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+													{#each job.expand.task as task}
+														<p
+															class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+																'!bg-primary-500 !text-surface-800'}"
+														>
+															{task.expand.service.name}
+														</p>
+													{/each}
+												</div>
+											</li>
+										</button>
+									{/each}
+								</section>
+								{#if selectedJobs.length}
+									<hr />
+								{/if}
+								{#each jobList as job}
 									<button
-										animate:flip={{ duration: 300 }}
 										type="button"
-										class="flex flex-row items-center w-full group rounded-md bg-primary-300"
+										class="flex flex-row items-center w-full md:hover:bg-primary-300 group rounded-md
+			"
 										on:click={() => jobSelect(job)}
 									>
-										<p class="w-3 text-primary-900 font-bold p-2">
-											{#if job.order}
-												{job.order}
-											{/if}
-										</p>
 										<div class="divider-vertical h-9 mx-2" />
 										<li value={job.id} class="grid grid-cols-2 text-left w-full">
 											<div>
-												<h5 class="h4 text-primary-900">
+												<h5 class="h4 md:group-hover:text-primary-900">
 													{job.expand.address.expand.client.first_name}
 													{job.expand.address.expand.client.last_name} |
-													<span class="text-secondary-700">
+													<span class="text-secondary-400 md:group-hover:text-secondary-700">
 														{job.id.slice(-4)}
 													</span>
 												</h5>
-												<p class="text-sm text-gray-700">
+												<p class="text-gray-400 text-sm md:group-hover:text-gray-800">
 													{job.expand.address.address}
 												</p>
 											</div>
 											<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
 												{#each job.expand.task as task}
 													<p
-														class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
-															'!bg-primary-500 !text-surface-800'}"
+														class="w-fit h-fit chip variant-soft-primary md:group-hover:bg-primary-500 md:group-hover:text-surface-800"
 													>
 														{task.expand.service.name}
 													</p>
 												{/each}
 											</div>
 										</li>
-									</button>
-								{/each}
-							</section>
-							{#if selectedJobs.length}
-								<hr />
+									</button>{/each}
+							{:else}
+								<div class="flex justify-center items-center flex-col h-full">
+									<p class="text-center text-3xl font-bold">No Jobs Found</p>
+									<p class="text-center text-primary-500-400-token">
+										Please create a job to scheudle
+									</p>
+								</div>
 							{/if}
-							{#each jobList as job}
-								<button
-									type="button"
-									class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
-			"
-									on:click={() => jobSelect(job)}
-								>
-									<div class="divider-vertical h-9 mx-2" />
-									<li value={job.id} class="grid grid-cols-2 text-left w-full">
-										<div>
-											<h5 class="h4 group-hover:text-primary-900">
-												{job.expand.address.expand.client.first_name}
-												{job.expand.address.expand.client.last_name} |
-												<span class="text-secondary-400 group-hover:text-secondary-700">
-													{job.id.slice(-4)}
-												</span>
-											</h5>
-											<p class="text-gray-400 text-sm group-hover:text-gray-800">
-												{job.expand.address.address}
-											</p>
-										</div>
-										<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-											{#each job.expand.task as task}
-												<p
-													class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800"
-												>
-													{task.expand.service.name}
-												</p>
-											{/each}
-										</div>
-									</li>
-								</button>{/each}
-						{:else}
-							<div class="flex justify-center items-center flex-col h-full">
-								<p class="text-center text-3xl font-bold">No Jobs Found</p>
-								<p class="text-center text-primary-500-400-token">
-									Please create a job to scheudle
-								</p>
+						</ul>
+						{#if $errors.job}
+							<div class="variant-soft-error">
+								<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
 							</div>
 						{/if}
-					</ul>
-					{#if $errors.job}
-						<div class="variant-soft-error">
-							<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
-						</div>
-					{/if}
-				</div>
-				{#if $form.job.length}
-					<div class="w-full min-h-[300px]">
-						<iframe
-							width="100%"
-							height="100%"
-							title="GMaps"
-							frameborder="0"
-							style="border:0"
-							referrerpolicy="no-referrer-when-downgrade"
-							allowfullscreen
-							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
+					</div>
+					{#if $form.job.length}
+						<div class="w-full min-h-[300px]">
+							<iframe
+								width="100%"
+								height="100%"
+								title="GMaps"
+								frameborder="0"
+								style="border:0"
+								referrerpolicy="no-referrer-when-downgrade"
+								allowfullscreen
+								src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
 							&mode=driving
 							{startLocation ? `&origin=${startLocation.lat},${startLocation.lng}` : '&origin=Current%20Location'}
 							{googleEmbeddedParams()}"
-						/>
-					</div>
-				{/if}
-			</div>
-			<footer class="modal-footer flex justify-between gap-6">
-				<button type="button" class="btn {parent.buttonNeutral}" on:click={() => (showFirst = true)}
-					>Back</button
-				>
-				<div>
+							/>
+						</div>
+					{/if}
+				</div>
+				<footer class="modal-footer flex justify-between gap-6">
 					<button
 						type="button"
-						disabled={checkSortDisable}
-						class="btn {parent.buttonPositive} "
-						on:click={sortJobForm}>Sort Location</button
+						class="btn {parent.buttonNeutral} h-fit self-center"
+						on:click={() => (showFirst = true)}>Back</button
 					>
-					<button type="submit" disabled={!selectedJobs.length} class="btn {parent.buttonPositive}"
-						>Create</button
-					>
-				</div>
-			</footer>
-		{/if}
-	</form>
+					<div class=" flex lg:flex-row flex-col gap-3">
+						<button
+							type="button"
+							disabled={checkSortDisable}
+							class="btn {parent.buttonPositive} "
+							on:click={sortJobForm}>Sort Location</button
+						>
+						<button
+							type="submit"
+							disabled={!selectedJobs.length}
+							class="btn {parent.buttonPositive}">Create</button
+						>
+					</div>
+				</footer>
+			{/if}
+		</form>
+	</div>
 {/if}

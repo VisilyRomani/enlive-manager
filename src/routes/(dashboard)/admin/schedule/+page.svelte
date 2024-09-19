@@ -7,7 +7,11 @@
 	export let data: PageData;
 	const modalStore = getModalStore();
 	const newScheduleModal = () => {
-		modalStore.trigger({ type: 'component', component: 'ScheduleModal', title: 'Scheduler' });
+		modalStore.trigger({
+			type: 'component',
+			component: 'ScheduleModal',
+			title: 'Scheduler'
+		});
 	};
 
 	$: itemsOnDay = data.scheduleList.map((s) => s.schedule_date);
