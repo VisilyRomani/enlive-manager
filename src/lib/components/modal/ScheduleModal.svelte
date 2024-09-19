@@ -327,9 +327,7 @@
 									<button
 										animate:flip={{ duration: 300 }}
 										type="button"
-										class="flex flex-row items-center w-full hover:bg-primary-300 group rounded-md
-							{job.order && 'bg-primary-300'}
-							"
+										class="flex flex-row items-center w-full group rounded-md bg-primary-300"
 										on:click={() => jobSelect(job)}
 									>
 										<p class="w-3 text-primary-900 font-bold p-2">
@@ -340,22 +338,14 @@
 										<div class="divider-vertical h-9 mx-2" />
 										<li value={job.id} class="grid grid-cols-2 text-left w-full">
 											<div>
-												<h5
-													class="h4 group-hover:text-primary-900
-									{job.order && 'text-primary-900 '}"
-												>
+												<h5 class="h4 text-primary-900">
 													{job.expand.address.expand.client.first_name}
 													{job.expand.address.expand.client.last_name} |
-													<span
-														class="text-secondary-400 group-hover:text-secondary-700
-									{job.order && 'text-secondary-700'}
-									">{job.id.slice(-4)}</span
-													>
+													<span class="text-secondary-700">
+														{job.id.slice(-4)}
+													</span>
 												</h5>
-												<p
-													class="text-gray-400 text-sm group-hover:text-gray-800 {job.order &&
-														'text-gray-700'}"
-												>
+												<p class="text-sm text-gray-700">
 													{job.expand.address.address}
 												</p>
 											</div>
