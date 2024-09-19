@@ -209,7 +209,7 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="lg:w-modal-wide min-h-full max-w-[100%] w-full p-[-1rem]">
+	<div class="lg:w-modal-wide min-h-full max-w-[100%] w-full">
 		<form
 			class=" w-full h-full card p-5 flex flex-col gap-3"
 			use:enhance
