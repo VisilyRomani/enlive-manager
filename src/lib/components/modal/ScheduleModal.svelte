@@ -26,10 +26,10 @@
 	let multiSelect = false;
 	let userSearch = '';
 	let offsetWidth = 0;
-	let showFirst = true;
+	let currentTab = 0;
 	let address = '';
 	const data = $page.data as PageData;
-	const { form, enhance, errors } = superForm(data.scheduleForm, {
+	const { form, enhance, errors, submit } = superForm(data.scheduleForm, {
 		dataType: 'json',
 		onResult: async (res) => {
 			res.result.type === 'success' && modalStore.close();
@@ -37,7 +37,6 @@
 		}
 	});
 
-	export let parent: any;
 	let startLocation: { lat: number; lng: number };
 
 	onMount(() => {
@@ -154,8 +153,13 @@
 		);
 	};
 
-	$: (!!$errors.employee?.length || !!$errors.dates?._errors?.length || !!$errors.title) &&
-		(showFirst = true);
+	const nextPageSubmit = () => {
+		if (currentTab !== 2) {
+			currentTab += 1;
+		} else {
+			submit();
+		}
+	};
 
 	$: !!$form.dates.length &&
 		errors.update(($errors) => {
@@ -169,7 +173,10 @@
 			return $errors;
 		});
 
-	$: jobList = [...data.jobList?.filter((d) => !$form.job.find((j) => j.id === d.id))] as TJob[];
+	$: jobList = data.jobList?.map((d) => ({
+		...d,
+		selected: !!$form.job.find((j) => j.id === d.id)
+	})) as (TJob & { selected: boolean })[];
 
 	$: selectedJobs = $form.job as TJob[];
 
@@ -220,13 +227,13 @@
 			<input
 				id="auto-complete-input"
 				type="search"
-				hidden={showFirst}
+				hidden={currentTab !== 2}
 				name="addr"
 				class="input"
 				placeholder="Starting Address"
 				bind:value={address}
 			/>
-			{#if showFirst}
+			{#if currentTab === 0}
 				<div class="ml-auto mr-0">
 					<SlideToggle size="sm" name="toggle" bind:checked={multiSelect}
 						>Duplicate Schedule
@@ -249,7 +256,7 @@
 						<div bind:offsetWidth>
 							<input
 								class="input {$errors.employee ? 'input-error' : undefined}"
-								placeholder="Schedule Users"
+								placeholder="Schedule Workers"
 								name="employee"
 								bind:value={userSearch}
 								use:popup={popupSettings}
@@ -298,161 +305,165 @@
 						{/if}
 					</div>
 				</div>
-				<footer class="modal-footer flex justify-between">
-					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
-						>{parent.buttonTextCancel}</button
+			{:else if currentTab === 1}
+				<div class=" gap-3">
+					<ul
+						class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
+							'border-2 border-error-500'}"
 					>
-					<button
-						type="button"
-						on:click={() => (showFirst = !showFirst)}
-						class="btn {parent.buttonPositive}">Next</button
-					>
-				</footer>
-			{:else}
-				<div class="grid {$form.job.length && 'lg:grid-cols-2'} gap-3">
-					<div>
-						<ul
-							class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
-								'border-2 border-error-500'}"
-						>
-							<input name="job" class="hidden" />
+						<input name="job" class="hidden" />
 
-							{#if jobList.length || selectedJobs.length}
-								<section
-									class="gap-3 flex flex-col"
-									use:dndzone={{ items: selectedJobs }}
-									on:consider={handleDndConsider}
-									on:finalize={handleDndFinalize}
+						{#if jobList.length}
+							{#each jobList as job}
+								<button
+									type="button"
+									class="flex flex-row items-center w-full md:hover:bg-primary-300 p-1 {job.selected &&
+										'!bg-primary-300'} group rounded-md
+		"
+									on:click={() => jobSelect(job)}
 								>
-									{#each selectedJobs as job (job.id)}
-										<button
-											animate:flip={{ duration: 300 }}
-											type="button"
-											class="flex flex-row items-center w-full group rounded-md bg-primary-300"
-											on:click={() => jobSelect(job)}
-										>
-											<p class="w-3 text-primary-900 font-bold p-2">
-												{#if job.order}
-													{job.order}
-												{/if}
+									<input type="checkbox" disabled checked={job.selected} class="checkbox" />
+									<li value={job.id} class="grid grid-cols-2 text-left w-full p-1">
+										<div>
+											<h5
+												class="h4 md:group-hover:text-primary-900
+											{job.selected && 'text-primary-900'}
+											"
+											>
+												{job.expand.address.expand.client.first_name}
+												{job.expand.address.expand.client.last_name} |
+												<span
+													class="text-secondary-400 md:group-hover:text-secondary-700
+												{job.selected && 'text-secondary-700'}"
+												>
+													{job.id.slice(-4)}
+												</span>
+											</h5>
+											<p
+												class="text-gray-400 text-sm col-span-2 md:group-hover:text-gray-800
+											{job.selected && 'text-gray-800'}"
+											>
+												{job.expand.address.address.split(',').at(0)}
 											</p>
-											<div class="divider-vertical h-9 mx-2" />
-											<li value={job.id} class="grid grid-cols-2 text-left w-full">
-												<div>
-													<h5 class="h4 text-primary-900">
-														{job.expand.address.expand.client.first_name}
-														{job.expand.address.expand.client.last_name} |
-														<span class="text-secondary-700">
-															{job.id.slice(-4)}
-														</span>
-													</h5>
-													<p class="text-sm text-gray-700">
-														{job.expand.address.address}
-													</p>
-												</div>
-												<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-													{#each job.expand.task as task}
-														<p
-															class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
-																'!bg-primary-500 !text-surface-800'}"
-														>
-															{task.expand.service.name}
-														</p>
-													{/each}
-												</div>
-											</li>
-										</button>
-									{/each}
-								</section>
-								{#if selectedJobs.length}
-									<hr />
-								{/if}
-								{#each jobList as job}
-									<button
-										type="button"
-										class="flex flex-row items-center w-full md:hover:bg-primary-300 group rounded-md
-			"
-										on:click={() => jobSelect(job)}
-									>
-										<div class="divider-vertical h-9 mx-2" />
-										<li value={job.id} class="grid grid-cols-2 text-left w-full">
-											<div>
-												<h5 class="h4 md:group-hover:text-primary-900">
-													{job.expand.address.expand.client.first_name}
-													{job.expand.address.expand.client.last_name} |
-													<span class="text-secondary-400 md:group-hover:text-secondary-700">
-														{job.id.slice(-4)}
-													</span>
-												</h5>
-												<p class="text-gray-400 text-sm md:group-hover:text-gray-800">
-													{job.expand.address.address}
+										</div>
+										<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+											{#each job.expand.task as task}
+												<p
+													class="w-fit h-fit chip
+													bg-primary-700 text-white
+													{job.selected && '!bg-primary-500 text-surface-800'}
+														 md:group-hover:bg-primary-500 md:group-hover:text-surface-800"
+												>
+													{task.expand.service.name}
 												</p>
-											</div>
-											<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-												{#each job.expand.task as task}
-													<p
-														class="w-fit h-fit chip variant-soft-primary md:group-hover:bg-primary-500 md:group-hover:text-surface-800"
-													>
-														{task.expand.service.name}
-													</p>
-												{/each}
-											</div>
-										</li>
-									</button>{/each}
-							{:else}
-								<div class="flex justify-center items-center flex-col h-full">
-									<p class="text-center text-3xl font-bold">No Jobs Found</p>
-									<p class="text-center text-primary-500-400-token">
-										Please create a job to scheudle
-									</p>
-								</div>
-							{/if}
-						</ul>
-						{#if $errors.job}
-							<div class="variant-soft-error">
-								<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
+											{/each}
+										</div>
+									</li>
+								</button>{/each}
+						{:else}
+							<div class="flex justify-center items-center flex-col h-full">
+								<p class="text-center text-3xl font-bold">No Jobs Found</p>
+								<p class="text-center text-primary-500-400-token">
+									Please create a job to scheudle
+								</p>
 							</div>
 						{/if}
-					</div>
-					{#if $form.job.length}
-						<div class="w-full min-h-[300px]">
-							<iframe
-								width="100%"
-								height="100%"
-								title="GMaps"
-								frameborder="0"
-								style="border:0"
-								referrerpolicy="no-referrer-when-downgrade"
-								allowfullscreen
-								src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
-							&mode=driving
-							{startLocation ? `&origin=${startLocation.lat},${startLocation.lng}` : '&origin=Current%20Location'}
-							{googleEmbeddedParams()}"
-							/>
+					</ul>
+					{#if $errors.job}
+						<div class="variant-soft-error">
+							<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
 						</div>
 					{/if}
 				</div>
-				<footer class="modal-footer flex justify-between gap-6">
+			{:else if currentTab === 2}
+				<div class="grid lg:grid-cols-2 grid-cols-1 gap-3">
+					<section
+						class="gap-3 flex flex-col"
+						use:dndzone={{ items: selectedJobs }}
+						on:consider={handleDndConsider}
+						on:finalize={handleDndFinalize}
+					>
+						{#each selectedJobs as job (job.id)}
+							<button
+								animate:flip={{ duration: 300 }}
+								type="button"
+								class="flex flex-row items-center w-full group rounded-md bg-primary-300"
+							>
+								<p class="w-3 text-primary-900 font-bold p-2">
+									{#if job.order}
+										{job.order}
+									{/if}
+								</p>
+								<div class="divider-vertical h-9 mx-2" />
+								<li value={job.id} class="grid grid-cols-2 text-left w-full p-1">
+									<div>
+										<h5 class="h4 text-primary-900">
+											{job.expand.address.expand.client.first_name}
+											{job.expand.address.expand.client.last_name}
+										</h5>
+									</div>
+
+									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+										{#each job.expand.task as task}
+											<p
+												class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+													'!bg-primary-500 !text-surface-800'}"
+											>
+												{task.expand.service.name}
+											</p>
+										{/each}
+									</div>
+									<p class="text-sm text-gray-700 col-span-2">
+										{job.expand.address.address.split(',').at(0)}
+									</p>
+								</li>
+							</button>
+						{/each}
+					</section>
+					<div class="w-full min-h-[300px]">
+						<iframe
+							width="100%"
+							height="100%"
+							title="GMaps"
+							frameborder="0"
+							style="border:0"
+							referrerpolicy="no-referrer-when-downgrade"
+							allowfullscreen
+							src="https://www.google.com/maps/embed/v1/directions?key={PUBLIC_GOOGLE_MAPS}
+	&mode=driving
+	{startLocation ? `&origin=${startLocation.lat},${startLocation.lng}` : '&origin=Current%20Location'}
+	{googleEmbeddedParams()}"
+						/>
+					</div>
+				</div>
+			{/if}
+			<footer class="modal-footer flex justify-between">
+				<button
+					type="button"
+					class="btn variant-outline-primary"
+					on:click={() => {
+						if (currentTab === 0) {
+							modalStore.close();
+						} else {
+							currentTab -= 1;
+						}
+					}}>{currentTab === 0 ? 'Close' : 'Back'}</button
+				>
+				{#if currentTab === 2}
 					<button
 						type="button"
-						class="btn {parent.buttonNeutral} h-fit self-center"
-						on:click={() => (showFirst = true)}>Back</button
+						disabled={checkSortDisable}
+						class="btn variant-outline-primary"
+						on:click={sortJobForm}>Sort</button
 					>
-					<div class=" flex lg:flex-row flex-col gap-3">
-						<button
-							type="button"
-							disabled={checkSortDisable}
-							class="btn {parent.buttonPositive} "
-							on:click={sortJobForm}>Sort Location</button
-						>
-						<button
-							type="submit"
-							disabled={!selectedJobs.length}
-							class="btn {parent.buttonPositive}">Create</button
-						>
-					</div>
-				</footer>
-			{/if}
+				{/if}
+				<button
+					type="button"
+					disabled={currentTab === 1 && (!jobList.length || !$form.job.length)}
+					on:click={nextPageSubmit}
+					class="btn variant-outline-primary">{currentTab === 2 ? 'Submit' : 'Next'}</button
+				>
+			</footer>
 		</form>
 	</div>
 {/if}
