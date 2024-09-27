@@ -376,9 +376,9 @@
 					{/if}
 				</div>
 			{:else if currentTab === 2}
-				<div class="grid lg:grid-cols-2 grid-cols-1 gap-3">
+				<div class="grid lg:grid-cols-2 grid-cols-1 gap-3 bg-surface-900 rounded-md p-1">
 					<section
-						class="gap-3 flex flex-col"
+						class="gap-3 flex flex-col max-h-56 !overflow-y-scroll pr-10"
 						use:dndzone={{ items: selectedJobs }}
 						on:consider={handleDndConsider}
 						on:finalize={handleDndFinalize}
@@ -420,7 +420,8 @@
 							</button>
 						{/each}
 					</section>
-					<div class="w-full min-h-[300px]">
+
+					<div class="w-full h-full">
 						<iframe
 							width="100%"
 							height="100%"
