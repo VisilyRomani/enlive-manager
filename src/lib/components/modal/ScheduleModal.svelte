@@ -406,7 +406,7 @@
 									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
 										{#each job.expand.task as task}
 											<p
-												class="w-fit h-fit chip variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+												class="w-fit h-fit chip !text-white !whitespace-normal text-xs variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
 													'!bg-primary-500 !text-surface-800'}"
 											>
 												{task.expand.service.name}
