@@ -216,9 +216,9 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="lg:w-modal-wide min-h-full max-w-[100%] w-full">
+	<div class="h-[100vh] w-[100vw] max-w-[100%]">
 		<form
-			class=" w-full h-full card p-5 flex flex-col gap-3"
+			class="w-full h-full card p-5 flex flex-col gap-3"
 			use:enhance
 			method="post"
 			action="?/createSchedule"
@@ -306,87 +306,79 @@
 					</div>
 				</div>
 			{:else if currentTab === 1}
-				<div class=" gap-3">
-					<ul
-						class="gap-3 flex flex-col h-80 overflow-auto {$errors.job &&
-							'border-2 border-error-500'}"
-					>
-						<input name="job" class="hidden" />
+				<ul class="gap-3 flex flex-col overflow-auto {$errors.job && 'border-2 border-error-500'}">
+					<input name="job" class="hidden" />
 
-						{#if jobList.length}
-							{#each jobList as job}
-								<button
-									type="button"
-									class="flex flex-row items-center w-full md:hover:bg-primary-300 p-1 {job.selected &&
-										'!bg-primary-300'} group rounded-md
+					{#if jobList.length}
+						{#each jobList as job}
+							<button
+								type="button"
+								class="flex flex-row items-center w-full md:hover:bg-primary-300 p-1 {job.selected &&
+									'!bg-primary-300'} group rounded-md
 		"
-									on:click={() => jobSelect(job)}
-								>
-									<input type="checkbox" disabled checked={job.selected} class="checkbox" />
-									<li value={job.id} class="grid grid-cols-2 text-left w-full p-1">
-										<div>
-											<h5
-												class="h4 md:group-hover:text-primary-900
+								on:click={() => jobSelect(job)}
+							>
+								<input type="checkbox" disabled checked={job.selected} class="checkbox" />
+								<li value={job.id} class="grid grid-cols-2 text-left w-full p-1">
+									<div>
+										<h5
+											class="h4 md:group-hover:text-primary-900
 											{job.selected && 'text-primary-900'}
 											"
-											>
-												{job.expand.address.expand.client.first_name}
-												{job.expand.address.expand.client.last_name} |
-												<span
-													class="text-secondary-400 md:group-hover:text-secondary-700
+										>
+											{job.expand.address.expand.client.first_name}
+											{job.expand.address.expand.client.last_name} |
+											<span
+												class="text-secondary-400 md:group-hover:text-secondary-700
 												{job.selected && 'text-secondary-700'}"
-												>
-													{job.id.slice(-4)}
-												</span>
-											</h5>
-											<p
-												class="text-gray-400 text-sm col-span-2 md:group-hover:text-gray-800
-											{job.selected && 'text-gray-800'}"
 											>
-												{job.expand.address.address.split(',').at(0)}
-											</p>
-										</div>
-										<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-											{#each job.expand.task as task}
-												<p
-													class="w-fit h-fit chip
+												{job.id.slice(-4)}
+											</span>
+										</h5>
+										<p
+											class="text-gray-400 text-sm col-span-2 md:group-hover:text-gray-800
+											{job.selected && 'text-gray-800'}"
+										>
+											{job.expand.address.address.split(',').at(0)}
+										</p>
+									</div>
+									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+										{#each job.expand.task as task}
+											<p
+												class="w-fit h-fit chip
 													bg-primary-700 text-white
 													{job.selected && '!bg-primary-500 text-surface-800'}
 														 md:group-hover:bg-primary-500 md:group-hover:text-surface-800"
-												>
-													{task.expand.service.name}
-												</p>
-											{/each}
-										</div>
-									</li>
-								</button>{/each}
-						{:else}
-							<div class="flex justify-center items-center flex-col h-full">
-								<p class="text-center text-3xl font-bold">No Jobs Found</p>
-								<p class="text-center text-primary-500-400-token">
-									Please create a job to scheudle
-								</p>
-							</div>
-						{/if}
-					</ul>
-					{#if $errors.job}
-						<div class="variant-soft-error">
-							<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
+											>
+												{task.expand.service.name}
+											</p>
+										{/each}
+									</div>
+								</li>
+							</button>{/each}
+					{:else}
+						<div class="flex justify-center items-center flex-col h-full">
+							<p class="text-center text-3xl font-bold">No Jobs Found</p>
+							<p class="text-center text-primary-500-400-token">Please create a job to scheudle</p>
 						</div>
 					{/if}
-				</div>
+				</ul>
+				{#if $errors.job}
+					<div class="variant-soft-error">
+						<span class="text-xs text-error-200 font-bold ml-3">{$errors.job._errors}</span>
+					</div>
+				{/if}
 			{:else if currentTab === 2}
-				<div class="grid lg:grid-cols-2 grid-cols-1 gap-3 bg-surface-900 rounded-md p-1">
+				<div class="lg:grid lg:grid-cols-2 overflow-y-scroll gap-3 rounded-md p-1 h-full">
 					<section
-						class="gap-3 flex flex-col max-h-56 !overflow-y-scroll pr-10"
+						class="gap-3 flex flex-col pr-10 h-full"
 						use:dndzone={{ items: selectedJobs }}
 						on:consider={handleDndConsider}
 						on:finalize={handleDndFinalize}
 					>
 						{#each selectedJobs as job (job.id)}
-							<button
-								animate:flip={{ duration: 300 }}
-								type="button"
+							<div
+								animate:flip={{ duration: 800 }}
 								class="flex flex-row items-center w-full group rounded-md bg-primary-300"
 							>
 								<p class="w-3 text-primary-900 font-bold p-2">
@@ -395,33 +387,32 @@
 									{/if}
 								</p>
 								<div class="divider-vertical h-9 mx-2" />
-								<li value={job.id} class="grid grid-cols-2 text-left w-full p-1">
+								<div class="grid grid-cols-2 text-left w-full p-1">
 									<div>
 										<h5 class="h4 text-primary-900">
 											{job.expand.address.expand.client.first_name}
 											{job.expand.address.expand.client.last_name}
 										</h5>
 									</div>
-
-									<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
-										{#each job.expand.task as task}
-											<p
-												class="w-fit h-fit chip !text-white !whitespace-normal text-xs variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
-													'!bg-primary-500 !text-surface-800'}"
-											>
-												{task.expand.service.name}
-											</p>
-										{/each}
-									</div>
 									<p class="text-sm text-gray-700 col-span-2">
 										{job.expand.address.address.split(',').at(0)}
 									</p>
-								</li>
-							</button>
+								</div>
+								<div class="flex flex-wrap flex-row-reverse gap-1 m-1">
+									{#each job.expand.task as task}
+										<p
+											class="w-fit h-fit chip !text-white !whitespace-normal text-xs variant-soft-primary group-hover:bg-primary-500 group-hover:text-surface-800 {job.order &&
+												'!bg-primary-500 !text-surface-800'}"
+										>
+											{task.expand.service.name}
+										</p>
+									{/each}
+								</div>
+							</div>
 						{/each}
 					</section>
 
-					<div class="w-full h-full">
+					<div class="w-full h-full lg:block hidden">
 						<iframe
 							width="100%"
 							height="100%"
@@ -438,7 +429,7 @@
 					</div>
 				</div>
 			{/if}
-			<footer class="modal-footer flex justify-between">
+			<footer class="flex mt-auto justify-between">
 				<button
 					type="button"
 					class="btn variant-outline-primary"
