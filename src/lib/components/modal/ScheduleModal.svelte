@@ -20,10 +20,13 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import type { DndEventInfo } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
 
 	const modalStore = getModalStore();
 	let date = dayjs();
-	let multiSelect = false;
+	let multiSelect: boolean;
 	let userSearch = '';
 	let offsetWidth = 0;
 	let currentTab = 0;
@@ -32,10 +35,42 @@
 	const { form, enhance, errors, submit } = superForm(data.scheduleForm, {
 		dataType: 'json',
 		onResult: async (res) => {
-			res.result.type === 'success' && modalStore.close();
-			await invalidate('/admin/schedule');
+			if (res.result.type === 'success') {
+				modalStore.close();
+				await invalidate('/admin/schedule');
+			}
 		}
 	});
+
+	const toastErrors = () => {
+		if (!!Object.keys($errors).length) {
+			if ($errors.title) {
+				toastStore.trigger({
+					message: $errors.title?.join(',') ?? 'Unknown Title Error',
+					background: 'bg-error-500'
+				});
+			} else if ($errors.employee) {
+				console.log(($errors.employee as unknown as { _errors: string[] })._errors);
+				toastStore.trigger({
+					message:
+						($errors.employee as unknown as { _errors: string[] })._errors.join(',') ??
+						'Unknown Employee Error',
+					background: 'bg-error-500'
+				});
+			} else if ($errors.dates) {
+				toastStore.trigger({
+					message: $errors.dates._errors?.join(',') ?? 'Unknown Date Error',
+					background: 'bg-error-500'
+				});
+			} else if ($errors.job) {
+				toastStore.trigger({
+					message: $errors.job._errors?.join(',') ?? 'Unknown Job Error',
+					background: 'bg-error-500'
+				});
+			}
+		}
+	};
+	$: $errors && toastErrors();
 
 	let startLocation: { lat: number; lng: number };
 
@@ -81,6 +116,7 @@
 			$errors.employee = undefined;
 			return $errors;
 		});
+
 		form.update(
 			($form) => {
 				$form.employee.has(e.detail.value)
@@ -261,11 +297,6 @@
 								bind:value={userSearch}
 								use:popup={popupSettings}
 							/>
-							{#if $errors.employee}
-								<div class="variant-soft-error">
-									<span class="text-xs text-error-200 font-bold ml-3">{$errors.employee}</span>
-								</div>
-							{/if}
 							<div data-popup="userPopup" class=" w-full z-50">
 								<div class="card max-h-60 overflow-auto w-[${offsetWidth + 'px'}]">
 									<Autocomplete
@@ -451,7 +482,9 @@
 				{/if}
 				<button
 					type="button"
-					disabled={currentTab === 1 && (!jobList.length || !$form.job.length)}
+					disabled={(currentTab === 0 && (!$form.title || !$form.employee.size)) ||
+						!$form.dates.length ||
+						(currentTab === 1 && (!jobList.length || !$form.job.length))}
 					on:click={nextPageSubmit}
 					class="btn variant-outline-primary">{currentTab === 2 ? 'Submit' : 'Next'}</button
 				>

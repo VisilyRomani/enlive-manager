@@ -4,7 +4,7 @@
 	import cright from '$lib/photos/cright.svg?raw';
 
 	export let date = dayjs();
-	export let multiSelect: boolean = false;
+	export let multiSelect: boolean;
 	export let itemsOnDay: string[] = [];
 	export let selectedDates: Date[] = [];
 	export let disabledDates: Date[] = [];
@@ -50,9 +50,11 @@
 	};
 
 	// Used to clear the selected when multi select changes
-	$: multiSelect ||
+	$: multiSelect,
 		(() => {
-			selectedDates = [];
+			if (selectedDates.length > 1 && multiSelect === false) {
+				selectedDates = [];
+			}
 		})();
 
 	const weekDate = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
