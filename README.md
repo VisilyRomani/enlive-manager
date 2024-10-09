@@ -5,7 +5,7 @@
 </h1>
 
 
-Enlive Manager is a progressive web app created to organize and track client data, jobs and seamlessly create invoices for small buisnesses. It can be used via the hosted service [here](enlivemanager.com).
+Enlive Manager is a progressive web app created to organize and track client data, jobs and seamlessly create invoices for small buisnesses. It can be used via the hosted service [here](https://enlivemanager.com).
 
 # Self hosting
 
