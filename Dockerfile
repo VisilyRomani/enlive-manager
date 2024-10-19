@@ -2,10 +2,9 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json .
 RUN NODE_ENV=development npm ci
-RUN npm ci
 COPY . .
-RUN npm run build
-RUN npm prune --production
+RUN NODE_ENV=development npm run build
+RUN NODE_ENV=development npm prune --production
 
 FROM node:18-alpine
 WORKDIR /app
