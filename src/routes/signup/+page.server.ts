@@ -3,13 +3,16 @@ import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
+import { validateToken } from '$lib/server/Turnstile';
+import { TURNSTILE_SECRET_KEY } from '$env/static/private';
 export type OutputType = { authProviderRedirect: string; authProviderState: string };
 
 const SignUpValidation = z
 	.object({
 		email: z.string().email(),
 		password: z.string().min(8),
-		passwordConfirm: z.string().min(8)
+		passwordConfirm: z.string().min(8),
+		'cf-turnstile-response':z.string()
 	})
 	.superRefine((data, ctx) => {
 		if (data.password !== data.passwordConfirm) {
@@ -44,7 +47,13 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url, request })
 export const actions = {
 	passwordSignUp: async ({ locals, request }) => {
 		const form = await superValidate(request, zod(SignUpValidation));
+		
+		const { success, error } = await validateToken(form.data['cf-turnstile-response'],TURNSTILE_SECRET_KEY);
 
+		if (!success){
+			form.errors['cf-turnstile-response'] = ["Failed to Validate Captcha"];
+			return fail(400, { form });
+		}
 		if (!form.valid) {
 			return fail(400, { form });
 		}

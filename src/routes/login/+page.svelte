@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { superForm } from 'sveltekit-superforms';
+	import { Turnstile } from 'svelte-turnstile';
+	import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
+	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	function gotoAuthProvider() {
 		if (browser) {
 			document.cookie = `state=${data?.authProviderState}`;
@@ -19,8 +22,9 @@
 	<title>Login</title>
 </svelte:head>
 
+<SuperDebug data={$form}/>
 <div class="flex justify-center items-center h-full">
-	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
+	<div class="card p-10 gap-3 flex flex-col w-96 text-center">
 		<h1 class="h2">Login</h1>
 		<form method="post" class="space-y-5" action="?/passwordLogin" use:enhance>
 			<label class="flex flex-col w-full items-start">
@@ -45,6 +49,11 @@
 				{#if $errors.password}
 					<span class="text-xs text-[rgb(var(--color-error-500))]">{$errors.password}</span>{/if}
 			</label>
+			<div>
+
+				<Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
+			</div>
+
 			<button type="submit" class=" w-full btn variant-form-material variant-outline-primary"
 				>Submit</button
 			>

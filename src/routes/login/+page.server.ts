@@ -4,10 +4,13 @@ import { z } from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { Infer, SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import { validateToken } from '$lib/server/Turnstile';
+import { TURNSTILE_SECRET_KEY } from '$env/static/private';
 
 const LoginValidation = z.object({
 	email: z.string().email(),
-	password: z.string().min(1)
+	password: z.string().min(1),
+	"cf-turnstile-response":z.string()
 });
 export type OutputType = {
 	authProviderRedirect: string;
@@ -43,9 +46,18 @@ export const load: PageServerLoad<OutputType> = async ({ locals, url, request })
 export const actions = {
 	passwordLogin: async ({ locals, cookies, request }) => {
 		const loginForm = await superValidate(request, zod(LoginValidation));
+		const { success, error } = await validateToken(loginForm.data['cf-turnstile-response'],TURNSTILE_SECRET_KEY);
+
+		if (!success){
+			loginForm.errors['cf-turnstile-response'] = ["Failed to Validate Captcha"];
+			return fail(400, { loginForm });
+		}
+		
 		if (!loginForm.valid) {
 			return fail(400, { loginForm });
 		}
+
+		
 
 		try {
 			await locals.pb
@@ -53,6 +65,7 @@ export const actions = {
 				.authWithPassword(loginForm.data.email, loginForm.data.password);
 		} catch (err) {
 			loginForm.errors.email = ["Email and/or password didn't match"];
+			
 
 			return fail(401, { loginForm });
 		}

@@ -15,7 +15,7 @@ const config = {
 	kit: {
 		csp: {
 			directives: {
-				'script-src': ['self', 'https://maps.googleapis.com']
+				'script-src': ['self', 'https://maps.googleapis.com','https://challenges.cloudflare.com']
 			},
 
 		},

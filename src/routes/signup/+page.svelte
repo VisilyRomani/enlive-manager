@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
+	import { Turnstile } from 'svelte-turnstile';
 	import { superForm } from 'sveltekit-superforms';
 	export let data;
 	const { form, enhance, errors } = superForm(data.form, {
@@ -11,7 +13,7 @@
 	<title>Sign Up</title>
 </svelte:head>
 <div class="flex justify-center items-center h-full">
-	<div class="card p-14 gap-3 flex flex-col w-96 text-center">
+	<div class="card p-10 gap-3 flex flex-col w-96 text-center">
 		<h2 class="h2">Sign Up</h2>
 		<form class="space-y-5" action="?/passwordSignUp" method="post" use:enhance>
 			<label class="flex flex-col w-full items-start">
@@ -47,7 +49,9 @@
 				{#if $errors.passwordConfirm}
 					<span class="text-xs text-red-500">{$errors.passwordConfirm}</span>{/if}
 			</label>
-
+			<div>
+				<Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
+			</div>
 			<button type="submit" class=" w-full btn variant-form-material variant-outline-primary"
 				>Submit</button
 			>
