@@ -3,7 +3,6 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { Turnstile } from 'svelte-turnstile';
 	import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	function gotoAuthProvider() {
 		if (browser) {
 			document.cookie = `state=${data?.authProviderState}`;
@@ -22,7 +21,6 @@
 	<title>Login</title>
 </svelte:head>
 
-<SuperDebug data={$form}/>
 <div class="flex justify-center items-center h-full">
 	<div class="card p-10 gap-3 flex flex-col w-96 text-center">
 		<h1 class="h2">Login</h1>
