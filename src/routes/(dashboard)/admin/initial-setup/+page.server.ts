@@ -5,39 +5,15 @@ import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
 
 const UserValidation = z.object({ first_name: z.string().min(4), last_name: z.string().min(4) });
-const CompanyValidation = z.object({
-	name: z.string().min(1, { message: 'Please enter company name' }),
-	phone: z.string().min(1, { message: 'Please enter phone number' }),
-	email: z.string().email(),
-	address: z.string().min(1, { message: 'Please enter address' }),
-	city: z.string().min(1, { message: 'Please  enter city' }),
-	gst: z.string().optional(),
-	pst: z.string().optional(),
-	url: z.string().url(),
-	terms: z.string().min(1, { message: 'Please enter invoice terms' }),
-	days_until_due: z
-		.number()
-		.nonnegative()
-		.default('' as unknown as number),
-	days_until_final: z
-		.number()
-		.nonnegative()
-		.default('' as unknown as number),
-	footer: z.string().min(1, { message: 'Please enter invoice footer' })
-});
 
 export type UserSchema = typeof UserValidation;
-
-export type CompanySchema = typeof CompanyValidation;
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	const userForm = await superValidate(request, zod(UserValidation));
 	userForm.data = { first_name: locals.user?.first_name, last_name: locals.user?.last_name };
-	const companyForm = await superValidate(request, zod(CompanyValidation));
 
 	return {
 		userForm,
-		companyForm
 	};
 };
 

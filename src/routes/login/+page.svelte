@@ -3,6 +3,10 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { Turnstile } from 'svelte-turnstile';
 	import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
+
+	export let data;
+	let TurnstileFinished = false;
+
 	function gotoAuthProvider() {
 		if (browser) {
 			document.cookie = `state=${data?.authProviderState}`;
@@ -10,10 +14,12 @@
 		window.location.href = data.authProviderRedirect || '';
 	}
 
-	export let data;
 	const { form, enhance, errors } = superForm(data.loginForm, {
 		taintedMessage: false
 	});
+	const callback = (e: { returnValue: boolean }) => {
+		TurnstileFinished = e.returnValue;
+	};
 </script>
 
 <svelte:head>
@@ -48,12 +54,13 @@
 					<span class="text-xs text-[rgb(var(--color-error-500))]">{$errors.password}</span>{/if}
 			</label>
 			<div>
-
-				<Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
+				<Turnstile on:callback={callback} siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
 			</div>
 
-			<button type="submit" class=" w-full btn variant-form-material variant-outline-primary"
-				>Submit</button
+			<button
+				type="submit"
+				disabled={!TurnstileFinished}
+				class=" w-full btn variant-form-material variant-outline-primary">Submit</button
 			>
 			<p>Don't have an account? <a class="anchor" href="/signup">Sign Up</a></p>
 		</form>

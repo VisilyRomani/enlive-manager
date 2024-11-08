@@ -3,9 +3,13 @@
 	import { Turnstile } from 'svelte-turnstile';
 	import { superForm } from 'sveltekit-superforms';
 	export let data;
+	let TurnstileFinished = false;
 	const { form, enhance, errors } = superForm(data.form, {
 		taintedMessage: false
 	});
+	const callback = (e: { returnValue: boolean }) => {
+		TurnstileFinished = e.returnValue;
+	};
 </script>
 
 <svelte:head>
@@ -50,10 +54,12 @@
 					<span class="text-xs text-red-500">{$errors.passwordConfirm}</span>{/if}
 			</label>
 			<div>
-				<Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
+				<Turnstile on:callback={callback} siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme="dark" />
 			</div>
-			<button type="submit" class=" w-full btn variant-form-material variant-outline-primary"
-				>Submit</button
+			<button
+				type="submit"
+				disabled={!TurnstileFinished}
+				class=" w-full btn variant-form-material variant-outline-primary">Submit</button
 			>
 			<p>Already have an account? <a class="anchor" href="/login">Login</a></p>
 		</form>
