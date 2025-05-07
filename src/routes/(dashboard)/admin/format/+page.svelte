@@ -129,6 +129,10 @@
 	};
 </script>
 
+<p>
+	If the autocomplete doesn't load switch to a different route then come back, This is caused
+	because you refreshed the page. need to fix
+</p>
 <div class="flex flex-col md:flex-row m-5 gap-3">
 	<div class="flex flex-col gap-3 w-full">
 		{#if errors.length}
