@@ -63,33 +63,28 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 	const codeForm = await superValidate(request, zod(CodeValidation));
 
-	if (locals.user?.permission !== 'WORKER') {
-		const services =
-			(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
-		const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
-		const employees = (await locals.pb?.collection('users').getFullList<TEmployeeList>()) ?? [];
-		const codes =
-			(await locals.pb
-				?.collection('code')
-				.getFullList<TCodeList>({ filter: `company="${locals.user.company}"` })) ?? [];
+	const services =
+		(await locals.pb?.collection('service').getFullList<TServiceList>({ expand: 'tax' })) ?? [];
+	const taxes = (await locals.pb?.collection('tax').getFullList<TTaxList>()) ?? [];
+	const employees = (await locals.pb?.collection('users').getFullList<TEmployeeList>()) ?? [];
+	const codes =
+		(await locals.pb
+			?.collection('code')
+			.getFullList<TCodeList>({ filter: `company="${locals.user.company}"` })) ?? [];
 
-		return {
-			taxForm,
-			taxes,
-			serviceForm,
-			services,
-			employees,
-			codes,
-			codeForm,
-			taxActive,
-			workerActive,
-			serviceActive
-		};
-	} else {
-		return {
+	return {
+		taxForm,
+		taxes,
+		serviceForm,
+		services,
+		employees,
+		codes,
+		codeForm,
+		taxActive,
+		workerActive,
+		serviceActive
+	};
 
-		};
-	}
 };
 
 export const actions = {

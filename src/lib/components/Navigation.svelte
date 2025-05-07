@@ -86,6 +86,15 @@
 				on:click={navClose}>Settings</a
 			>
 		</li>
+		<li>
+			<a
+				class="!rounded-md {$page.url.pathname === '/admin/format'
+					? '!bg-primary-900 text-cyan-50'
+					: ''}"
+				href="/admin/format"
+				on:click={navClose}>Format</a
+			>
+		</li>
 	</ul>
 	<ul>
 		<li>

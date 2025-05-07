@@ -1,17 +1,14 @@
 <script lang="ts">
-	import { FileDropzone, ProgressBar } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
-	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import type { CompanySchema } from '../+page.server';
+	import { FileDropzone } from '@skeletonlabs/skeleton';
+	import { superForm, fileProxy } from 'sveltekit-superforms';
+	import SuperDebug from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	export let data: SuperValidated<Infer<CompanySchema>>;
-	const { form, enhance, errors, delayed } = superForm(data, {
-		dataType: 'json',
-		delayMs: 500,
-		timeoutMs: 8000
-	});
+	import type { PageData } from './$types';
 
-	let files: FileList;
+	export let data: PageData;
+
+	const { form, enhance, errors } = superForm(data.companyForm);
+	const file = fileProxy(form, 'logo');
 
 	onMount(() => {
 		const autoCompleteInput = document.getElementById('auto-complete-input') as HTMLInputElement;
@@ -77,6 +74,7 @@
 				{#if $errors.email} <span class="text-xs text-red-500">{$errors.email}</span>{/if}
 			</div>
 			<div>
+				<input hidden name="address" bind:value={$form.address} />
 				<input
 					class="input variant-form-material {$errors.address ? 'input-error' : undefined}"
 					id="auto-complete-input"
@@ -90,16 +88,17 @@
 		</div>
 		<h3>Logo Upload</h3>
 		<div class="flex flex-col gap-4 justify-center items-center">
-			{#if files?.length}
-				<img class="rounded-lg max-h-72 w-fit" src={URL.createObjectURL(files[0])} alt="" />
+			{#if $form?.logo}
+				<img class="rounded-lg max-h-72 w-fit" src={URL.createObjectURL($form?.logo)} alt="" />
 			{/if}
 			<FileDropzone
 				class={$errors.name ? 'input-error' : undefined}
-				name="logo"
+				name="image"
 				multiple={false}
+				bind:files={$file}
 				accept="image/*"
-				bind:files
 			/>
+			{#if $errors.logo} <span class="text-xs text-red-500">{$errors.logo}</span>{/if}
 		</div>
 		<h3>Invoice Information</h3>
 		<div class=" card p-4 gap-4 grid lg:grid-cols-2">
