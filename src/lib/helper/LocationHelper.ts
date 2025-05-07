@@ -35,3 +35,13 @@ export const nearestJob = (list: TJob[], curSmallest: TJob) => {
 
 	return list.find((i) => i.id === smallestElem.id);
 };
+
+export const nextClosestLatLng = (list: { address: string, lat: number, lng: number }[], currentPosition: { lat: number, lng: number }) => {
+	const destinationDistanceList = list.map(i => {
+		const dist = haversine(currentPosition.lat, currentPosition.lng, i.lat, i.lng);
+		return { ...i, distance: dist }
+	})
+	return destinationDistanceList.reduce((min, current) => {
+		return current.distance < min.distance ? current : min;
+	});
+}

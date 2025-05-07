@@ -14,9 +14,7 @@
 	import Navigation from '$lib/components/Navigation.svelte';
 	import { onMount } from 'svelte';
 	import { navigating } from '$app/stores';
-
 	import ArrowBack from '$lib/photos/aback.svelte';
-
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
@@ -27,11 +25,9 @@
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 	initializeStores();
 	const drawerStore = getDrawerStore();
-
 	const navOpen = () => {
 		drawerStore.open({});
 	};
-
 	$: classesSidebar =
 		[
 			'/signup',
@@ -41,27 +37,38 @@
 			'/admin/initial-setup/create',
 			'/admin/initial-setup/connect'
 		].includes($page.url.pathname) && '!hidden';
-	let mapsScript;
 
 	onMount(() => {
 		const script = document.createElement('script');
 		script.src = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS}&loading=async&libraries=places`;
 		script.async = true;
 		script.defer = true;
-		mapsScript = script;
+
+		// Create a custom event to signal when Google Maps is loaded
+		script.onload = () => {
+			window.dispatchEvent(new Event('google-maps-loaded'));
+		};
+
 		document.head.appendChild(script);
 	});
 </script>
+
+<svelte:head>
+	{#if typeof window !== 'undefined'}
+		<script>
+			// This will ensure the google variable is properly typed in TypeScript
+			window.google = window.google || {};
+		</script>
+	{/if}
+</svelte:head>
 
 <Drawer width="w-[20em]">
 	<h2 class="font-bold p-4">Enlive Manager</h2>
 	<hr />
 	<Navigation />
 </Drawer>
-
 <Toast zIndex="z-[1000]" />
 <Modal components={modalRegistry} />
-
 <!-- App Shell -->
 <AppShell>
 	<svelte:fragment slot="header">
@@ -88,7 +95,6 @@
 					{/if}
 					<strong class="text-xl uppercase flex flex-row justify-center item-center h-fit gap-3">
 						<Avatar src="/drawing.png" width="w-12" />
-
 						<a href="/" class="mt-auto mb-auto"> Enlive Manager </a>
 					</strong>
 				</div>

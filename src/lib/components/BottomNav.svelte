@@ -34,4 +34,10 @@
 		</div>
 		<span class="text-xs">Profile</span>
 	</TabAnchor>
+	<TabAnchor href="/admin/format" selected={$page.url.pathname === '/admin/format'}>
+		<div class="flex justify-center">
+			<People size={30} fill={$page.url.pathname === '/admin/format' ? 'black' : 'white'} />
+		</div>
+		<span class="text-xs">Format</span>
+	</TabAnchor>
 </TabGroup>
